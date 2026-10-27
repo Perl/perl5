@@ -2549,7 +2549,7 @@ Perl_study_chunk(pTHX_
                 goto optimize_curly_tail;
             case CURLY:
                 if (stopparen > 0 && (OP(scan) == CURLYN || OP(scan) == CURLYM)
-                    && (FLAGS(scan) == stopparen))
+                    && (CURLY_CAPTURE_PARENS(scan) == stopparen))
                 {
                     mincount = 1;
                     maxcount = 1;
@@ -2560,7 +2560,7 @@ Perl_study_chunk(pTHX_
                 next = regnext(scan);
                 if (OP(scan) == CURLYX) {
                     I32 lp = (data ? *(data->last_closep) : 0);
-                    FLAGS(scan) = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
+                    CURLYX_CAPTURE_FLOOR_SET(scan, ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX));
                 }
                 scan = REGNODE_AFTER(scan);
                 next_is_eval = (OP(scan) == EVAL);
@@ -2725,8 +2725,8 @@ Perl_study_chunk(pTHX_
                         RExC_close_parens[PARNO(nxt1)] = REGNODE_OFFSET(nxt) + 2;
                     }
                     /* Now we know that nxt2 is the only contents: */
-                    FLAGS(oscan) = (U8)PARNO(nxt);
                     OP(oscan) = CURLYN;
+                    CURLY_CAPTURE_PARENS_SET(oscan, (U8)PARNO(nxt));
                     OP(nxt1) = NOTHING; /* was OPEN. */
 
 #ifdef DEBUGGING
@@ -2783,7 +2783,7 @@ Perl_study_chunk(pTHX_
                         /* note that we have changed the type of oscan to CURLYM here */
                         regnode *nxt1 = REGNODE_AFTER_type(oscan, tregnode_CURLYM); /* OPEN*/
 
-                        FLAGS(oscan) = (U8)PARNO(nxt);
+                        CURLY_CAPTURE_PARENS_SET(oscan, (U8)PARNO(nxt));
                         if (RExC_open_parens) {
                              /*open->CURLYM*/
                             RExC_open_parens[PARNO(nxt1)] = REGNODE_OFFSET(oscan);
@@ -2822,7 +2822,7 @@ Perl_study_chunk(pTHX_
                                     depth+1, mutate_ok);
                     }
                     else
-                        FLAGS(oscan) = 0;
+                        CURLY_CAPTURE_PARENS_SET(oscan, 0);
                 }
                 else if ((OP(oscan) == CURLYX)
                         /* Possibly mark the corresponding WHILEM node as

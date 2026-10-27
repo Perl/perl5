@@ -9585,7 +9585,7 @@ NULL
         case CURLYX:    /* start of /A*B/  (for complex A) */
         {
             /* No need to save/restore up to this paren */
-            I32 parenfloor = FLAGS(scan);
+            I32 parenfloor = CURLYX_CAPTURE_FLOOR(scan);
 
             assert(next); /* keep Coverity happy */
             if (OP(REGNODE_BEFORE(next)) == NOTHING) /* LONGJMP */
@@ -10015,8 +10015,8 @@ NULL
             ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
 
             /* if paren positive, emulate an OPEN/CLOSE around A */
-            if (FLAGS(ST.me)) {
-                U32 paren = FLAGS(ST.me);
+            if (CURLY_CAPTURE_PARENS(ST.me)) {
+                U32 paren = CURLY_CAPTURE_PARENS(ST.me);
                 lastopen = paren;
                 if (paren > maxopenparen)
                     maxopenparen = paren;
@@ -10063,15 +10063,15 @@ NULL
                           depth, (IV) ST.count, (IV)ST.alen)
             );
 
-            if (FLAGS(ST.me)) {
+            if (CURLY_CAPTURE_PARENS(ST.me)) {
                 /* emulate CLOSE: mark current A as captured */
-                U32 paren = (U32)FLAGS(ST.me);
+                U32 paren = (U32)CURLY_CAPTURE_PARENS(ST.me);
                 CLOSE_CAPTURE(rex, paren,
                     HOPc(locinput, -ST.alen) - reginfo->strbeg,
                     locinput - reginfo->strbeg);
             }
 
-            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
+            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)CURLY_CAPTURE_PARENS(ST.me)))
                 goto fake_end;
 
 
@@ -10088,7 +10088,7 @@ NULL
 
 
             if (ST.minmod || ST.count < CURLY_MIN_REPEAT(ST.me)
-                || EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
+                || EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)CURLY_CAPTURE_PARENS(ST.me)))
                 sayNO;
 
           curlym_do_B: /* execute the B in /A{m,n}B/  */
@@ -10137,9 +10137,9 @@ NULL
             }
 
           curlym_close_B:
-            if (FLAGS(ST.me)) {
+            if (CURLY_CAPTURE_PARENS(ST.me)) {
                 /* emulate CLOSE: mark current A as captured */
-                U32 paren = (U32)FLAGS(ST.me);
+                U32 paren = (U32)CURLY_CAPTURE_PARENS(ST.me);
                 if (ST.count || is_accepted) {
                     CLOSE_CAPTURE(rex, paren,
                         HOPc(locinput, -ST.alen) - reginfo->strbeg,
@@ -10148,7 +10148,7 @@ NULL
                 else
                     RXp_OFFSp(rex)[paren].end = -1;
 
-                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
+                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)CURLY_CAPTURE_PARENS(ST.me)))
                 {
                     if (ST.count || is_accepted)
                         goto fake_end;
@@ -10211,7 +10211,7 @@ NULL
             goto repeat;
 
         case CURLYN:		/*  /(A){m,n}B/ where A is width 1 char */
-            ST.paren = FLAGS(scan);     /* Which paren to set */
+            ST.paren = CURLY_CAPTURE_PARENS(scan);     /* Which paren to set */
             ST.lastparen      = RXp_LASTPAREN(rex);
             ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
             if (ST.paren > maxopenparen)
