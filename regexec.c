@@ -9487,7 +9487,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (sw)
                 next = REGNODE_AFTER_type(scan,tregnode_IFTHEN);
             else {
-                next = scan + ARG1u(scan);
+                next = scan + IFTHEN_ELSE_OFFSET(scan);
                 if (OP(next) == IFTHEN) /* Fake one. */
                     next = REGNODE_AFTER_type(next,tregnode_IFTHEN);
             }
@@ -9589,7 +9589,7 @@ NULL
 
             assert(next); /* keep Coverity happy */
             if (OP(REGNODE_BEFORE(next)) == NOTHING) /* LONGJMP */
-                next += ARG1u(next);
+                next += REGNODE_NEXT_OFFSET(next);
 
             /* XXXX Probably it is better to teach regpush to support
                parenfloor > maxopenparen ... */
@@ -9914,7 +9914,7 @@ NULL
 #define ST st->u.branch
 
         case BRANCHJ:	    /*  /(...|A|...)/ with long next pointer */
-            next = scan + ARG1u(scan);
+            next = scan + REGNODE_NEXT_OFFSET(scan);
             if (next == scan)
                 next = NULL;
             ST.before_paren = BRANCH_CAPTURE_FLOOR(scan);
@@ -10642,7 +10642,7 @@ NULL
                     sayNO;
 
                 /* Here, we didn't want it to match, so is actually success */
-                next = scan + ARG1u(scan);
+                next = scan + SUBPATTERN_CONTINUE_OFFSET(scan);
                 if (next == scan)
                     next = NULL;
                 break;
@@ -10704,7 +10704,7 @@ NULL
                 loceol = st->loceol;
                 script_run_begin = st->sr0;
             }
-            scan = ST.me + ARG1u(ST.me);
+            scan = ST.me + SUBPATTERN_CONTINUE_OFFSET(ST.me);
             if (scan == ST.me)
                 scan = NULL;
             continue; /* execute B */
@@ -10714,7 +10714,7 @@ NULL
 
         case LONGJMP: /*  alternative with many branches compiles to
                        * (BRANCHJ; EXACT ...; LONGJMP ) x N */
-            next = scan + ARG1u(scan);
+            next = scan + REGNODE_NEXT_OFFSET(scan);
             if (next == scan)
                 next = NULL;
             break;
