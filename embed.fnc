@@ -3289,6 +3289,9 @@ Aadip	|char * |savepvn	|NULLOK const char *pv			\
 Cdp	|void	|save_rcpv	|NN char **prcpv
 Cp	|void	|save_re_context
 Adhp	|SV *	|save_scalar	|NN GV *gv
+Adhp	|SV *	|save_scalar_flags					\
+				|NN GV *gv				\
+				|const U32 flags
 Cdp	|void	|save_set_svflags					\
 				|NN SV *sv				\
 				|U32 mask				\

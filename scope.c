@@ -354,6 +354,14 @@ Perl_save_scalar(pTHX_ GV *gv)
 {
     PERL_ARGS_ASSERT_SAVE_SCALAR;
 
+    return save_scalar_flags(gv, SAVEf_SETMAGIC);
+}
+
+SV *
+Perl_save_scalar_flags(pTHX_ GV *gv, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SAVE_SCALAR_FLAGS;
+
     SV ** const sptr = &GvSVn(gv);
 
     if (UNLIKELY(SvGMAGICAL(*sptr))) {
@@ -362,7 +370,7 @@ Perl_save_scalar(pTHX_ GV *gv)
         PL_localizing = 0;
     }
     save_pushptrptr(SvREFCNT_inc_simple(gv), SvREFCNT_inc(*sptr), SAVEt_SV);
-    return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
+    return save_scalar_at(sptr, flags);
 }
 
 /*

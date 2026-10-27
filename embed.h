@@ -642,6 +642,7 @@
 # define save_rcpv(a)                           Perl_save_rcpv(aTHX_ a)
 # define save_re_context()                      Perl_save_re_context(aTHX)
 # define save_scalar(a)                         Perl_save_scalar(aTHX_ a)
+# define save_scalar_flags(a,b)                 Perl_save_scalar_flags(aTHX_ a,b)
 # define save_set_svflags(a,b,c)                Perl_save_set_svflags(aTHX_ a,b,c)
 # define save_shared_pvref(a)                   Perl_save_shared_pvref(aTHX_ a)
 # define save_sptr(a)                           Perl_save_sptr(aTHX_ a)
