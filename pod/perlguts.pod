@@ -2414,6 +2414,14 @@ best to just use the macro, and not those or the ones below.
 
 =over 4
 
+=item C<SV* save_scalar_flags(GV *gv, U32 flags)>
+
+=for apidoc save_scalar_flags
+
+Equivalent to Perl code C<local $gv>. C<flags> can contain
+C<SAVEf_SETMAGIC> to automatically call setmagic; this should be done
+when not immediately assigning to the new scalar.
+
 =item C<SV* save_scalar(GV *gv)>
 
 =for apidoc save_scalar

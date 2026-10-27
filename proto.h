@@ -7537,6 +7537,15 @@ Perl_save_scalar(pTHX_ GV *gv)
                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
+PERL_CALLCONV SV *
+Perl_save_scalar_flags(pTHX_ GV *gv, const U32 flags)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+#define PERL_ARGS_ASSERT_SAVE_SCALAR_FLAGS      \
+    STMT_START { Perl_assert_aTHX; assert(gv);         \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
 PERL_CALLCONV void
 Perl_save_set_svflags(pTHX_ SV *sv, U32 mask, U32 val)
         Perl_attribute_nonnull_aTHX

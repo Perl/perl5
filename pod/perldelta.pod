@@ -394,9 +394,9 @@ well.
 
 =over 4
 
-=item *
+=item * save_scalar_flags
 
-XXX
+Added a new function analogous to C<save_aelem_flags> and C<save_helem_flags>, to have more control over saving scalars.
 
 =back
 
