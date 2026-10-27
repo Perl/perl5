@@ -9000,7 +9000,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 if (!caller_cv)
                     caller_cv = find_runcv(NULL);
 
-                n = ARG1u(scan);
+                n = EVAL_CODE_DATA_SLOT(scan);
 
                 if (rexi->data->what[n] == 'r') { /* code from an external qr */
                     newcv = (ReANY(
@@ -9235,11 +9235,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         /* if we got here, it should be an engine which
                          * supports compiling code blocks and stuff */
                         assert(rex->engine && rex->engine->op_comp);
-                        assert(!(FLAGS(scan) & ~RXf_PMf_COMPILETIME));
+                        assert(!(EVAL_NODE_FLAGS(scan) & ~RXf_PMf_COMPILETIME));
                         re_sv = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
                                     rex->engine, NULL, NULL,
                                     /* copy /msixn etc to inner pattern */
-                                    ARG2i(scan),
+                                    EVAL_COMPILE_FLAGS(scan),
                                     pm_flags);
 
                         if (!(SvFLAGS(ret)
@@ -9494,7 +9494,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             break;
 
         case LOGICAL:  /* modifier for EVAL and IFMATCH */
-            logical = FLAGS(scan) & EVAL_FLAGS_MASK; /* reserve a bit for optimistic eval */
+            logical = LOGICAL_MODE(scan) & EVAL_FLAGS_MASK; /* reserve a bit for optimistic eval */
             break;
 
 /*******************************************************************

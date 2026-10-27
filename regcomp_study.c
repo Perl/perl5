@@ -3511,7 +3511,7 @@ Perl_study_chunk(pTHX_
             }
         }
         else if (OP(scan) == EVAL) {
-            if (data && !(FLAGS(scan) & EVAL_OPTIMISTIC_FLAG) )
+            if (data && !(EVAL_IS_OPTIMISTIC(scan)) )
                 data->flags |= SF_HAS_EVAL;
         }
         else if ( REGNODE_TYPE(OP(scan)) == ENDLIKE ) {
@@ -3538,7 +3538,7 @@ Perl_study_chunk(pTHX_
                 flags &= ~SCF_DO_SUBSTR;
             }
         }
-        else if (OP(scan) == LOGICAL && FLAGS(scan) == 2) /* Embedded follows */
+        else if (OP(scan) == LOGICAL && LOGICAL_MODE(scan) == 2) /* Embedded follows */
         {
                 if (flags & SCF_DO_SUBSTR) {
                     scan_commit(pRExC_state, data, minlenp, is_inf);
