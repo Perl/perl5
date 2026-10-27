@@ -970,14 +970,16 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (op == ANYOFHs) {
             sv_catpvf(sv, " (Leading UTF-8 bytes = %s", 
                 byte_dump_string_((U8 *) ((struct regnode_anyofhs *) o)->string,
-                FLAGS(o), 1));
+                STR_LEN_U8(o), 1));
         }
         else if (REGNODE_TYPE(op) != ANYOF) {
-            U8 lowest = (op != ANYOFHr)
-                         ? FLAGS(o)
-                         : LOWEST_ANYOF_HRx_BYTE(FLAGS(o));
+            U8 lowest = op == ANYOFHr
+                         ? LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(o))
+                         : (op == ANYOFH || op == ANYOFR)
+                           ? ANYOF_FLAGS(o)
+                           : FIRST_BYTE(o);
             U8 highest = (op == ANYOFHr)
-                         ? HIGHEST_ANYOF_HRx_BYTE(FLAGS(o))
+                         ? HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(o))
                          : (op == ANYOFH || op == ANYOFR)
                            ? 0xFF
                            : lowest;
@@ -1010,7 +1012,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (op == NEXACTb) {
         sv_catpvf(sv, "[%s%c%s]",
-                       PL_colors[0], (int) ARG1u(o), PL_colors[1]);
+                       PL_colors[0], (int) NEXACTb_BYTE(o), PL_colors[1]);
     }
     else if (k == ANYOFHbbm) {
         SV * cp_list = get_ANYOFHbbm_contents(o);

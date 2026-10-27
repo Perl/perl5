@@ -379,7 +379,7 @@ Perl_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     Zero(ssc, 1, regnode_ssc);
     set_ANYOF_SYNTHETIC(ssc);
-    ARG1u_SET(ssc, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
+    ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_SET(ssc);
     ssc_anything(ssc);
 
     /* If any portion of the regex is to operate under locale rules that aren't
@@ -456,7 +456,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         invlist = add_range_to_invlist_(invlist, NUM_ANYOF_CODE_POINTS, UV_MAX);
     }
     else if (ANYOF_HAS_AUX(node)) {
-        const U32 n = ARG1u(node);
+        const U32 n = ANYOF_AUX_DATA_SLOT(node);
         SV * const rv = MUTABLE_SV(RExC_rxi->data->data[n]);
         AV * const av = AV_FROM_REF(rv);
         SV **const ary = AvARRAY(av);
@@ -3156,7 +3156,7 @@ Perl_study_chunk(pTHX_
                   {
                     SV* Nb_invlist = new_invlist_(2);
                     Nb_invlist = add_cp_to_invlist(Nb_invlist,
-                                                   (U8) ARG1u(scan));
+                                                   (U8) NEXACTb_BYTE(scan));
                     if (flags & SCF_DO_STCLASS_OR) {
                         ssc_union(data->start_class, Nb_invlist, true);
                     }
