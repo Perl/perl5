@@ -502,6 +502,30 @@ struct regnode_ssc {
 #define CURLY_FIRST_CAPTURE_SET(p, val) ARG3a_SET((p), (val))
 #define CURLY_LAST_CAPTURE_SET(p, val)  ARG3b_SET((p), (val))
 
+/* Named properties for arguments and overloaded header fields. Capture
+ * numbers are physical. Offsets are relative to the node, in regnode units.
+ * GOSUB_FIXUP_INDEX and GOSUB_TARGET_OFFSET name the same field before and
+ * after final fixup. Generic node construction uses the ARG primitives.
+ */
+#define BRANCH_CAPTURE_FLOOR(p)                                               \
+    (assert(OP(p) == BRANCH || OP(p) == BRANCHJ), PREVENT_LVALUE((OP(p) ==    \
+        BRANCH ? ARG1a(p) : ARG2a(p))))
+#define BRANCH_CAPTURE_FLOOR_SET(p, val) STMT_START {                         \
+    assert(OP(p) == BRANCH || OP(p) == BRANCHJ);                              \
+    if (OP(p) == BRANCH) ARG1a_SET((p), (val));                               \
+    else ARG2a_SET((p), (val));                                               \
+} STMT_END
+
+#define BRANCH_LAST_CAPTURE(p)                                                \
+    (assert(OP(p) == BRANCH || OP(p) == BRANCHJ), PREVENT_LVALUE((OP(p) ==    \
+        BRANCH ? ARG1b(p) : ARG2b(p))))
+#define BRANCH_LAST_CAPTURE_SET(p, val) STMT_START {                          \
+    assert(OP(p) == BRANCH || OP(p) == BRANCHJ);                              \
+    if (OP(p) == BRANCH) ARG1b_SET((p), (val));                               \
+    else ARG2b_SET((p), (val));                                               \
+} STMT_END
+
+
 /* the following define was set to 0xde in 075abff3
  * as part of some linting logic. I have set it to 0
  * as otherwise in every place where we /might/ set flags

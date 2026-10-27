@@ -574,11 +574,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     sv_catpv(sv, REGNODE_NAME(op)); /* Take off const! */
 
     k = REGNODE_TYPE(op);
-    if (op == BRANCH) {
-        sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG1a(o),(IV)ARG1b(o));
-    }
-    else if (op == BRANCHJ) {
-        sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG2a(o),(IV)ARG2b(o));
+    if (op == BRANCH || op == BRANCHJ) {
+        sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")",
+                    (IV)BRANCH_CAPTURE_FLOOR(o), (IV)BRANCH_LAST_CAPTURE(o));
     }
     else if (k == EXACT) {
         sv_catpvs(sv, " ");
