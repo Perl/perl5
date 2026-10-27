@@ -648,6 +648,13 @@ struct regnode_ssc {
     FLAGS(p) = (val);                                                         \
 } STMT_END
 
+#define WHILEM_CACHE_SLOT(p)                                                  \
+    (assert(OP(p) == WHILEM), PREVENT_LVALUE(FLAGS(p)))
+#define WHILEM_CACHE_SLOT_SET(p, val) STMT_START {                            \
+    assert(OP(p) == WHILEM);                                                  \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
 #define LOGICAL_MODE(p)                                                       \
     (assert(OP(p) == LOGICAL), PREVENT_LVALUE(FLAGS(p) & EVAL_FLAGS_MASK))
 #define LOGICAL_MODE_SET(p, val) STMT_START {                                 \

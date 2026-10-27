@@ -2846,13 +2846,13 @@ Perl_study_chunk(pTHX_
                     nxt = REGNODE_BEFORE(nxt);
                     if (
                         /* we've not already set WHILEM count on this node */
-                        !FLAGS(nxt)
+                        !WHILEM_CACHE_SLOT(nxt)
                         /* max supported number of WHILEM nodes that can
                          * participate in super-linear cache */
                       && RExC_rxi->slc_whilem_seen < SLC_MAX_WHILEM_NODES)
                     {
                         ++RExC_rxi->slc_whilem_seen;
-                        FLAGS(nxt) = RExC_rxi->slc_whilem_seen; /* On WHILEM */
+                        WHILEM_CACHE_SLOT_SET(nxt, RExC_rxi->slc_whilem_seen); /* On WHILEM */
                     }
                 }
                 if (data && fl & (SF_HAS_PAR|SF_IN_PAR))
