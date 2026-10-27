@@ -1888,15 +1888,16 @@ Perl_re_intuit_start(pTHX_
                  trie_latin_utf8_fold, trie_utf8_exactfa_fold,              \
                  trie_latin_utf8_exactfa_fold,                              \
                  trie_flu8, trie_flu8_latin }                               \
-                    trie_type = ((IS_EXACT_OR_NF(FLAGS(scan))              \
-                                  || IS_EXACT_REQ8_OR_NF_REQ8(FLAGS(scan)) \
-                                  || FLAGS(scan) == EXACTL)                \
+                    trie_type = ((IS_EXACT_OR_NF(TRIE_LITERAL_TYPE(scan))  \
+                                  || IS_EXACT_REQ8_OR_NF_REQ8(              \
+                                         TRIE_LITERAL_TYPE(scan))          \
+                                  || TRIE_LITERAL_TYPE(scan) == EXACTL)    \
                                  ? trie_plain                              \
-                                    : (FLAGS(scan) == EXACTFAA)             \
+                                    : (TRIE_LITERAL_TYPE(scan) == EXACTFAA) \
                                       ? (utf8_target                        \
                                          ? trie_utf8_exactfa_fold           \
                                          : trie_latin_utf8_exactfa_fold)    \
-                                      : (FLAGS(scan) == EXACTFLU8           \
+                                      : (TRIE_LITERAL_TYPE(scan) == EXACTFLU8 \
                                          ? (utf8_target                     \
                                            ? trie_flu8                      \
                                            : trie_flu8_latin)               \
@@ -7436,12 +7437,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 U32 state = trie->startstate;
 
-                if (FLAGS(scan) == EXACTL || FLAGS(scan) == EXACTFLU8) {
+                if (   TRIE_LITERAL_TYPE(scan) == EXACTL
+                    || TRIE_LITERAL_TYPE(scan) == EXACTFLU8)
+                {
                     CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
                     if (utf8_target
                         && ! NEXTCHR_IS_EOS
                         && UTF8_IS_ABOVE_LATIN1(nextbyte)
-                        && FLAGS(scan) == EXACTL)
+                        && TRIE_LITERAL_TYPE(scan) == EXACTL)
                     {
                         /* We only output for EXACTL, as we let the folder
                          * output this message for EXACTFLU8 to avoid

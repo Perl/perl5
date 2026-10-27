@@ -601,7 +601,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         const reg_trie_data * const trie
             = (reg_trie_data*)progi->data->data[!IS_TRIE_AC(op) ? n : ac->trie];
 
-        sv_catpvf(sv, "-%s", REGNODE_NAME(FLAGS(o)));
+        sv_catpvf(sv, "-%s", REGNODE_NAME(TRIE_LITERAL_TYPE(o)));
         DEBUG_TRIE_COMPILE_r({
           if (trie->jump)
             sv_catpvs(sv, "(JUMP)");
