@@ -1,0 +1,62 @@
+name: block merge and autosquash commits
+
+on:
+  pull_request:
+
+permissions:
+  pull-requests: read
+
+jobs:
+  block-merge-and-autosquash-commits:
+    name: Block merge and autosquash commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check pull request commits
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const query = `query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
+              repository(owner: $owner, name: $repo) {
+                pullRequest(number: $number) {
+                  commits(first: 100, after: $cursor) {
+                    nodes {
+                      commit {
+                        oid
+                        messageHeadline
+                        parents(first: 2) { totalCount }
+                      }
+                    }
+                    pageInfo { hasNextPage endCursor }
+                  }
+                }
+              }
+            }`;
+            const rejected = [];
+            let cursor = null;
+            let hasNextPage = true;
+            while (hasNextPage) {
+              const result = await github.graphql(query, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                number: context.issue.number,
+                cursor,
+              });
+              const commits = result.repository.pullRequest.commits;
+              for (const { commit } of commits.nodes) {
+                const subject = commit.messageHeadline;
+                if (commit.parents.totalCount > 1) {
+                  rejected.push(`${commit.oid.slice(0, 7)} is a merge commit`);
+                }
+                if (/^(fixup!|squash!)/.test(subject)) {
+                  rejected.push(`${commit.oid.slice(0, 7)} has autosquash subject: ${subject}`);
+                }
+                if (subject.includes('XXX') || subject.includes('WIP')) {
+                  rejected.push(`${commit.oid.slice(0, 7)} has XXX or WIP in subject: ${subject}`);
+                }
+              }
+              ({ hasNextPage, endCursor: cursor } = commits.pageInfo);
+            }
+
+            if (rejected.length) {
+              core.setFailed(`Pull request contains disallowed commits:\n${rejected.join('\n')}`);
+            }
