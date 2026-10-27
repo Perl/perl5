@@ -2200,8 +2200,8 @@ Perl_study_chunk(pTHX_
                  * the rest of this block. Specifically setting
                  * RExC_recurse[] must happen at least once during
                  * study_chunk(). */
-                paren = ARG1u(scan);
-                RExC_recurse[ARG2i(scan)] = scan;
+                paren = GOSUB_CAPTURE(scan);
+                RExC_recurse[GOSUB_FIXUP_INDEX(scan)] = scan;
                 start = REGNODE_p(RExC_open_parens[paren]);
                 end   = REGNODE_p(RExC_close_parens[paren]);
 

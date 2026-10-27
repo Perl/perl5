@@ -562,6 +562,27 @@ struct regnode_ssc {
     ARG1u_SET((p), (val));                                                    \
 } STMT_END
 
+#define GOSUB_CAPTURE(p)                                                      \
+    (assert(OP(p) == GOSUB), PREVENT_LVALUE(ARG1u(p)))
+#define GOSUB_CAPTURE_SET(p, val) STMT_START {                                \
+    assert(OP(p) == GOSUB);                                                   \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define GOSUB_FIXUP_INDEX(p)                                                  \
+    (assert(OP(p) == GOSUB), PREVENT_LVALUE(ARG2i(p)))
+#define GOSUB_FIXUP_INDEX_SET(p, val) STMT_START {                            \
+    assert(OP(p) == GOSUB);                                                   \
+    ARG2i_SET((p), (val));                                                    \
+} STMT_END
+
+#define GOSUB_TARGET_OFFSET(p)                                                \
+    (assert(OP(p) == GOSUB), PREVENT_LVALUE(ARG2i(p)))
+#define GOSUB_TARGET_OFFSET_SET(p, val) STMT_START {                          \
+    assert(OP(p) == GOSUB);                                                   \
+    ARG2i_SET((p), (val));                                                    \
+} STMT_END
+
 #define REF_IS_VOLATILE(p)                                                    \
     (assert(REGNODE_TYPE(OP(p)) == REF), PREVENT_LVALUE((FLAGS(p) &           \
         VOLATILE_REF) != 0))

@@ -728,7 +728,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
     } else if (k == GOSUB) {
         AV *name_list= NULL;
-        IV parno = ARG1u(o);
+        IV parno = GOSUB_CAPTURE(o);
         IV logical_parno = (parno && prog->parno_to_logical)
                          ? prog->parno_to_logical[parno]
                          : parno;
@@ -743,10 +743,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (logical_parno != parno)
             sv_catpvf(sv, "/%" IVdf, parno);
 
-        sv_catpvf(sv, "[%+d:%d]", (int)ARG2i(o),
-                (int)((o + (int)ARG2i(o)) - progi->program) );
+        sv_catpvf(sv, "[%+d:%d]", (int)GOSUB_TARGET_OFFSET(o),
+                (int)((o + (int)GOSUB_TARGET_OFFSET(o)) - progi->program) );
         if (name_list) {
-            SV **name= av_fetch_simple(name_list, ARG1u(o), 0 );
+            SV **name= av_fetch_simple(name_list, GOSUB_CAPTURE(o), 0 );
             if (name)
                 sv_catpvf(sv, " '%" SVf "'", SVfARG(*name));
         }

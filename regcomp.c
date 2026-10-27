@@ -2445,11 +2445,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          *
          * If for some reason someone writes code that optimises
          * away a GOSUB opcode then the assert should be changed to
-         * an if(scan) to guard the ARG2i_SET() - Yves
+         * an if(scan) to guard GOSUB_TARGET_OFFSET_SET() - Yves
          *
          */
         assert(scan && OP(scan) == GOSUB);
-        ARG2i_SET( scan, RExC_open_parens[ARG1u(scan)] - REGNODE_OFFSET(scan));
+        GOSUB_TARGET_OFFSET_SET( scan, RExC_open_parens[GOSUB_CAPTURE(scan)] - REGNODE_OFFSET(scan));
     }
     if (RExC_logical_total_parens != RExC_total_parens) {
         Newxz(RExC_parno_to_logical_next, RExC_total_parens, I32);
@@ -4018,7 +4018,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 }
 
                 /* We keep track how many GOSUB items we have produced.
-                   To start off the ARG2i() of the GOSUB holds its "id",
+                   Initially GOSUB_FIXUP_INDEX() holds its fixup index,
                    which is used later in conjunction with RExC_recurse
                    to calculate the offset we need to jump for the GOSUB,
                    which it will store in the final representation.
@@ -4030,8 +4030,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 DEBUG_OPTIMISE_MORE_r(re_printf(
                     "%*s%*s Recurse #%" UVuf " to %" IVdf "\n",
                             22, "|    |", (int)(depth * 2 + 1), "",
-                            (UV)ARG1u(REGNODE_p(ret)),
-                            (IV)ARG2i(REGNODE_p(ret))));
+                            (UV)GOSUB_CAPTURE(REGNODE_p(ret)),
+                            (IV)GOSUB_FIXUP_INDEX(REGNODE_p(ret))));
                 RExC_seen |= REG_RECURSE_SEEN;
 
                 *flagp |= POSTPONED;
