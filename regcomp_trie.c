@@ -962,18 +962,8 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     assert((noper_next - convert) >= 0);
                     assert((noper_next - convert) <= TRIE_JUMP_TYPE_MAX);
                     trie->jump[curword] = noper_next - convert;
-                    U16 set_before_paren;
-                    U16 set_after_paren;
-                    if (OP(cur) == BRANCH) {
-                        set_before_paren = ARG1a(cur);
-                        set_after_paren = ARG1b(cur);
-                    }
-                    else {
-                        set_before_paren = ARG2a(cur);
-                        set_after_paren = ARG2b(cur);
-                    }
-                    trie->j_before_paren[curword] = set_before_paren;
-                    trie->j_after_paren[curword] = set_after_paren;
+                    trie->j_before_paren[curword] = BRANCH_CAPTURE_FLOOR(cur);
+                    trie->j_after_paren[curword] = BRANCH_LAST_CAPTURE(cur);
                     if (!jumper)
                         jumper = noper_next;
                     if (!nextbranch)
@@ -1001,13 +991,9 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             trie->prop_flags |= TRIE_CP_NO_LATIN1_WORDS;
 
         /* The list pass has also completed the source analysis. */
-        trie->before_paren = OP(first) == BRANCH
-                     ? ARG1a(first)
-                     : ARG2a(first); /* BRANCHJ */
+        trie->before_paren = BRANCH_CAPTURE_FLOOR(first);
 
-        trie->after_paren = OP(lastbranch) == BRANCH
-                     ? ARG1b(lastbranch)
-                     : ARG2b(lastbranch); /* BRANCHJ */
+        trie->after_paren = BRANCH_LAST_CAPTURE(lastbranch);
         DEBUG_TRIE_COMPILE_r(
             re_indentf(
                     "TRIE(%s): W:%d C:%d Uq:%d Min:%d Max:%d\n",

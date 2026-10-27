@@ -9917,14 +9917,14 @@ NULL
             next = scan + ARG1u(scan);
             if (next == scan)
                 next = NULL;
-            ST.before_paren = ARG2a(scan);
-            ST.after_paren = ARG2b(scan);
+            ST.before_paren = BRANCH_CAPTURE_FLOOR(scan);
+            ST.after_paren = BRANCH_LAST_CAPTURE(scan);
             goto branch_logic;
             NOT_REACHED; /* NOTREACHED */
 
         case BRANCH:	    /*  /(...|A|...)/ */
-            ST.before_paren = ARG1a(scan);
-            ST.after_paren = ARG1b(scan);
+            ST.before_paren = BRANCH_CAPTURE_FLOOR(scan);
+            ST.after_paren = BRANCH_LAST_CAPTURE(scan);
           branch_logic:
             scan = REGNODE_AFTER_opcode(scan,state_num); /* scan now points to inner node */
             assert(scan);

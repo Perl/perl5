@@ -4468,13 +4468,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     if (*RExC_parse == '|') {
         if (RExC_use_BRANCHJ) {
             reginsert(pRExC_state, BRANCHJ, br, depth+1);
-            ARG2a_SET(REGNODE_p(br), npar_before_regbranch);
-            ARG2b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
+            BRANCH_CAPTURE_FLOOR_SET(REGNODE_p(br), npar_before_regbranch);
+            BRANCH_LAST_CAPTURE_SET(REGNODE_p(br), (U16)RExC_npar - 1);
         }
         else {
             reginsert(pRExC_state, BRANCH, br, depth+1);
-            ARG1a_SET(REGNODE_p(br), (U16)npar_before_regbranch);
-            ARG1b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
+            BRANCH_CAPTURE_FLOOR_SET(REGNODE_p(br), (U16)npar_before_regbranch);
+            BRANCH_LAST_CAPTURE_SET(REGNODE_p(br), (U16)RExC_npar - 1);
         }
         have_branch = 1;
     }
@@ -4519,19 +4519,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         }
         assert(OP(REGNODE_p(br)) == BRANCH || OP(REGNODE_p(br))==BRANCHJ);
         assert(OP(REGNODE_p(lastbr)) == BRANCH || OP(REGNODE_p(lastbr))==BRANCHJ);
-        if (OP(REGNODE_p(br)) == BRANCH) {
-            if (OP(REGNODE_p(lastbr)) == BRANCH)
-                ARG1b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
-            else
-                ARG2b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
-        }
-        else
-        if (OP(REGNODE_p(br)) == BRANCHJ) {
-            if (OP(REGNODE_p(lastbr)) == BRANCH)
-                ARG1b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
-            else
-                ARG2b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
-        }
+        BRANCH_LAST_CAPTURE_SET(REGNODE_p(lastbr),
+                                BRANCH_CAPTURE_FLOOR(REGNODE_p(br)));
 
         lastbr = br;
         *flagp |= flags & (HASWIDTH | POSTPONED);
@@ -4607,11 +4596,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             );
         });
         if (OP(REGNODE_p(lastbr)) == BRANCH) {
-            ARG1b_SET(REGNODE_p(lastbr),(U16)RExC_npar-1);
+            BRANCH_LAST_CAPTURE_SET(REGNODE_p(lastbr),(U16)RExC_npar-1);
         }
         else
         if (OP(REGNODE_p(lastbr)) == BRANCHJ) {
-            ARG2b_SET(REGNODE_p(lastbr),(U16)RExC_npar-1);
+            BRANCH_LAST_CAPTURE_SET(REGNODE_p(lastbr),(U16)RExC_npar-1);
         }
 
         if (! REGTAIL(pRExC_state, lastbr, ender)) {
@@ -4790,11 +4779,11 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
         if (RExC_use_BRANCHJ) {
             ret = reg2node(pRExC_state, BRANCHJ, 0, 0);
             branch_node = REGNODE_p(ret);
-            ARG2a_SET(branch_node, (U16)RExC_npar-1);
+            BRANCH_CAPTURE_FLOOR_SET(branch_node, (U16)RExC_npar-1);
         } else {
             ret = reg1node(pRExC_state, BRANCH, 0);
             branch_node = REGNODE_p(ret);
-            ARG1a_SET(branch_node, (U16)RExC_npar-1);
+            BRANCH_CAPTURE_FLOOR_SET(branch_node, (U16)RExC_npar-1);
         }
     }
 
