@@ -1680,7 +1680,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             }
 
             /* store the type in the flags */
-            FLAGS(convert) = nodetype;
+            TRIE_LITERAL_TYPE_SET(convert, nodetype);
             DEBUG_r({
             optimize = convert
                       + NODE_STEP_REGNODE
@@ -1957,7 +1957,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
         tregnode_AHOCORASICK *op = (tregnode_AHOCORASICK *)
             PerlMemShared_calloc(1, sizeof(tregnode_AHOCORASICK));
         OP(op) = AHOCORASICK;
-        FLAGS(op) = FLAGS(source);
+        TRIE_LITERAL_TYPE_SET(op, TRIE_LITERAL_TYPE(source));
         stclass = (regnode *)op;
     }
 

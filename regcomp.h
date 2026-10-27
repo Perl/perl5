@@ -698,6 +698,14 @@ struct regnode_ssc {
     FLAGS(p) = (val);                                                         \
 } STMT_END
 
+#define TRIE_LITERAL_TYPE(p)                                                  \
+    (assert(REGNODE_TYPE(OP(p)) == TRIE || OP(p) == AHOCORASICK),             \
+        PREVENT_LVALUE(FLAGS(p)))
+#define TRIE_LITERAL_TYPE_SET(p, val) STMT_START {                            \
+    assert(REGNODE_TYPE(OP(p)) == TRIE || OP(p) == AHOCORASICK);              \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
 #define POSIX_CLASS(p)                                                        \
     (assert(REGNODE_TYPE(OP(p)) == POSIXD || REGNODE_TYPE(OP(p)) ==           \
         NPOSIXD), PREVENT_LVALUE(FLAGS(p)))
