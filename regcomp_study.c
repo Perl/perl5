@@ -60,7 +60,7 @@ S_rck_elide_nothing(pTHX_ regnode *node)
                         ? I32_MAX
                           /* I32 may be smaller than U16 on CRAYs! */
                         : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
-        int off = (REGNODE_OFF_BY_ARG(OP(node)) ? ARG1u(node) : NEXT_OFF(node));
+        int off = REGNODE_NEXT_OFFSET(node);
         int noff;
         regnode *n = node;
 
@@ -69,14 +69,14 @@ S_rck_elide_nothing(pTHX_ regnode *node)
             (n = regnext(n))
             && (
                 (REGNODE_TYPE(OP(n)) == NOTHING && (noff = NEXT_OFF(n)))
-                || ((OP(n) == LONGJMP) && (noff = ARG1u(n)))
+                || ((OP(n) == LONGJMP) && (noff = REGNODE_NEXT_OFFSET(n)))
             )
             && off + noff < max
         ) {
             off += noff;
         }
         if (REGNODE_OFF_BY_ARG(OP(node)))
-            ARG1u(node) = off;
+            REGNODE_NEXT_OFFSET_SET(node, off);
         else
             NEXT_OFF_set(node, off);
     }
@@ -1285,7 +1285,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         if (flags && !NEXT_OFF(n)) {
             DEBUG_PEEP("atch", val, depth, 0);
             if (REGNODE_OFF_BY_ARG(OP(n))) {
-                ARG1u_SET(n, val - n);
+                REGNODE_NEXT_OFFSET_SET(n, val - n);
             }
             else {
                 NEXT_OFF_set(n, val - n);
@@ -2806,7 +2806,7 @@ Perl_study_chunk(pTHX_
                             regnode *nnxt = regnext(nxt1);
                             if (nnxt == nxt) {
                                 if (REGNODE_OFF_BY_ARG(OP(nxt1)))
-                                    ARG1u_SET(nxt1, nxt2 - nxt1);
+                                    REGNODE_NEXT_OFFSET_SET(nxt1, nxt2 - nxt1);
                                 else if (nxt2 - nxt1 < U16_MAX)
                                     NEXT_OFF_set(nxt1, nxt2 - nxt1);
                                 else
@@ -2842,7 +2842,7 @@ Perl_study_chunk(pTHX_
                     regnode *nxt = oscan + NEXT_OFF(oscan);
 
                     if (OP(REGNODE_BEFORE(nxt)) == NOTHING) /* LONGJMP */
-                        nxt += ARG1u(nxt);
+                        nxt += REGNODE_NEXT_OFFSET(nxt);
                     nxt = REGNODE_BEFORE(nxt);
                     if (
                         /* we've not already set WHILEM count on this node */

@@ -612,6 +612,28 @@ struct regnode_ssc {
     ARG2u_SET((p), (val));                                                    \
 } STMT_END
 
+#define REGNODE_NEXT_OFFSET(p)                                                \
+    (PREVENT_LVALUE((REGNODE_OFF_BY_ARG(OP(p)) ? ARG1u(p) : NEXT_OFF(p))))
+#define REGNODE_NEXT_OFFSET_SET(p, val) STMT_START {                          \
+    if (REGNODE_OFF_BY_ARG(OP(p))) ARG1u_SET((p), (val));                     \
+    else NEXT_OFF_set((p), (val));                                            \
+} STMT_END
+
+#define IFTHEN_ELSE_OFFSET(p)                                                 \
+    (assert(OP(p) == IFTHEN), PREVENT_LVALUE(REGNODE_NEXT_OFFSET(p)))
+#define IFTHEN_ELSE_OFFSET_SET(p, val) STMT_START {                           \
+    assert(OP(p) == IFTHEN);                                                  \
+    REGNODE_NEXT_OFFSET_SET((p), (val));                                      \
+} STMT_END
+
+#define SUBPATTERN_CONTINUE_OFFSET(p)                                         \
+    (assert(OP(p) == IFMATCH || OP(p) == UNLESSM || OP(p) == SUSPEND),        \
+        PREVENT_LVALUE(REGNODE_NEXT_OFFSET(p)))
+#define SUBPATTERN_CONTINUE_OFFSET_SET(p, val) STMT_START {                   \
+    assert(OP(p) == IFMATCH || OP(p) == UNLESSM || OP(p) == SUSPEND);         \
+    REGNODE_NEXT_OFFSET_SET((p), (val));                                      \
+} STMT_END
+
 #define LOGICAL_MODE(p)                                                       \
     (assert(OP(p) == LOGICAL), PREVENT_LVALUE(FLAGS(p) & EVAL_FLAGS_MASK))
 #define LOGICAL_MODE_SET(p, val) STMT_START {                                 \
