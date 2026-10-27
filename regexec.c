@@ -9426,9 +9426,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case ACCEPT:  /*  (*ACCEPT)  */
             is_accepted = true;
-            if (FLAGS(scan))
-                sv_yes_mark = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
-            utmp = ARG2u(scan);
+            if (VERB_HAS_ARG(scan))
+                sv_yes_mark = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
+            utmp = ACCEPT_CLOSE_TO_CAPTURE(scan);
 
             if ( utmp ) {
                 regnode *cursor;
@@ -9948,8 +9948,8 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case CUTGROUP:  /*  /(*THEN)/  */
-            sv_yes_mark = st->u.mark.mark_name = FLAGS(scan)
-                ? MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ])
+            sv_yes_mark = st->u.mark.mark_name = VERB_HAS_ARG(scan)
+                ? MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ])
                 : NULL;
             PUSH_STATE_GOTO(CUTGROUP_next, next, locinput, loceol,
                             script_run_begin);
@@ -10724,8 +10724,8 @@ NULL
             /* FALLTHROUGH */
 
         case PRUNE:   /*  (*PRUNE)   */
-            if (FLAGS(scan))
-                sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+            if (VERB_HAS_ARG(scan))
+                sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
             PUSH_STATE_GOTO(COMMIT_next, next, locinput, loceol,
                             script_run_begin);
             NOT_REACHED; /* NOTREACHED */
@@ -10737,8 +10737,8 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case OPFAIL:   /* (*FAIL)  */
-            if (FLAGS(scan))
-                sv_commit = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+            if (VERB_HAS_ARG(scan))
+                sv_commit = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
             if (logical) {
                 /* deal with (?(?!)X|Y) properly,
                  * make sure we trigger the no branch
@@ -10754,7 +10754,7 @@ NULL
         case MARKPOINT: /*  (*MARK:foo)  */
             ST.prev_mark = mark_state;
             ST.mark_name = sv_commit = sv_yes_mark
-                = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+                = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
             mark_state = st;
             ST.mark_loc = locinput;
             PUSH_YES_STATE_GOTO(MARKPOINT_next, next, locinput, loceol,
@@ -10787,7 +10787,7 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case SKIP:  /*  (*SKIP)  */
-            if (!FLAGS(scan)) {
+            if (!VERB_HAS_ARG(scan)) {
                 /* (*SKIP) : if we fail we cut here*/
                 ST.mark_name = NULL;
                 ST.mark_loc = locinput;
@@ -10798,7 +10798,7 @@ NULL
                    otherwise do nothing.  Meaning we need to scan
                  */
                 regmatch_state *cur = mark_state;
-                SV *find = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+                SV *find = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
 
                 while (cur) {
                     if ( sv_eq( cur->u.mark.mark_name,

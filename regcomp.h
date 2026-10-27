@@ -597,6 +597,21 @@ struct regnode_ssc {
     ARG2i_SET((p), (val));                                                    \
 } STMT_END
 
+#define VERB_ARG_DATA_SLOT(p)                                                 \
+    (assert(REGNODE_TYPE(OP(p)) == VERB || OP(p) == ACCEPT || OP(p) ==        \
+        OPFAIL), PREVENT_LVALUE(ARG1u(p)))
+#define VERB_ARG_DATA_SLOT_SET(p, val) STMT_START {                           \
+    assert(REGNODE_TYPE(OP(p)) == VERB || OP(p) == ACCEPT || OP(p) == OPFAIL);\
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define ACCEPT_CLOSE_TO_CAPTURE(p)                                            \
+    (assert(OP(p) == ACCEPT), PREVENT_LVALUE(ARG2u(p)))
+#define ACCEPT_CLOSE_TO_CAPTURE_SET(p, val) STMT_START {                      \
+    assert(OP(p) == ACCEPT);                                                  \
+    ARG2u_SET((p), (val));                                                    \
+} STMT_END
+
 #define LOGICAL_MODE(p)                                                       \
     (assert(OP(p) == LOGICAL), PREVENT_LVALUE(FLAGS(p) & EVAL_FLAGS_MASK))
 #define LOGICAL_MODE_SET(p, val) STMT_START {                                 \
@@ -610,6 +625,14 @@ struct regnode_ssc {
 #define REF_IS_VOLATILE_SET(p, val) STMT_START {                              \
     assert(REGNODE_TYPE(OP(p)) == REF);                                       \
     FLAGS(p) = (val) ? VOLATILE_REF : 0;                                      \
+} STMT_END
+
+#define VERB_HAS_ARG(p)                                                       \
+    (assert(REGNODE_TYPE(OP(p)) == VERB || OP(p) == ACCEPT || OP(p) ==        \
+        OPFAIL), PREVENT_LVALUE(FLAGS(p) != 0))
+#define VERB_HAS_ARG_SET(p, val) STMT_START {                                 \
+    assert(REGNODE_TYPE(OP(p)) == VERB || OP(p) == ACCEPT || OP(p) == OPFAIL);\
+    FLAGS(p) = cBOOL(val);                                                    \
 } STMT_END
 
 #define EVAL_NODE_FLAGS(p)                                                    \
