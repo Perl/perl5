@@ -646,8 +646,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             sv_catpvf(sv, "%u", (unsigned) hi);
         sv_catpvs(sv, "}");
     }
-    else if (k == WHILEM && FLAGS(o))                   /* Ordinal/of */
-        sv_catpvf(sv, "[%d/%d]", (int)FLAGS(o), (int)progi->slc_whilem_seen);
+    else if (k == WHILEM && WHILEM_CACHE_SLOT(o))                   /* Ordinal/of */
+        sv_catpvf(sv, "[%d/%d]", (int)WHILEM_CACHE_SLOT(o), (int)progi->slc_whilem_seen);
     else if (k == REF || k == OPEN || k == CLOSE
              || k == GROUPP || op == ACCEPT)
     {

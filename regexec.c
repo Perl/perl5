@@ -6940,7 +6940,7 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
                 REGNODE_BEFORE(regnext(cur_curlyx->u.curlyx.me));      \
             re_exec_indentf(                                           \
                 "WHILEM[%d/%d]: (cache) marking failure at pos %" UVuf "\n",  \
-                depth, (int)FLAGS(whilem), (int)rexi->slc_whilem_seen, \
+                depth, (int)WHILEM_CACHE_SLOT(whilem), (int)rexi->slc_whilem_seen, \
                 (UV)(locinput - reginfo->strbeg));                     \
         });                                                            \
        *ST.slc_byte |= ST.slc_mask;                                    \
@@ -9677,7 +9677,7 @@ NULL
                 goto do_whilem_B_max;
             }
 
-            if (   FLAGS(scan)
+            if (   WHILEM_CACHE_SLOT(scan)
                    /* not running a (??{...}) or (?N) sub-pattern */
                 && !cur_eval)
             {
@@ -9687,7 +9687,7 @@ NULL
                  * background on how this works.
                  *
                  * For WHILEM nodes which can participate in the cache
-                 * (FLAGS() is non-zero), the processing at this point is
+                 * (WHILEM_CACHE_SLOT() is non-zero), the processing at this point is
                  * to first initiate a countdown. Then when on subsequent
                  * iterations that reaches zero, the match has likely gone
                  * super-linear and the per-WHILEM cache is allocated and
@@ -9696,7 +9696,7 @@ NULL
                 assert(rexi->slc);
                 assert(reginfo->info_aux->slc);
                 struct slc_cache_item *item =
-                                &reginfo->info_aux->slc[FLAGS(scan)-1];
+                                &reginfo->info_aux->slc[WHILEM_CACHE_SLOT(scan)-1];
 
                 if (item->slc_bitmap) {
                     /* Cache is live */
@@ -9712,7 +9712,7 @@ NULL
                         DEBUG_EXECUTE_r( re_exec_indentf(
                             "WHILEM[%d/%d]: (cache) already failed at pos %"
                                                                     UVuf "\n",
-                            depth, (int)FLAGS(scan),
+                            depth, (int)WHILEM_CACHE_SLOT(scan),
                             (int)rexi->slc_whilem_seen,
                             (UV)(locinput - reginfo->strbeg))
                         );
@@ -9741,7 +9741,7 @@ NULL
                         DEBUG_EXECUTE_r( re_exec_indentf(
                             "%sWHILEM[%d/%d]: detected a super-linear match, enabling cache%s...\n",
                             depth, PL_colors[4],
-                            (int)FLAGS(scan),
+                            (int)WHILEM_CACHE_SLOT(scan),
                             (int)rexi->slc_whilem_seen,
                             PL_colors[5]
                         ));
