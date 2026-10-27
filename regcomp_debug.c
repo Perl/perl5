@@ -1049,8 +1049,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             "{sb}",
             "{wb}"
         };
-        assert(FLAGS(o) < C_ARRAY_LENGTH(bounds));
-        sv_catpv(sv, bounds[FLAGS(o)]);
+        assert(BOUNDARY_TYPE(o) < C_ARRAY_LENGTH(bounds));
+        sv_catpv(sv, bounds[BOUNDARY_TYPE(o)]);
     }
     else if (k == BRANCHJ && (op == UNLESSM || op == IFMATCH)) {
         sv_catpvf(sv, "[%d", -(LOOKBEHIND_MAX_CHARS(o)));

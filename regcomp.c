@@ -6140,7 +6140,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
 
             ret = reg_node(pRExC_state, op);
-            FLAGS(REGNODE_p(ret)) = flags;
+            BOUNDARY_TYPE_SET(REGNODE_p(ret), flags);
 
             goto finish_meta_pat;
           }
