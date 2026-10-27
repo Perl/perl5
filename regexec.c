@@ -8927,7 +8927,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             U32 arg;
 
         case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
-            arg = ARG1u(scan);
+            arg = GOSUB_CAPTURE(scan);
             if (cur_eval && cur_eval->locinput == locinput) {
                 if ( ++nochange_depth > max_nochange_depth )
                     croak(
@@ -8939,7 +8939,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             re_sv = rex_sv;
             re = rex;
             rei = rexi;
-            startpoint = scan + ARG2i(scan);
+            startpoint = scan + GOSUB_TARGET_OFFSET(scan);
             EVAL_CLOSE_PAREN_SET( st, arg );
             /* Detect infinite recursion
              *
