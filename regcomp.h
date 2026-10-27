@@ -612,6 +612,28 @@ struct regnode_ssc {
     ARG2u_SET((p), (val));                                                    \
 } STMT_END
 
+#define ANYOF_AUX_DATA_SLOT(p)                                                \
+    (assert(ANYOF_HAS_AUX(p)), PREVENT_LVALUE(ARG1u(p)))
+#define ANYOF_AUX_DATA_SLOT_SET(p, val) STMT_START {                          \
+    assert(((val) & ANYOF_ONLY_HAS_BITMAP_MASK) !=                            \
+        ANYOF_ONLY_HAS_BITMAP_MASK);                                          \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define NEXACTb_BYTE(p)                                                       \
+    (assert(OP(p) == NEXACTb), PREVENT_LVALUE(ARG1u(p)))
+#define NEXACTb_BYTE_SET(p, val) STMT_START {                                 \
+    assert(OP(p) == NEXACTb);                                                 \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define REGEX_SET_INVLIST(p)                                                  \
+    (assert(OP(p) == REGEX_SET), ARGp(p))
+#define REGEX_SET_INVLIST_SET(p, val) STMT_START {                            \
+    assert(OP(p) == REGEX_SET);                                               \
+    ARGp_SET((p), (val));                                                     \
+} STMT_END
+
 #define REGNODE_NEXT_OFFSET(p)                                                \
     (PREVENT_LVALUE((REGNODE_OFF_BY_ARG(OP(p)) ? ARG1u(p) : NEXT_OFF(p))))
 #define REGNODE_NEXT_OFFSET_SET(p, val) STMT_START {                          \
@@ -717,6 +739,10 @@ struct regnode_ssc {
 } STMT_END
 
 #define IS_LOOKBEHIND(p) (LOOKBEHIND_MAX_CHARS(p) != 0)
+#define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_SET(p)                               \
+    ARG1u_SET((p), ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE)
+#define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_SET(p)                              \
+    ARG1u_SET((p), ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE)
 
 /* the following define was set to 0xde in 075abff3
  * as part of some linting logic. I have set it to 0

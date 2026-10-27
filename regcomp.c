@@ -8964,7 +8964,7 @@ redo_curchar:
                     {
                         vFAIL("Expecting interpolated extended charclass");
                     }
-                    resultant_invlist = (SV *) ARGp(REGNODE_p(node));
+                    resultant_invlist = REGEX_SET_INVLIST(REGNODE_p(node));
                     current = invlist_clone(resultant_invlist, NULL);
                     SvREFCNT_dec(resultant_invlist);
 
@@ -12637,7 +12637,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
              *  1)  there is no list of code points matched outside the bitmap
              */
             if (! cp_list) {
-                ARG1u_SET(node, ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE);
+                ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_SET(node);
                 return;
             }
 
@@ -12646,7 +12646,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
                 && invlist_highest_range_start(cp_list)
                                                        <= NUM_ANYOF_CODE_POINTS)
             {
-                ARG1u_SET(node, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
+                ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_SET(node);
                 return;
             }
 
@@ -12719,7 +12719,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
             /* Here, the existence and contents of both compile-time lists
              * are identical between the new and existing data.  Re-use the
              * existing one */
-            ARG1u_SET(node, i);
+            ANYOF_AUX_DATA_SLOT_SET(node, i);
             return;
         } /* end of loop through existing classes */
     }
@@ -12751,7 +12751,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
     rv = newRV_noinc(MUTABLE_SV(av));
     n = reg_add_data(pRExC_state, STR_WITH_LEN("s"));
     RExC_rxi->data->data[n] = (void*)rv;
-    ARG1u_SET(node, n);
+    ANYOF_AUX_DATA_SLOT_SET(node, n);
 }
 #endif /* PERL_RE_BUILD_AUX */
 
@@ -12809,7 +12809,7 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
     const struct reg_data * const data = prog ? progi->data : NULL;
 
     if (data && data->count) {
-        const U32 n = ARG1u(node);
+        const U32 n = ANYOF_AUX_DATA_SLOT(node);
 
         if (data->what[n] == 's') {
             SV * const rv = MUTABLE_SV(data->data[n]);

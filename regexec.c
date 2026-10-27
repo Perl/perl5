@@ -2669,13 +2669,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NEXACTb_tb_pb:
       case NEXACTb_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-           find_span_end((U8 *) s, (U8 *) strend, (U8) ARG1u(c)));
+           find_span_end((U8 *) s, (U8 *) strend, (U8) NEXACTb_BYTE(c)));
         break;
 
       case NEXACTb_t8_pb:
       case NEXACTb_t8_p8:
         REXEC_FBC_UTF8_CLASS_SCAN(
-           ! (UTF8SKIP(s) == 1 && (U8) *s == (U8) ARG1u(c)));
+           ! (UTF8SKIP(s) == 1 && (U8) *s == (U8) NEXACTb_BYTE(c)));
         break;
 
       /* These nodes all require at least one code point to be in UTF-8 to
@@ -2711,7 +2711,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFHb_t8_p8:
         {
             /* We know what the first byte of any matched string should be. */
-            U8 first_byte = FLAGS(c);
+            U8 first_byte = FIRST_BYTE(c);
 
             anyofh_list = GET_ANYOFH_INVLIST(prog, c);
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
@@ -2726,7 +2726,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFHbbm_t8_p8:
         {
             /* We know what the first byte of any matched string should be. */
-            U8 first_byte = FLAGS(c);
+            U8 first_byte = FIRST_BYTE(c);
 
             /* And a bitmap defines all the legal 2nd byte matches */
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
@@ -2755,7 +2755,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         REXEC_FBC_FIND_NEXT_UTF8_STRING_SCAN(
                         ((struct regnode_anyofhs *) c)->string,
                         /* Note FLAGS is the string length in this regnode */
-                        ((struct regnode_anyofhs *) c)->string + FLAGS(c),
+                        ((struct regnode_anyofhs *) c)->string + STR_LEN_U8(c),
                         invlist_contains_cp_(anyofh_list,
                                              utf8_to_uv_or_die((U8 *) s,
                                                                (U8 *) strend,
@@ -2787,7 +2787,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFRb_t8_pb:
       case ANYOFRb_t8_p8:
         {   /* We know what the first byte of any matched string should be */
-            U8 first_byte = FLAGS(c);
+            U8 first_byte = FIRST_BYTE(c);
 
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
                                 withinCOUNT(utf8_to_uv_or_die((U8 *) s,
@@ -8369,7 +8369,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case NEXACTb: /*  /[^x]/ : single excluded byte  */
             if (   NEXTCHR_IS_EOS
-                || (U8) ARG1u(scan) == UCHARAT(locinput)
+                || (U8) NEXACTb_BYTE(scan) == UCHARAT(locinput)
                 || locinput >= loceol)
             {
                 sayNO;
@@ -8440,8 +8440,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case ANYOFHs:
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
-                ||   loceol - locinput < FLAGS(scan)
-                ||   memNE(locinput, ((struct regnode_anyofhs *) scan)->string, FLAGS(scan))
+                ||   loceol - locinput < STR_LEN_U8(scan)
+                ||   memNE(locinput, ((struct regnode_anyofhs *) scan)->string, STR_LEN_U8(scan))
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
                 || ! invlist_contains_cp_(anyofh_list,
                                           utf8_to_uv_or_die((U8 *) locinput,
@@ -11419,7 +11419,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case NEXACTb_t8:
         {
-          const U8 nchar = (U8) ARG1u(p);
+          const U8 nchar = (U8) NEXACTb_BYTE(p);
           while (     hardcount < max
                  &&   scan < this_eol
                  &&  (UTF8SKIP(scan) != 1 || (U8) *scan != nchar))
@@ -11432,7 +11432,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case NEXACTb_tb:
         {
-          char * found = (char *) memchr(scan, (U8) ARG1u(p),
+          char * found = (char *) memchr(scan, (U8) NEXACTb_BYTE(p),
                                          this_eol - scan);
           scan = found ? found : this_eol;
         }
@@ -11509,8 +11509,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
       case ANYOFHs_t8:
         anyofh_list = GET_ANYOFH_INVLIST(prog, p);
         while (   hardcount < max
-               && scan + FLAGS(p) < this_eol
-               && memEQ(scan, ((struct regnode_anyofhs *) p)->string, FLAGS(p))
+               && scan + STR_LEN_U8(p) < this_eol
+               && memEQ(scan, ((struct regnode_anyofhs *) p)->string, STR_LEN_U8(p))
                && invlist_contains_cp_(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
@@ -11884,7 +11884,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         {
             /* In this case, the ARG is set up so that the final bit indicates
              * whether it matches or not */
-            match = ARG1u(n) & 1;
+            match = ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(n);
         }
         else
             /* Here, the main way it could match is if the code point is
