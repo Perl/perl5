@@ -706,6 +706,14 @@ struct regnode_ssc {
     FLAGS(p) = (val);                                                         \
 } STMT_END
 
+#define BOUNDARY_TYPE(p)                                                      \
+    (assert(REGNODE_TYPE(OP(p)) == BOUND || REGNODE_TYPE(OP(p)) == NBOUND),   \
+        PREVENT_LVALUE(FLAGS(p)))
+#define BOUNDARY_TYPE_SET(p, val) STMT_START {                                \
+    assert(REGNODE_TYPE(OP(p)) == BOUND || REGNODE_TYPE(OP(p)) == NBOUND);    \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
 #define ANYOFM_MASK(p)                                                        \
     (assert(OP(p) == ANYOFM || OP(p) == NANYOFM), PREVENT_LVALUE(FLAGS(p)))
 #define ANYOFM_MASK_SET(p, val) STMT_START {                                  \

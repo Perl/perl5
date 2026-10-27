@@ -3024,7 +3024,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUND_tb_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         FBC_BOUND_A_NON_UTF8(isWORDCHAR_A);
         break;
@@ -3033,7 +3033,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUNDA_t8_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         FBC_BOUND_A_UTF8(isWORDCHAR_A);
         break;
@@ -3044,7 +3044,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUND_tb_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         FBC_NBOUND_A_NON_UTF8(isWORDCHAR_A);
         break;
@@ -3053,14 +3053,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUNDA_t8_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         FBC_NBOUND_A_UTF8(isWORDCHAR_A);
         break;
 
       case NBOUNDU_tb_pb:
       case NBOUNDU_tb_p8:
-        if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
+        if ((bound_type) BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_NON_UTF8(isWORDCHAR_L1);
             break;
         }
@@ -3071,7 +3071,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUNDL_tb_pb:
       case NBOUNDL_tb_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-        if (FLAGS(c) == TRADITIONAL_BOUND) {
+        if (BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_NON_UTF8(isWORDCHAR_LC);
             break;
         }
@@ -3084,7 +3084,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUNDL_tb_pb:
       case BOUNDL_tb_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-        if (FLAGS(c) == TRADITIONAL_BOUND) {
+        if (BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_NON_UTF8(isWORDCHAR_LC);
             break;
         }
@@ -3095,7 +3095,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
       case BOUNDU_tb_pb:
       case BOUNDU_tb_p8:
-        if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
+        if ((bound_type) BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_NON_UTF8(isWORDCHAR_L1);
             break;
         }
@@ -3114,7 +3114,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             }
         }
 
-        switch((bound_type) FLAGS(c)) {
+        switch((bound_type) BOUNDARY_TYPE(c)) {
           case TRADITIONAL_BOUND: /* Should have already been handled */
             assert(0);
             break;
@@ -3215,7 +3215,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUNDL_t8_pb:
       case BOUNDL_t8_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-        if (FLAGS(c) == TRADITIONAL_BOUND) {
+        if (BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_UTF8(isWORDCHAR_LC, isWORDCHAR_LC_uvchr,
                            isWORDCHAR_LC_utf8_safe);
             break;
@@ -3229,7 +3229,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUNDL_t8_pb:
       case NBOUNDL_t8_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-        if (FLAGS(c) == TRADITIONAL_BOUND) {
+        if (BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_UTF8(isWORDCHAR_LC, isWORDCHAR_LC_uvchr,
                             isWORDCHAR_LC_utf8_safe);
             break;
@@ -3244,13 +3244,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUND_t8_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         /* FALLTHROUGH */
 
       case NBOUNDU_t8_pb:
       case NBOUNDU_t8_p8:
-        if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
+        if ((bound_type) BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_UTF8(isWORDCHAR_L1, isWORDCHAR_uni,
                             isWORDCHAR_utf8_safe);
             break;
@@ -3263,13 +3263,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUND_t8_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         /* FALLTHROUGH */
 
       case BOUNDU_t8_pb:
       case BOUNDU_t8_p8:
-        if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
+        if ((bound_type) BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_UTF8(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8_safe);
             break;
         }
@@ -3288,7 +3288,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             }
         }
 
-        switch((bound_type) FLAGS(c)) {
+        switch((bound_type) BOUNDARY_TYPE(c)) {
           case TRADITIONAL_BOUND: /* Should have already been handled */
             assert(0);
             break;
@@ -8051,7 +8051,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             bool b1, b2;
             CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
 
-            if (FLAGS(scan) != TRADITIONAL_BOUND) {
+            if (BOUNDARY_TYPE(scan) != TRADITIONAL_BOUND) {
                 CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_BOUND;
                 goto boundu;
             }
@@ -8135,7 +8135,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             else if (utf8_target) {
               bound_utf8:
-                switch((bound_type) FLAGS(scan)) {
+                switch((bound_type) BOUNDARY_TYPE(scan)) {
                     case TRADITIONAL_BOUND:
                     {
                         bool b1, b2;
@@ -8239,7 +8239,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
             }
             else {  /* Not utf8 target */
-                switch((bound_type) FLAGS(scan)) {
+                switch((bound_type) BOUNDARY_TYPE(scan)) {
                     case TRADITIONAL_BOUND:
                     {
                         bool b1, b2;
