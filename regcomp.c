@@ -3677,15 +3677,15 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             RExC_seen |= REG_VERBARG_SEEN;
             if (start_arg) {
                 SV *sv = newSVpvn( start_arg, RExC_parse - start_arg);
-                ARG1u(REGNODE_p(ret)) = reg_add_data( pRExC_state,
-                                        STR_WITH_LEN("S"));
-                RExC_rxi->data->data[ARG1u(REGNODE_p(ret))]=(void*)sv;
-                FLAGS(REGNODE_p(ret)) = 1;
+                VERB_ARG_DATA_SLOT_SET(REGNODE_p(ret), reg_add_data( pRExC_state,
+                                        STR_WITH_LEN("S")));
+                RExC_rxi->data->data[VERB_ARG_DATA_SLOT(REGNODE_p(ret))]=(void*)sv;
+                VERB_HAS_ARG_SET(REGNODE_p(ret), TRUE);
             } else {
-                FLAGS(REGNODE_p(ret)) = 0;
+                VERB_HAS_ARG_SET(REGNODE_p(ret), FALSE);
             }
             if ( internal_argval != -1 )
-                ARG2i_SET(REGNODE_p(ret), internal_argval);
+                ACCEPT_CLOSE_TO_CAPTURE_SET(REGNODE_p(ret), internal_argval);
             nextchar(pRExC_state);
             return ret;
         }

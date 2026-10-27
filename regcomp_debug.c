@@ -650,7 +650,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
              || k == GROUPP || op == ACCEPT)
     {
         AV *name_list= NULL;
-        U32 parno = (op == ACCEPT)              ? ARG2u(o) :
+        U32 parno = (op == ACCEPT)              ? ACCEPT_CLOSE_TO_CAPTURE(o) :
                    (op == OPEN || op == CLOSE) ? PARNO(o) :
                    (k == GROUPP) ? GROUPP_CAPTURE(o) :
                    (op >= REFN) ? NAMED_CAPTURE_LIST_SLOT(o) : REF_CAPTURE(o);
@@ -1063,10 +1063,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
 
     /* add on the verb argument if there is one */
-    if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && FLAGS(o)) {
-        if ( ARG1u(o) )
+    if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && VERB_HAS_ARG(o)) {
+        if ( VERB_ARG_DATA_SLOT(o) )
             sv_catpvf(sv, ":%" SVf,
-                       SVfARG((MUTABLE_SV(progi->data->data[ ARG1u( o ) ]))));
+                       SVfARG((MUTABLE_SV(progi->data->data[ VERB_ARG_DATA_SLOT( o ) ]))));
         else
             sv_catpvs(sv, ":NULL");
     }
