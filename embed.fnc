@@ -1015,6 +1015,9 @@ p	|void	|boot_core_mro
 p	|void	|boot_core_PerlIO
 : Used in perl.c
 p	|void	|boot_core_UNIVERSAL
+Rdp	|OP *	|build_array_element					\
+				|NN OP *target				\
+				|NN OP *selector
 Rdp	|OP *	|build_function_invocation				\
 				|I32 flags				\
 				|NN OP *code				\

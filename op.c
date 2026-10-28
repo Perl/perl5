@@ -4893,6 +4893,31 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 }
 
 /*
+=for apidoc build_array_element
+
+    build_array_element ($target, $selector);
+
+Builds C<OP *> representing an element of an array.
+
+Represents:
+
+    $array[$index]
+    $term->[$index]
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_array_element (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_ARRAY_ELEMENT;
+
+    return newBINOP (OP_AELEM, 0, target, scalar (selector));
+}
+
+/*
 =for apidoc build_function_invocation
 
     build_function_invocation (flags, $function, $arguments);
