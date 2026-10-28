@@ -1015,7 +1015,7 @@ p	|void	|boot_core_mro
 p	|void	|boot_core_PerlIO
 : Used in perl.c
 p	|void	|boot_core_UNIVERSAL
-dp	|OP *	|build_function_invocation				\
+Rdp	|OP *	|build_function_invocation				\
 				|I32 flags				\
 				|NN OP *code				\
 				|NULLOK OP *arguments
@@ -1023,11 +1023,11 @@ p	|OP *	|build_infix_plugin					\
 				|NN OP *lhs				\
 				|NN OP *rhs				\
 				|NN void *tokendata
-dp	|OP *	|build_method_invocation				\
+Rdp	|OP *	|build_method_invocation				\
 				|NN OP *target				\
 				|NN OP *method				\
 				|NULLOK OP *arguments
-dp	|OP *	|build_method_invocation_arguments			\
+Rdp	|OP *	|build_method_invocation_arguments			\
 				|NN OP *target				\
 				|NULLOK OP *arguments
 EXp	|const char *|byte_dump_string_ 				\
