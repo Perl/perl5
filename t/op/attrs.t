@@ -351,6 +351,21 @@ foreach my $test (@tests) {
 }
 
 {
+  package withmultipleattributes;
+  my @attrs_applied;
+  sub MODIFY_SCALAR_ATTRIBUTES {
+    # [0] = this package, [1] = ref to item, [2...] = attrs
+    push @attrs_applied, [ @_[2 .. $#_] ];
+    return ();
+  }
+  our $SCALAR :red :green :blue :yellow;
+  ::is scalar(@attrs_applied), 1,
+    'MODIFY_SCALAR_ATTRIBUTES invoked just once';
+  ::is join("|", $attrs_applied[0]->@*), "red|green|blue|yellow",
+    'MODIFY_SCALAR_ATTRIBUTES invocation received all four attributes';
+}
+
+{
   my $w;
   local $SIG{__WARN__} = sub { $w = shift };
   sub  ent         {}
