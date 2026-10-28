@@ -11,6 +11,13 @@
 #define PERL_IN_ATTRIBUTES_C
 #include "perl.h"
 
+#define croak_apply_attribute(attrname, targettype)  S_croak_apply_attribute(aTHX_ attrname, targettype)
+static void
+S_croak_apply_attribute(pTHX_ const char *attrname, const char *targettype)
+{
+    croak("Can only apply the :%s attribute to %s", attrname, targettype);
+}
+
 #define targetsv(target, type, attrname)  S_targetsv(aTHX_ target, type, attrname)
 static SV *
 S_targetsv(pTHX_ struct PerlAttributeTarget *target, U8 type, const char *attrname)
@@ -25,10 +32,70 @@ S_targetsv(pTHX_ struct PerlAttributeTarget *target, U8 type, const char *attrna
     switch (type) {
         case SVt_PVCV:
             if (SvTYPE(sv) != SVt_PVCV)
-                croak("Can only apply the :%s attribute to CODE", attrname);
+                croak_apply_attribute(attrname, "CODE");
             break;
     }
     return sv;
+}
+
+/*
+=for apidoc attrtarget_class
+Asserts that the given C<struct PerlAttributeTarget> refers to a class (i.e.
+a stash HV with C<HvSTASH_IS_CLASS> true) and returns it. Intended to be
+called as part of an attribute C<apply> callback.
+
+=cut
+*/
+
+HV *
+Perl_attrtarget_class(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+{
+    PERL_ARGS_ASSERT_ATTRTARGET_CLASS;
+
+    SV *sv = targetsv(target, 0, attrname);
+    if (SvTYPE(sv) != SVt_PVHV ||
+            !HvHasAUX((HV *)sv) ||
+            !HvSTASH_IS_CLASS((HV *)sv)) {
+        croak_apply_attribute(attrname, "a class");
+    }
+    return (HV *)sv;
+}
+
+/*
+=for apidoc attrtarget_code
+Asserts that the given C<struct PerlAttributeTarget> refers to a subroutine
+(i.e. whose C<SvTYPE> is C<SVt_PVCV>) and returns it. Intended to be called as
+part of an attribute C<apply> callback.
+
+=cut
+*/
+
+CV *
+Perl_attrtarget_code(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+{
+    PERL_ARGS_ASSERT_ATTRTARGET_CODE;
+
+    return (CV *)targetsv(target, SVt_PVCV, attrname);
+}
+
+/*
+=for apidoc attrtarget_padname
+Asserts that the given C<struct PerlAttributeTarget> refers to a padname (i.e.
+its C<kind> field is C<PERL_ATTRTARGET_LEXICAL>) and returns it. Intended to
+be called as part of an attribute C<apply> callback.
+
+=cut
+*/
+
+PADNAME *
+Perl_attrtarget_padname(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+{
+    PERL_ARGS_ASSERT_ATTRTARGET_PADNAME;
+
+    if (target->kind != PERL_ATTRTARGET_LEXICAL)
+        croak_apply_attribute(attrname, "a lexical");
+
+    return target->lexical.padname;
 }
 
 /* :const */
@@ -40,7 +107,7 @@ S_apply_attribute_const(pTHX_
 {
     PERL_UNUSED_ARG(attrvalue);
     PERL_UNUSED_ARG(data);
-    CV *cv = (CV *)targetsv(target, SVt_PVCV, "const");
+    CV *cv = attrtarget_code(target, "const");
 
     CvANONCONST_on(cv);
     if (!CvANON(cv))
@@ -61,7 +128,7 @@ S_apply_attribute_lvalue(pTHX_
 {
     PERL_UNUSED_ARG(attrvalue);
     PERL_UNUSED_ARG(data);
-    CV *cv = (CV *)targetsv(target, SVt_PVCV, "lvalue");
+    CV *cv = attrtarget_code(target, "lvalue");
 
     CvLVALUE_on(cv);
 }
@@ -80,7 +147,7 @@ S_apply_attribute_method(pTHX_
 {
     PERL_UNUSED_ARG(attrvalue);
     PERL_UNUSED_ARG(data);
-    CV *cv = (CV *)targetsv(target, SVt_PVCV, "method");
+    CV *cv = attrtarget_code(target, "method");
 
     CvNOWARN_AMBIGUOUS_on(cv);
 }
