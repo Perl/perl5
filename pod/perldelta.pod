@@ -304,6 +304,25 @@ made:
 
 =over 4
 
+=item * t/TEST and t/harness now run generated tests
+
+F<t/TEST> and F<t/harness> are the programs which are the engines underneath
+C<make test> and C<make test_harness>.  Up till now the list of test files that
+they run was composed by examination of F<MANIFEST>.  However in 2020 the test
+files for the Devel-PPPort library (shipped with core in the
+F<dist/Devel-PPPort> directory) were overhauled such that they were composed
+during that library's own build process from data files found underneath that
+directory.  As such they were no longer listed as test files in F<MANIFEST> --
+but F<t/TEST> and F<t/harness> were not updated to account for the possibility
+of generated tests in addition to "MANIFEST-listed" tests.  This was not
+noticed until L<[GH #24855]|https://github.com/Perl/perl5/issues/24855>.
+
+This has been corrected.  Testers will now see F<dist/Devel-PPPort/t/*.t> test
+files being run as part of C<make test> and C<make test_harness>.  In
+addition, F<t/porting/test_testlist.t> now verifies that generated tests are
+being run and more thoroughly exercises the various ways in which running the
+test suite can be triggered.
+
 =item *
 
 XXX
