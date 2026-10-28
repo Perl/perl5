@@ -1,5 +1,5 @@
 #
-# $Id: GSM0338.pm,v 2.10 2021/05/24 10:56:53 dankogai Exp $
+# $Id: GSM0338.pm,v 2.11 2026/10/26 01:42:18 dankogai Exp $
 #
 package Encode::GSM0338;
 
@@ -8,7 +8,7 @@ use warnings;
 use Carp;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = ( q$Revision: 2.10 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+$VERSION = '2.11';
 
 use Encode qw(:fallbacks);
 

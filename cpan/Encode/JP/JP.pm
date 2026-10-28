@@ -7,7 +7,7 @@ BEGIN {
 use strict;
 use warnings;
 use Encode;
-our $VERSION = do { my @r = ( q$Revision: 2.5 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = '2.06';
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );

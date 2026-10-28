@@ -2,7 +2,7 @@
 # Demand-load module list
 #
 package Encode::Config;
-our $VERSION = do { my @r = ( q$Revision: 2.5 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = '2.06';
 
 use strict;
 use warnings;

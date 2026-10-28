@@ -12,7 +12,13 @@ my $notaint = "";
 my $notaint_str = "dan\x{5f3e}" . $notaint;
 my $notaint_bin = encode('UTF-8', $notaint_str);
 my @names = Encode->encodings(':all');
-if (exists($Config{taint_support}) && not $Config{taint_support}) {
+
+# $Config{taint_support} was added in 5.37.11
+# the eval below won't fail if taint is not enabled
+if ( $^V < v5.38 && eval { eval "# $ENV{PATH}"; 1 } ) {
+    plan skip_all => "your perl was built without taint support";
+}
+elsif (exists($Config{taint_support}) && not $Config{taint_support}) {
     plan skip_all => "your perl was built without taint support";
 }
 else {

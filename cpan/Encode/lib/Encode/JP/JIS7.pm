@@ -1,7 +1,7 @@
 package Encode::JP::JIS7;
 use strict;
 use warnings;
-our $VERSION = do { my @r = ( q$Revision: 2.8 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = '2.09';
 
 use Encode qw(:fallbacks);
 

@@ -5,7 +5,7 @@ use warnings;
 use utf8 ();
 
 use vars qw($VERSION);
-$VERSION = do { my @r = ( q$Revision: 2.10 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+$VERSION = '2.11';
 
 use Encode qw(:fallbacks);
 

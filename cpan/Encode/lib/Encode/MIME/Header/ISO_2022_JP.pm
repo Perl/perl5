@@ -15,7 +15,7 @@ use constant TAIL => '?=';
 
 use Encode::CJKConstants qw(%RE);
 
-our $VERSION = do { my @r = ( q$Revision: 1.9 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = '1.10';
 
 # I owe the below codes totally to
 #   Jcode by Dan Kogai & http://www.din.or.jp/~ohzaki/perl.htm#JP_Base64

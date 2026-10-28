@@ -1,7 +1,7 @@
 package Encode::MIME::Name;
 use strict;
 use warnings;
-our $VERSION = do { my @r = ( q$Revision: 1.3 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = '1.04';
 
 # NOTE: This table must be 1:1 mapping
 our %MIME_NAME_OF = (

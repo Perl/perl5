@@ -1,7 +1,7 @@
 package Encode::Alias;
 use strict;
 use warnings;
-our $VERSION = do { my @r = ( q$Revision: 2.25 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = '2.26';
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 
 use Exporter 'import';

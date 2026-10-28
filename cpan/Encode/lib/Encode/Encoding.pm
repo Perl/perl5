@@ -3,7 +3,7 @@ package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
 use warnings;
-our $VERSION = do { my @r = ( q$Revision: 2.8 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = '2.09';
 
 our @CARP_NOT = qw(Encode Encode::Encoder);
 

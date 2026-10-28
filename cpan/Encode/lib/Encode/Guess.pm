@@ -2,7 +2,7 @@ package Encode::Guess;
 use strict;
 use warnings;
 use Encode qw(:fallbacks find_encoding);
-our $VERSION = do { my @r = ( q$Revision: 2.8 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = '2.09';
 
 my $Canon = 'Guess';
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};

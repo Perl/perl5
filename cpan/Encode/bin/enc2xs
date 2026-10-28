@@ -11,7 +11,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.25 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = '2.26';
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
