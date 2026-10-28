@@ -33,6 +33,7 @@
 #if defined(USE_PERLIO)
 #include "perliol.h" /* For the PERLIO_F_XXX */
 #endif
+#include "XSUB.h"
 
 /*
  * Contributed by Graham Barr  <Graham.Barr@tiuk.ti.com>
@@ -210,6 +211,8 @@ overloaded C<isa()> method, nor will check subclassing.
 
 */
 
+XS(XS_UNIVERSAL_isa); /* defined later */
+
 bool
 Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
 {
@@ -220,10 +223,14 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
     if(!SvROK(sv) || !SvOBJECT(SvRV(sv)))
         return FALSE;
 
-    isagv = gv_fetchmeth_pvn(SvSTASH(SvRV(sv)), "isa", 3, -1, GV_NOUNIVERSAL);
-    if(isagv) {
+    isagv = gv_fetchmeth_pvn(SvSTASH(SvRV(sv)), "isa", 3, -1, 0);
+    if (isagv) {
         dSP;
         CV *isacv = isGV(isagv) ? GvCV(isagv) : (CV *)isagv;
+
+        if (CvISXSUB(isacv) && CvXSUB(isacv) == XS_UNIVERSAL_isa)
+            goto default_isa;
+        
         SV *retsv;
         bool ret;
 
@@ -253,6 +260,7 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
 
     /* TODO: Support namesv being an HV ref to the stash directly? */
 
+ default_isa:
     return sv_derived_from_sv(sv, namesv, 0);
 }
 
@@ -291,8 +299,6 @@ writing.  It only recognizes SVs_TEMP and SVf_UTF8.
 XXX extracted in sv_does_sv is more complicated than the hand waving above
 
 */
-
-#include "XSUB.h"
 
 bool
 Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
