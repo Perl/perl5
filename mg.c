@@ -511,7 +511,7 @@ Perl_mg_magical(SV *sv)
 
                     case MGv2s_SCALARVALUE:
                         SvRMAGICAL_on(sv);
-                        if(SvTYPE(sv) <= SVt_PVMG)
+                        if (SvTYPE(sv) <= SVt_PVMG)
                             /* Only regular scalars can use the SVs_VMG flag.
                              * If this was a SVt_REGEXP or similar, we'll just
                              * have to ignore it and go the long way round
@@ -789,10 +789,10 @@ Perl_mg_propagate(pTHX_ SV *ssv, SV *dsv)
 {
     PERL_ARGS_ASSERT_MG_PROPAGATE;
 
-    if(SvTYPE(ssv) < SVt_PVMG || !SvMAGICAL(ssv))
+    if (SvTYPE(ssv) < SVt_PVMG || !SvMAGICAL(ssv))
         return;
 
-    for(MAGIC *smg = SvMAGIC(ssv); smg; smg = smg->mg_moremagic) {
+    for (MAGIC *smg = SvMAGIC(ssv); smg; smg = smg->mg_moremagic) {
         if (!MgIsV2(smg))
             continue;
 
@@ -804,12 +804,12 @@ Perl_mg_propagate(pTHX_ SV *ssv, SV *dsv)
         const struct ScalarValueMagicFunctions *funcs = MgSCALARVALUEFUNCS(smg);
 
         MAGIC *dmg = NULL;
-        if(funcs->flags & MGv2f_SCALARVALUE_AUTOPROPAGATE) {
+        if (funcs->flags & MGv2f_SCALARVALUE_AUTOPROPAGATE) {
             dmg = sv_magicv2_attach(dsv, MgFUNCS(smg), MgFLAGS(smg));
             mgv2_copy(smg, dmg);
         }
 
-        if(funcs->propagate)
+        if (funcs->propagate)
             (*funcs->propagate)(aTHX_ ssv, smg, dsv, dmg);
     }
 }
@@ -961,17 +961,17 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
                     break;
 
                 case MGv2s_SCALARVAR:
-                    if(MgSCALARVARFUNCS(mg)->localize_mg)
+                    if (MgSCALARVARFUNCS(mg)->localize_mg)
                         (*MgSCALARVARFUNCS(mg)->localize_mg)(aTHX_ nsv, sv, mg);
                     break;
 
                 case MGv2s_ARRAYVAR:
-                    if(MgARRAYVARFUNCS(mg)->localize_mg)
+                    if (MgARRAYVARFUNCS(mg)->localize_mg)
                         (*MgARRAYVARFUNCS(mg)->localize_mg)(aTHX_ nsv, sv, mg);
                     break;
 
                 case MGv2s_HASHVAR:
-                    if(MgHASHVARFUNCS(mg)->localize_mg)
+                    if (MgHASHVARFUNCS(mg)->localize_mg)
                         (*MgHASHVARFUNCS(mg)->localize_mg)(aTHX_ nsv, sv, mg);
                     break;
             }
@@ -1064,22 +1064,22 @@ Perl_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MG_FREE_STRUCT;
 
-    if(MgIsV2(mg)) {
+    if (MgIsV2(mg)) {
         const struct MagicFunctions *funcs = MgFUNCS(mg);
         if (funcs->free_mg)
             funcs->free_mg(aTHX_ sv, mg);
 
-        if(MgHasKEYSV(mg))
+        if (MgHasKEYSV(mg))
             SvREFCNT_dec(MgKEYSV(mg));
 
-        if(MgPTR(mg) && MgPTRLEN(mg)) {
+        if (MgPTR(mg) && MgPTRLEN(mg)) {
             /* can't
                 Safefree(MgPTR(mg));
               here because Safefree() requires an lvalue under -DPERL_POISON */
             Safefree(mg->mg_ptr);
         }
 
-        if(MgAUXSV(mg) && !MgWEAK_AUXSV(mg)) {
+        if (MgAUXSV(mg) && !MgWEAK_AUXSV(mg)) {
             SvREFCNT_dec(MgAUXSV(mg));
         }
     }
@@ -1088,7 +1088,7 @@ Perl_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
         if (vtbl && vtbl->svt_free)
             vtbl->svt_free(aTHX_ sv, mg);
 
-        if(mg->mg_ptr) {
+        if (mg->mg_ptr) {
             if (mg->mg_type == PERL_MAGIC_regex_global)
                 NOOP;
             else if (mg->mg_len > 0)
