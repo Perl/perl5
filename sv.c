@@ -4575,7 +4575,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
     SV_CHECK_THINKFIRST_COW_DROP(dsv);
     dtype = SvTYPE(dsv); /* THINKFIRST may have changed type */
 
-    if(dtype >= SVt_PVMG)
+    if (dtype >= SVt_PVMG)
         mg_unpropagate(dsv);
 
     /* There's a lot of redundancy below but we're going for speed here
@@ -6706,7 +6706,7 @@ Perl_sv_magicv2_add(pTHX_ SV *sv, const struct MagicFunctions *funcs, U32 flags,
     PERL_ARGS_ASSERT_SV_MAGICV2_ADD;
     U8 svt = SvTYPE(sv);
 
-    if(funcs->ver != 2)
+    if (funcs->ver != 2)
         croak("Unsupported MagicFunctions->ver value of %u", (unsigned int)funcs->ver);
 
     switch(funcs->shape) {
@@ -6715,22 +6715,22 @@ Perl_sv_magicv2_add(pTHX_ SV *sv, const struct MagicFunctions *funcs, U32 flags,
             break;
 
         case MGv2s_SCALARVAR:
-            if(svt > SVt_PVMG && svt != SVt_PVLV)
+            if (svt > SVt_PVMG && svt != SVt_PVLV)
                 goto bad_shape;
             break;
 
         case MGv2s_ARRAYVAR:
-            if(svt != SVt_PVAV)
+            if (svt != SVt_PVAV)
                 goto bad_shape;
             break;
 
         case MGv2s_HASHVAR:
-            if(svt != SVt_PVHV)
+            if (svt != SVt_PVHV)
                 goto bad_shape;
             break;
 
         case MGv2s_SCALARVALUE:
-            if(svt > SVt_PVMG && svt != SVt_PVLV && svt != SVt_REGEXP)
+            if (svt > SVt_PVMG && svt != SVt_PVLV && svt != SVt_REGEXP)
                 goto bad_shape;
             break;
 
@@ -6746,11 +6746,11 @@ bad_shape:
 
     MgPRIV(mg)  = 0;
 
-    if(!(funcs->flags & MGv2f_ALWAYS_WEAK_AUXSV))
+    if (!(funcs->flags & MGv2f_ALWAYS_WEAK_AUXSV))
         MgFLAGS(mg) |= MGv2f_REFCOUNTED_AUXSV;
 
-    if(funcs->shape == MGv2s_SCALARVALUE)
-        if(!PL_valuemagic_annotations) {
+    if (funcs->shape == MGv2s_SCALARVALUE)
+        if (!PL_valuemagic_annotations) {
             PL_valuemagic_annotations = newSV_type(SVt_PVMG);
         }
 
@@ -6832,28 +6832,28 @@ Perl_mg_ptr_store(pTHX_ MAGIC *mg, const void *ptr, STRLEN len)
     MgPTR_set(mg, new_ptr);
     MgPTRLEN_set(mg, len);
 
-    if(was_ptr && was_len)
+    if (was_ptr && was_len)
         Safefree(was_ptr);
 }
 
 static MAGIC *
 S_sv_magicv2_find(pTHX_ const SV *sv, bool (*filter)(pTHX_ MAGIC *mg, const void *key), const void *key, MAGIC *mg)
 {
-    if(SvTYPE(sv) < SVt_PVMG || !SvMAGICAL(sv))
+    if (SvTYPE(sv) < SVt_PVMG || !SvMAGICAL(sv))
         return NULL;
 
-    if(mg)
+    if (mg)
         mg = mg->mg_moremagic;
     else
         mg = SvMAGIC(sv);
-    for(/**/; mg; mg = mg->mg_moremagic) {
+    for (/**/; mg; mg = mg->mg_moremagic) {
         /* Don't really need to look at mg->mg_type since we're going to
          * filter on the virtual table anyway
          */
-        if(!MgIsV2(mg))
+        if (!MgIsV2(mg))
             continue;
 
-        if((*filter)(aTHX_ (MAGIC *)mg, key))
+        if ((*filter)(aTHX_ (MAGIC *)mg, key))
             return (MAGIC *)mg;
     }
 
@@ -6950,21 +6950,21 @@ S_sv_magicv2_remove(pTHX_ SV *sv, bool (*filter)(pTHX_ MAGIC *mg, const void *ke
      * functions are running. This permits us to remove the very magic that
      * is actively running, allowing magics to remove themselves
      */
-    if(SvTYPE(sv) < SVt_PVMG)
+    if (SvTYPE(sv) < SVt_PVMG)
         return;
 
     bool mg_magical_again = false;
 
     MAGIC *prevmg = NULL, *nextmg;
-    for(MAGIC *mg = SvMAGIC(sv); mg; prevmg = mg, mg = nextmg) {
+    for (MAGIC *mg = SvMAGIC(sv); mg; prevmg = mg, mg = nextmg) {
         nextmg = mg->mg_moremagic;
-        if(!MgIsV2(mg))
+        if (!MgIsV2(mg))
             continue;
 
-        if(!(*filter)(aTHX_ (MAGIC *)mg, key))
+        if (!(*filter)(aTHX_ (MAGIC *)mg, key))
             continue;
 
-        if(prevmg)
+        if (prevmg)
             prevmg->mg_moremagic = nextmg;
         else
             SvMAGIC_set(sv, nextmg);
@@ -6975,7 +6975,7 @@ S_sv_magicv2_remove(pTHX_ SV *sv, bool (*filter)(pTHX_ MAGIC *mg, const void *ke
         mg = prevmg;
     }
 
-    if(mg_magical_again)
+    if (mg_magical_again)
         mg_magical(sv);
 }
 
@@ -6997,7 +6997,7 @@ Perl_sv_magicv2_find_or_add(pTHX_ SV *sv, const struct MagicFunctions *funcs)
     PERL_ARGS_ASSERT_SV_MAGICV2_FIND_OR_ADD;
 
     MAGIC *mg = sv_magicv2_find_by_funcs(sv, funcs);
-    if(!mg)
+    if (!mg)
         mg = sv_magicv2_add(sv, funcs, 0, NULL);
 
     return mg;
@@ -15725,22 +15725,22 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 
             void *optr  = MgPTR(mg);
             STRLEN olen = MgPTRLEN(mg);
-            if(optr && olen) {
+            if (optr && olen) {
                 MgPTR_set(nmg, savepvn((char *)optr, olen));
             }
 
-            if(MgAUXSV(nmg)) {
-                if(MgWEAK_AUXSV(nmg))
+            if (MgAUXSV(nmg)) {
+                if (MgWEAK_AUXSV(nmg))
                     nmg->mg_obj = sv_dup    (MgAUXSV(nmg), param);
                 else
                     nmg->mg_obj = sv_dup_inc(MgAUXSV(nmg), param);
             }
 
-            if(MgHasKEYSV(nmg)) {
+            if (MgHasKEYSV(nmg)) {
                 MgKEYSV(nmg) = sv_dup_inc(MgKEYSV(nmg), param);
             }
 
-            if(funcs->clone_mg) {
+            if (funcs->clone_mg) {
                 /* TODO: Once we are no longer layered on top of MAGIC, then we should
                  * have direct access to the osv and nsv values. For now we will just
                  * pass them in as NULL
