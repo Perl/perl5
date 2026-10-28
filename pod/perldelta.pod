@@ -423,6 +423,15 @@ well.
 
 =over 4
 
+=item * CODE magic for Magic v2
+
+A new sub-type of magic has been added, designed to be applied to subroutines
+(i.e. SVs having the type C<SVt_PVCV>). This magic sub-type has various
+trigger functions relating to compile-time or runtime management of the
+subroutine to which it is attached.
+
+For more details, see L<perlapi/"struct CodeMagicFunctions">.
+
 =item * save_scalar_flags
 
 Added a new function analogous to C<save_aelem_flags> and C<save_helem_flags>, to have more control over saving scalars.

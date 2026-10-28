@@ -23,6 +23,13 @@ sv_magicv2_add(SV *sv, SV *magicname, SV *auxsvref, U16 priv = 0)
             user->y = 456;
         }
 
+SV *
+PL_compcv()
+    CODE:
+        RETVAL = newRV_inc((SV *)PL_compcv);
+    OUTPUT:
+        RETVAL
+
 bool
 sv_magicv2_exists(SV *sv, SV *magicname)
     CODE:
@@ -40,6 +47,7 @@ sv_magicv2_exists_by_auxsv(SV *sv, SV *auxsvref)
 SV *
 MgAUXSV(SV *sv, SV *magicname)
     // args different than the C macros
+    PROTOTYPE: \[$@%]$
     ALIAS:
         MgAUXSV = 0
         MgPRIV  = 2
@@ -47,7 +55,7 @@ MgAUXSV(SV *sv, SV *magicname)
         MgKEYSV = 4
     CODE:
     {
-        MAGIC *mg = sv_magicv2_find_by_funcs(sv, S_magicfuncs_by_name(aTHX_ magicname));
+        MAGIC *mg = sv_magicv2_find_by_funcs(SvRV(sv), S_magicfuncs_by_name(aTHX_ magicname));
         if(!mg)
             XSRETURN_UNDEF;
 
@@ -242,3 +250,19 @@ void
 sv_magicv2_remove(SV *sv, SV *magicname)
     CODE:
         sv_magicv2_remove_by_funcs(sv, S_magicfuncs_by_name(aTHX_ magicname));
+
+SV *
+find_lexical_protosub(SV *name)
+    CODE:
+        PADOFFSET padix = pad_findmy_sv(name, 0);
+        if (padix == NOT_IN_PAD)
+            croak("Did not find %" SVf " in the pad", SVfARG(name));
+
+        PADNAME *pn = PadnamelistARRAY(PL_comppad_name)[padix];
+        CV *protocv = PadnamePROTOCV(pn);
+        if (!protocv)
+            croak("Lexical sub %" SVf " does not have a protocv", SVfARG(name));
+
+        RETVAL = newRV_inc((SV *)protocv);
+    OUTPUT:
+        RETVAL

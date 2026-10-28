@@ -11490,6 +11490,51 @@ S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
     return;
 }
 
+#define run_codemagics_pre_newcv(cv, block) S_run_codemagics_pre_newcv(aTHX_ cv, block)
+static OP *
+S_run_codemagics_pre_newcv(pTHX_ SV *cv, OP *block)
+{
+    /* We want to run `pre_newcv` triggers in the reverse order from
+     * mg_moremagic iteration order. We'll capture MAGICs into a temporary
+     * AV so we can iterate it backwards.
+     */
+
+    AV *codemagics = NULL;
+
+    for (MAGIC *mg = SvMAGIC(cv); mg; mg = mg->mg_moremagic) {
+        if (MgIsV2(mg) && 
+                MgFUNCS(mg)->shape == MGv2s_CODE &&
+                MgCODEFUNCS(mg)->pre_newcv)
+            av_create_and_push(&codemagics, newSVuv(PTR2UV(mg)));
+    }
+
+    if (!codemagics)
+        return block;
+
+    sv_2mortal((SV *)codemagics);
+
+    UV n_magics = av_count(codemagics);
+    SV **svp = AvARRAY(codemagics);
+    for (UV i = n_magics; i > 0; i--) {
+        MAGIC *mg = INT2PTR(MAGIC *, SvUV(svp[i-1]));
+        block = (*MgCODEFUNCS(mg)->pre_newcv)(aTHX_ (SV *)cv, block, mg);
+    }
+
+    return block;
+}
+
+#define run_codemagics_post_newcv(newcv, compcv)  S_run_codemagics_post_newcv(aTHX_ newcv, compcv)
+static void
+S_run_codemagics_post_newcv(pTHX_ SV *newcv, SV *compcv)
+{
+    for (MAGIC *mg = SvMAGIC(compcv); mg; mg = mg->mg_moremagic) {
+        if (MgIsV2(mg) &&
+                MgFUNCS(mg)->shape == MGv2s_CODE &&
+                MgCODEFUNCS(mg)->post_newcv)
+            (void)(*MgCODEFUNCS(mg)->post_newcv)(aTHX_ newcv, compcv, mg);
+    }
+}
+
 /*
 =for apidoc newMYSUB
 
@@ -11601,6 +11646,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (block) {
         if (CvIsMETHOD(PL_compcv))
             block = class_wrap_method_body(block);
+        if (SvMAGIC(PL_compcv))
+            block = run_codemagics_pre_newcv((SV *)PL_compcv, block);
         /* This makes sub {}; work as expected.  */
         if (block->op_type == OP_STUB) {
             const line_t l = PL_parser->copline;
@@ -11848,6 +11895,9 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
             SvREFCNT_dec(oldcv);
         }
     }
+
+    if (PL_compcv && SvMAGIC((SV *)PL_compcv))
+        run_codemagics_post_newcv((SV *)cv, (SV *)PL_compcv);
 
   done:
     if (PL_parser)
@@ -12153,8 +12203,13 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (block) {
         assert(PL_parser);
+        /* TODO(leonerd):
+         *   This suggests that class_wrap_method_body might want to just be some CODE magic */
         if (CvIsMETHOD(PL_compcv))
             block = class_wrap_method_body(block);
+        if (SvMAGIC((SV *)PL_compcv))
+            block = run_codemagics_pre_newcv((SV *)PL_compcv, block);
+
         /* This makes sub {}; work as expected.  */
         if (block->op_type == OP_STUB) {
             const line_t l = PL_parser->copline;
@@ -12425,6 +12480,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     }
 
     assert(cv);
+
+    if (PL_compcv && SvMAGIC((SV *)PL_compcv))
+        run_codemagics_post_newcv((SV *)cv, (SV *)PL_compcv);
+
     if (block && has_name) {
         if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
             SV * const tmpstr = cv_name(cv,NULL,0);
