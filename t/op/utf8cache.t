@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use Config ();
 
-plan(tests => 16);
+plan(tests => 17);
 
 SKIP: {
 skip_without_dynamic_extension("Devel::Peek", 2);
@@ -163,3 +163,10 @@ $ref = bless [], "αabcd_";
 () = length $ref;
 bless $ref, "α";
 is length $ref, length "$ref", 'no utf8 length cache on references';
+
+SKIP: {
+	skip 'No threads', 1 unless $Config::Config{usethreads};
+	require threads;
+	my $val = threads->create(sub { ${^UTF8CACHE} })->join;
+	is $val, ${^UTF8CACHE}, '${^UTF8CACHE} has the correct value in child thread';
+}

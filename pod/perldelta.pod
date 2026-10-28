@@ -423,6 +423,10 @@ Z<>
 
 This bug has now been fixed. [GH #24933]
 
+=item * Properly initialize ${^UTF8CACHE} in new threads
+
+Previously the UTF-8 cache wasn't enabled in new threads, leading to performance issues.
+
 =back
 
 =head1 Known Problems
