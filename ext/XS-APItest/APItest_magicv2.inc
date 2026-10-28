@@ -176,22 +176,34 @@ const struct ScalarValueMagicFunctions magicfuncs_value = {
     .propagate = magicfunc_propagate,
 };
 
+static const struct {
+  const char *name;
+  const struct MagicFunctions *funcs;
+} magicfuncs[] = {
+  {"empty",                                         &magicfuncs_empty},
+  {"weak",                                          &magicfuncs_weak},
+  {"container_empty",      (struct MagicFunctions *)&magicfuncs_container_empty},
+  {"with_keyiv",           (struct MagicFunctions *)&magicfuncs_with_keyiv},
+  {"with_keysv",           (struct MagicFunctions *)&magicfuncs_with_keysv},
+  {"inc_on_free",                                   &magicfuncs_inc_on_free},
+  {"inc_on_clone",                                  &magicfuncs_inc_on_clone},
+  {"userstruct",           (struct MagicFunctions *)&magicfuncs_userstruct},
+  {"grab_before_get",      (struct MagicFunctions *)&magicfuncs_grab_before_get},
+  {"inc_after_set",        (struct MagicFunctions *)&magicfuncs_inc_after_set},
+  {"inc_after_clear_arr",  (struct MagicFunctions *)&magicfuncs_inc_after_clear_arr},
+  {"inc_after_clear_hash", (struct MagicFunctions *)&magicfuncs_inc_after_clear_hash},
+  {"value",                (struct MagicFunctions *)&magicfuncs_value},
+  {NULL, NULL},
+};
+
 static const struct MagicFunctions *S_magicfuncs_by_name(pTHX_ SV *name)
 {
     char *namepv = SvPV_nolen(name);
-    if(strEQ(namepv, "empty"))           return &magicfuncs_empty;
-    if(strEQ(namepv, "weak"))            return &magicfuncs_weak;
-    if(strEQ(namepv, "container_empty")) return (struct MagicFunctions *)&magicfuncs_container_empty;
-    if(strEQ(namepv, "with_keyiv"))      return (struct MagicFunctions *)&magicfuncs_with_keyiv;
-    if(strEQ(namepv, "with_keysv"))      return (struct MagicFunctions *)&magicfuncs_with_keysv;
-    if(strEQ(namepv, "inc_on_free"))     return &magicfuncs_inc_on_free;
-    if(strEQ(namepv, "inc_on_clone"))    return &magicfuncs_inc_on_clone;
-    if(strEQ(namepv, "userstruct"))      return (struct MagicFunctions *)&magicfuncs_userstruct;
-    if(strEQ(namepv, "grab_before_get")) return (struct MagicFunctions *)&magicfuncs_grab_before_get;
-    if(strEQ(namepv, "inc_after_set"))   return (struct MagicFunctions *)&magicfuncs_inc_after_set;
-    if(strEQ(namepv, "inc_after_clear_arr"))  return (struct MagicFunctions *)&magicfuncs_inc_after_clear_arr;
-    if(strEQ(namepv, "inc_after_clear_hash")) return (struct MagicFunctions *)&magicfuncs_inc_after_clear_hash;
-    if(strEQ(namepv, "value"))           return (struct MagicFunctions *)&magicfuncs_value;
+
+    for (int i = 0; magicfuncs[i].name; i++)
+        if (strEQ(namepv, magicfuncs[i].name))
+            return magicfuncs[i].funcs;
+
     croak("Unrecognised magicfuncs name %" SVf, SVfARG(name));
 }
 
