@@ -1,7 +1,7 @@
 # Net::Cmd.pm
 #
 # Copyright (C) 1995-2006 Graham Barr.  All rights reserved.
-# Copyright (C) 2013-2016, 2020, 2022 Steve Hay.  All rights reserved.
+# Copyright (C) 2013-2016, 2020, 2022, 2026 Steve Hay.  All rights reserved.
 # This module is free software; you can redistribute it and/or modify it under
 # the same terms as Perl itself, i.e. under the terms of either the GNU General
 # Public License or the Artistic License, as specified in the F<LICENCE> file.
@@ -26,7 +26,7 @@ BEGIN {
   }
 }
 
-our $VERSION = "3.15";
+our $VERSION = "3.16";
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(CMD_INFO CMD_OK CMD_MORE CMD_REJECT CMD_ERROR CMD_PENDING);
 
@@ -258,6 +258,42 @@ sub _set_status_closed {
     . "(): unexpected EOF on command channel: $err") if $cmd->debug;
 }
 
+# Max length of an incomplete response line
+sub max_partial_bytes  { 1024 * 1024      }    # 1 MiB
+
+# Max total size of a multiline response
+sub max_resp_bytes     { 8 * 1024 * 1024  }    # 8 MiB
+
+# Max total size of a dot-terminated body
+sub max_dotread_bytes  { 32 * 1024 * 1024 }    # 32 MiB
+
+sub _set_status_line_too_long {
+  my $cmd = shift;
+  my $pkg = ref($cmd) || $cmd;
+
+  $cmd->set_status($cmd->DEF_REPLY_CODE, "[$pkg] Response line too long");
+  carp(ref($cmd) . ": " . (caller(1))[3]
+    . "(): response line too long") if $cmd->debug;
+}
+
+sub _set_status_resp_too_large {
+  my $cmd = shift;
+  my $pkg = ref($cmd) || $cmd;
+
+  $cmd->set_status($cmd->DEF_REPLY_CODE, "[$pkg] Response too large");
+  carp(ref($cmd) . ": " . (caller(1))[3]
+    . "(): response too large") if $cmd->debug;
+}
+
+sub _set_status_dotread_too_large {
+  my $cmd = shift;
+  my $pkg = ref($cmd) || $cmd;
+
+  $cmd->set_status($cmd->DEF_REPLY_CODE, "[$pkg] Dot-read too large");
+  carp(ref($cmd) . ": " . (caller(1))[3]
+    . "(): dot-read too large") if $cmd->debug;
+}
+
 sub _is_closed {
   my $cmd = shift;
   if (!defined fileno($cmd)) {
@@ -350,6 +386,12 @@ sub getline {
         return;
       }
 
+      if (length($partial) + length($buf) > $cmd->max_partial_bytes) {
+        $cmd->close;
+        $cmd->_set_status_line_too_long;
+        return;
+      }
+
       substr($buf, 0, 0) = $partial;    ## prepend from last sysread
 
       my @buf = split(/\015?\012/, $buf, -1);    ## break into lines
@@ -398,6 +440,8 @@ sub response {
 
   $cmd->set_status($cmd->DEF_REPLY_CODE, undef); # initialize the response
 
+  my $resp_bytes = 0;
+
   while (1) {
     my $str = $cmd->getline();
 
@@ -418,6 +462,12 @@ sub response {
     ${*$cmd}{'net_cmd_code'} = $code;
 
     push(@{${*$cmd}{'net_cmd_resp'}}, $str);
+    $resp_bytes += length($str);
+    if ($resp_bytes > $cmd->max_resp_bytes) {
+      $cmd->close;
+      $cmd->_set_status_resp_too_large;
+      return CMD_ERROR;
+    }
 
     last unless ($more);
   }
@@ -431,6 +481,7 @@ sub read_until_dot {
   my $cmd = shift;
   my $fh  = shift;
   my $arr = [];
+  my $total = 0;
 
   while (1) {
     my $str = $cmd->getline() or return;
@@ -447,6 +498,12 @@ sub read_until_dot {
     }
     else {
       push(@$arr, $str);
+      $total += length($str);
+      if ($total > $cmd->max_dotread_bytes) {
+        $cmd->close;
+        $cmd->_set_status_dotread_too_large;
+        return;
+      }
     }
   }
 
@@ -805,6 +862,27 @@ the server after issuing a command that expects data to be written.
 
 See the Net::POP3 and Net::SMTP modules for examples of this.
 
+=item C<max_partial_bytes()>
+
+Returns the maximum number of bytes that an incomplete response line (data
+received without a terminating CRLF) may accumulate before the connection
+is closed with an error. The default is 1 MiB. Override this method in a
+subclass to change the limit.
+
+=item C<max_resp_bytes()>
+
+Returns the maximum number of bytes that a multiline response (NNN-...
+continuation lines accumulated by C<response()>) may occupy before the
+connection is closed with an error. The default is 8 MiB. Override this
+method in a subclass to change the limit.
+
+=item C<max_dotread_bytes()>
+
+Returns the maximum number of bytes that a dot-terminated body read (data
+accumulated by C<read_until_dot()> when no filehandle is supplied) may
+occupy before the connection is closed with an error. The default is
+32 MiB. Override this method in a subclass to change the limit.
+
 =back
 
 =head2 Pseudo Responses
@@ -842,6 +920,33 @@ If there is a read or write timeout C<code()> will return "421"
 that subclassed C<Net::Cmd>). The _set_status_timeout() method
 can be overridden to set a different message (by calling set_status())
 or otherwise trap this error.
+
+=item Response line too long
+
+If an incomplete response line (data received without a terminating CRLF)
+exceeds the C<max_partial_bytes()> limit, C<code()> will return "421" and
+C<message()> will return "[$pkg] Response line too long" (where $pkg is
+the name of the class that subclassed C<Net::Cmd>). The
+C<_set_status_line_too_long()> method can be overridden to set a different
+message or otherwise trap this error.
+
+=item Response too large
+
+If the accumulated bytes of a multiline response (NNN-... continuation
+lines) exceed the C<max_resp_bytes()> limit, C<code()> will return "421"
+and C<message()> will return "[$pkg] Response too large" (where $pkg is
+the name of the class that subclassed C<Net::Cmd>). The
+C<_set_status_resp_too_large()> method can be overridden to set a different
+message or otherwise trap this error.
+
+=item Dot-read body too large
+
+If the accumulated bytes of a dot-terminated body read (when no filehandle
+is supplied) exceed the C<max_dotread_bytes()> limit, C<code()> will return
+"421" and C<message()> will return "[$pkg] Dot-read too large" (where $pkg
+is the name of the class that subclassed C<Net::Cmd>). The
+C<_set_status_dotread_too_large()> method can be overridden to set a
+different message or otherwise trap this error.
 
 =back
 
@@ -887,7 +992,7 @@ libnet as of version 1.22_02.
 
 Copyright (C) 1995-2006 Graham Barr.  All rights reserved.
 
-Copyright (C) 2013-2016, 2020, 2022 Steve Hay.  All rights reserved.
+Copyright (C) 2013-2016, 2020, 2022, 2026 Steve Hay.  All rights reserved.
 
 =head1 LICENCE
 
@@ -897,11 +1002,11 @@ License or the Artistic License, as specified in the F<LICENCE> file.
 
 =head1 VERSION
 
-Version 3.15
+Version 3.16
 
 =head1 DATE
 
-20 March 2023
+24 Oct 2026
 
 =head1 HISTORY
 

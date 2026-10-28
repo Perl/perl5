@@ -1582,6 +1582,7 @@ cpan/libnet/lib/Net/POP3.pm		Module related to libnet
 cpan/libnet/lib/Net/SMTP.pm		Module related to libnet
 cpan/libnet/lib/Net/Time.pm		Module related to libnet
 cpan/libnet/Makefile.PL			libnet
+cpan/libnet/t/cmd_buffer_limits.t	libnet
 cpan/libnet/t/config.t			libnet
 cpan/libnet/t/datasend.t		libnet
 cpan/libnet/t/ftp.t			libnet
