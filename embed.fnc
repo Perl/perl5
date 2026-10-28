@@ -1031,6 +1031,13 @@ p	|OP *	|build_infix_plugin					\
 				|NN OP *lhs				\
 				|NN OP *rhs				\
 				|NN void *tokendata
+Rdp	|OP *	|build_list_slice					\
+				|I32 operation				\
+				|NN OP *target				\
+				|NN OP *selector
+Rdp	|OP *	|build_list_slice_array 				\
+				|NN OP *target				\
+				|NN OP *selector
 Rdp	|OP *	|build_method_invocation				\
 				|NN OP *target				\
 				|NN OP *method				\
