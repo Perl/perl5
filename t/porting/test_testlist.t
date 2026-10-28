@@ -165,8 +165,8 @@ sub test_via_runtests {
 
     ok(-f './runtests', "runtests is found in top level directory");
     ok(-e './runtests', "runtests is executable");
-    my $TEST_FILES = join ' ' => @these_tests;
-    my @output = `TEST_FILES="$TEST_FILES" ./runtests choose`;
+    my $these_test_args = join ' ' => @these_tests;
+    my @output = `TEST_ARGS="$these_test_args" ./runtests choose`;
     for my $l (@output) {
         chomp $l;
         next unless $l =~ m{^t/};
