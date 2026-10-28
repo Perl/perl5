@@ -17424,6 +17424,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_cv_has_eval	= proto_perl->Icv_has_eval;
     /* Unicode features (see perlrun/-C) */
     PL_unicode		= proto_perl->Iunicode;
+    PL_utf8cache	= proto_perl->Iutf8cache;
 
     /* Pre-5.8 signals control */
     PL_signals		= proto_perl->Isignals;
