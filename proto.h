@@ -281,6 +281,36 @@ PERL_CALLCONV void
 Perl_atfork_unlock(void);
 #define PERL_ARGS_ASSERT_ATFORK_UNLOCK
 
+PERL_CALLCONV HV *
+Perl_attrtarget_class(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_ATTRTARGET_CLASS       \
+    STMT_START { Perl_assert_aTHX; assert(target); assert(attrname);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                 \
+    } STMT_END
+
+PERL_CALLCONV CV *
+Perl_attrtarget_code(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_ATTRTARGET_CODE        \
+    STMT_START { Perl_assert_aTHX; assert(target); assert(attrname);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                 \
+    } STMT_END
+
+PERL_CALLCONV PADNAME *
+Perl_attrtarget_padname(pTHX_ struct PerlAttributeTarget *target, const char *attrname)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2);
+#define PERL_ARGS_ASSERT_ATTRTARGET_PADNAME     \
+    STMT_START { Perl_assert_aTHX; assert(target); assert(attrname);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                 \
+    } STMT_END
+
 PERL_CALLCONV SV **
 Perl_av_arylen_p(pTHX_ AV *av)
         Perl_attribute_nonnull_aTHX

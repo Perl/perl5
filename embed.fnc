@@ -945,6 +945,14 @@ Adp	|OP *	|apply_builtin_cv_attributes				\
 CTp	|void	|atfork_child
 CTp	|void	|atfork_lock
 CTp	|void	|atfork_unlock
+Adpx	|HV *	|attrtarget_class					\
+				|NN struct PerlAttributeTarget *target	\
+				|NN const char *attrname
+Adpx	|CV *	|attrtarget_code|NN struct PerlAttributeTarget *target	\
+				|NN const char *attrname
+Adpx	|PADNAME *|attrtarget_padname					\
+				|NN struct PerlAttributeTarget *target	\
+				|NN const char *attrname
 Cop	|SV **	|av_arylen_p	|NN AV *av
 Adp	|void	|av_clear	|NN AV *av
 ARdip	|Size_t |av_count	|NN AV *av

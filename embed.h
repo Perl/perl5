@@ -123,6 +123,9 @@
 # define atfork_child                           Perl_atfork_child
 # define atfork_lock                            Perl_atfork_lock
 # define atfork_unlock                          Perl_atfork_unlock
+# define attrtarget_class(a,b)                  Perl_attrtarget_class(aTHX_ a,b)
+# define attrtarget_code(a,b)                   Perl_attrtarget_code(aTHX_ a,b)
+# define attrtarget_padname(a,b)                Perl_attrtarget_padname(aTHX_ a,b)
 # define av_clear(a)                            Perl_av_clear(aTHX_ a)
 # define av_count(a)                            Perl_av_count(aTHX_ a)
 # define av_create_and_push(a,b)                Perl_av_create_and_push(aTHX_ a,b)
