@@ -45,6 +45,16 @@ magicfunc_inc_on_clone_clone(pTHX_ SV *nsv, MAGIC *nmg, SV *osv, MAGIC *omg, CLO
         sv_inc(auxsv);
 }
 
+static MAGIC *
+magicfunc_copy_clone(pTHX_ SV *nsv, SV *sv, MAGIC *mg)
+{
+    MAGIC *nmg = magicv2_copy(nsv, sv, mg);
+
+    MgAUXSV_set(nmg, newSVpvs("this-is-clone"));
+
+    return nmg;
+}
+
 static const struct MagicFunctions magicfuncs_empty = {
     .ver   = 2,
     .shape = MGv2s_BASE,
@@ -147,6 +157,14 @@ static const struct ArrayVarMagicFunctions magicfuncs_inc_after_clear_hash = {
     .clear = &magicfunc_inc,
 };
 
+static const struct CodeMagicFunctions magicfuncs_copy_clonecv = {
+    .ver = 2,
+    .shape = MGv2s_CODE,
+    .debug_name = "XS::APItest/copy_clonecv",
+
+    .clone_cv = &magicfunc_copy_clone,
+};
+
 /* we can't make this one `static` because -Wc++-compat gets upset if we do */
 extern const struct ScalarValueMagicFunctions magicfuncs_value;
 
@@ -192,6 +210,7 @@ static const struct {
   {"inc_after_set",        (struct MagicFunctions *)&magicfuncs_inc_after_set},
   {"inc_after_clear_arr",  (struct MagicFunctions *)&magicfuncs_inc_after_clear_arr},
   {"inc_after_clear_hash", (struct MagicFunctions *)&magicfuncs_inc_after_clear_hash},
+  {"copy_clonecv",         (struct MagicFunctions *)&magicfuncs_copy_clonecv},
   {"value",                (struct MagicFunctions *)&magicfuncs_value},
   {NULL, NULL},
 };

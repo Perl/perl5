@@ -332,6 +332,37 @@ clears the hash, such as C<undef %hash>.
 
 =back
 
+=for apidoc Axy||struct CodeMagicFunctions
+
+This structure extends the basic C<struct MagicFunctions> by adding the
+following fields to store more trigger functions. It may only be applied
+to subroutines - i.e. those whose type is C<SVt_PVCV>.
+
+    struct CodeMagicFunctions {
+        ...
+
+        MAGIC *(*clone_cv)(pTHX_ SV *ncv, SV *protocv,
+                           MAGIC *protomg);
+    };
+
+For this structure, the C<shape> field takes the value C<MGv2s_CODE>.
+
+=over 4
+
+=item C<clone_cv> trigger function
+
+An optional pointer to a function to be invoked as part of the L</cv_clone>
+API function. It is passed a pointer to the new CV that was created as part
+of the clone operation, as well as the original protosub and the magic that
+invoked it.
+
+As this trigger function has the same argument shape and return type as the
+C<localize_mg> trigger, the same notes apply to this with regard to using
+L</magicv2_copy> or its variants; or wrapping those in your own trigger
+function to perform additional steps.
+
+=back
+
 =for apidoc Axy||struct ScalarValueMagicFunctions
 
 This structure extends the basic C<struct MagicFunctions> by adding the
@@ -481,6 +512,7 @@ Perl_mg_magical(SV *sv)
             if (MgIsV2(mg)) {
                 switch (MgFUNCS(mg)->shape) {
                     case MGv2s_BASE:
+                    case MGv2s_CODE:
                         break;
 
                     case MGv2s_SCALARVAR:
@@ -908,19 +940,41 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     MAGIC* mg;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-        const MGVTBL* const vtbl = mg->mg_virtual;
-        if ((mg->mg_flags & MGf_COPY) && vtbl->svt_copy){
-            count += vtbl->svt_copy(aTHX_ sv, mg, nsv, key, klen);
+        if (MgIsV2(mg)) {
+            switch (MgFUNCS(mg)->shape) {
+                case MGv2s_BASE:
+                case MGv2s_SCALARVAR:
+                case MGv2s_ARRAYVAR:
+                case MGv2s_HASHVAR:
+                case MGv2s_SCALARVALUE:
+                    /* nothing to do */
+                    break;
+
+                case MGv2s_CODE:
+                {
+                    /* This is a 'clone_cv' operation */
+                    const struct CodeMagicFunctions *funcs = MgCODEFUNCS(mg);
+                    if (funcs->clone_cv)
+                        (*funcs->clone_cv)(aTHX_ nsv, sv, mg);
+                    break;
+                }
+            }
         }
         else {
-            const char type = mg->mg_type;
-            if (isUPPER(type) && type != PERL_MAGIC_uvar) {
-                sv_magic(nsv,
-                     (type == PERL_MAGIC_tied)
-                        ? SvTIED_obj(sv, mg)
-                        : mg->mg_obj,
-                     toLOWER(type), key, klen);
-                count++;
+            const MGVTBL* const vtbl = mg->mg_virtual;
+            if ((mg->mg_flags & MGf_COPY) && vtbl->svt_copy){
+                count += vtbl->svt_copy(aTHX_ sv, mg, nsv, key, klen);
+            }
+            else {
+                const char type = mg->mg_type;
+                if (isUPPER(type) && type != PERL_MAGIC_uvar) {
+                    sv_magic(nsv,
+                         (type == PERL_MAGIC_tied)
+                            ? SvTIED_obj(sv, mg)
+                            : mg->mg_obj,
+                         toLOWER(type), key, klen);
+                    count++;
+                }
             }
         }
     }
@@ -956,6 +1010,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
         if (MgIsV2(mg)) {
             switch(MgFUNCS(mg)->shape) {
                 case MGv2s_BASE:
+                case MGv2s_CODE:
                 case MGv2s_SCALARVALUE:
                     /* does not support localisation */
                     break;

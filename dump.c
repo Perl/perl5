@@ -2025,6 +2025,7 @@ Perl_do_magicv2_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I
             case MGv2s_SCALARVAR: shapename = "SCALARVAR"; break;
             case MGv2s_ARRAYVAR:  shapename = "ARRAYVAR";  break;
             case MGv2s_HASHVAR:   shapename = "HASHVAR";   break;
+            case MGv2s_CODE:      shapename = "CODE";      break;
             case MGv2s_SCALARVALUE:
                                   shapename = "SCALARVALUE"; break;
         }
@@ -2067,6 +2068,15 @@ Perl_do_magicv2_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I
                     dump_indent(level, file, "      CLEAR\n");
                 break;
             }
+
+            case MGv2s_CODE:
+            {
+                const struct CodeMagicFunctions *funcs = MgCODEFUNCS(mg);
+                if (funcs->clone_cv)
+                    dump_indent(level, file, "      CLONE_CV\n");
+                break;
+            }
+
             case MGv2s_SCALARVALUE:
             {
                 const struct ScalarValueMagicFunctions *funcs = MgSCALARVALUEFUNCS(mg);

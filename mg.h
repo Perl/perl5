@@ -116,6 +116,7 @@ enum MagicShape {
     MGv2s_SCALARVAR,
     MGv2s_ARRAYVAR,
     MGv2s_HASHVAR,
+    MGv2s_CODE,
     MGv2s_SCALARVALUE,
 };
 
@@ -225,6 +226,27 @@ magic structure is compatible.
 */
 
 #define MgHASHVARFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_HASHVAR, const struct HashVarMagicFunctions *)
+
+struct CodeMagicFunctions {
+    _PERL_MAGICFUNCTIONS_COMMON_FIELDS;
+    /* TODO: Add various trigger functions for lifetimes of the CV, including
+     * around its compiletime, and callchecker
+     */
+
+    MAGIC *(*clone_cv)(pTHX_ SV *ncv, SV *protocv, MAGIC *protomg);
+};
+
+/*
+=for apidoc Am|const struct CodeMagicFunctions *|MgCODEFUNCS|MAGIC *mg
+Returns a pointer to the magic functions structure of the given Magic v2
+instance, cast to a type of C<const struct CodeMagicFunctions>. On debugging
+perls this will additionally assert that the I<shape> field of the magic
+structure is compatible.
+
+=cut
+*/
+
+#define MgCODEFUNCS(mg)  MGv2_ASSERT_AND_CAST_FUNCS_(mg, MGv2s_CODE, const struct CodeMagicFunctions *)
 
 #define MGv2f_SCALARVALUE_AUTOPROPAGATE   (1<<18)
 
