@@ -1822,6 +1822,88 @@
         code    => 'index $x, "b"',
     },
 
+    # test isa itself
+    'func::isa::unblessed' => {
+        desc    => 'isa on unblessed reference',
+        setup   => 'my $x = {}; package X {}; use feature "isa";',
+        code    => 'my $y = $x isa X',
+    },
+    'func::isa::plainfalse' => {
+        desc    => 'false isa on blessed non-@ISA',
+        setup   => 'package X {} my $x = bless {}, "X"; package Y {} use feature "isa";',
+        code    => 'my $y = $x isa Y',
+    },
+    'func::isa::plaintrue' => {
+        desc    => 'true isa on blessed non-@ISA',
+        setup   => 'package X {} my $x = bless {}, "X"; use feature "isa";',
+        code    => 'my $y = $x isa X',
+    },
+    'func::isa::5deepfalse' => {
+        desc    => 'false isa on blessed 5 deep-@ISA',
+        setup   => <<'EOS',
+package A {} package B { our @ISA = "A"; } package C { our @ISA = "B" } package D { our @ISA = "C"; } package E { our @ISA = "D"; }
+package Y {} my $x = bless {}, "Y"; use feature "isa";
+EOS
+        code    => 'my $y = $x isa A',
+    },
+    'func::isa::5deeptruetop' => {
+        desc    => 'false isa on blessed 5 deep-@ISA at top',
+        setup   => <<'EOS',
+package A {} package B { our @ISA = "A"; } package C { our @ISA = "B" } package D { our @ISA = "C"; } package E { our @ISA = "D"; }
+my $x = bless {}, "E"; use feature "isa";
+EOS
+        code    => 'my $y = $x isa E',
+    },
+    'func::isa::5deeptruebot' => {
+        desc    => 'false isa on blessed 5 deep-@ISA at bottom',
+        setup   => <<'EOS',
+package A {} package B { our @ISA = "A"; } package C { our @ISA = "B" } package D { our @ISA = "C"; } package E { our @ISA = "D"; }
+my $x = bless {}, "E"; use feature "isa";
+EOS
+        code    => 'my $y = $x isa A',
+    },
+
+    # test the not so direct alternative to isa
+    'func::isa::unblessed_blessedandisa' => {
+        desc    => 'isa on unblessed reference',
+        setup   => 'my $x = {}; package X {}; use builtin "blessed"',
+        code    => 'my $y = blessed($x) && $x->isa("X")',
+    },
+    'func::isa::plainfalse_blessedandisa' => {
+        desc    => 'false isa on blessed non-@ISA',
+        setup   => 'package X {} my $x = bless {}, "X"; package Y {} use builtin "blessed";',
+        code    => 'my $y = blessed($x) && $x->isa("Y")',
+    },
+    'func::isa::plaintrue_blessedandisa' => {
+        desc    => 'true isa on blessed non-@ISA',
+        setup   => 'package X {} my $x = bless {}, "X"; use builtin "blessed";',
+        code    => 'my $y = blessed($x) && $x->isa("X")',
+    },
+    'func::isa::5deepfalse_blessedandisa' => {
+        desc    => 'false isa on blessed 5 deep-@ISA',
+        setup   => <<'EOS',
+package A {} package B { our @ISA = "A"; } package C { our @ISA = "B" } package D { our @ISA = "C"; } package E { our @ISA = "D"; }
+package Y {} my $x = bless {}, "Y"; use builtin "blessed";
+EOS
+        code    => 'my $y = blessed($x) && $x->isa("A")',
+    },
+    'func::isa::5deeptruetop_blessedandisa' => {
+        desc    => 'false isa on blessed 5 deep-@ISA at top',
+        setup   => <<'EOS',
+package A {} package B { our @ISA = "A"; } package C { our @ISA = "B" } package D { our @ISA = "C"; } package E { our @ISA = "D"; }
+my $x = bless {}, "E"; use builtin "blessed";
+EOS
+        code    => 'my $y = blessed($x) && $x->isa("E")',
+    },
+    'func::isa::5deeptruebot_blessedandisa' => {
+        desc    => 'false isa on blessed 5 deep-@ISA at bottom',
+        setup   => <<'EOS',
+package A {} package B { our @ISA = "A"; } package C { our @ISA = "B" } package D { our @ISA = "C"; } package E { our @ISA = "D"; }
+my $x = bless {}, "E"; use builtin "blessed";
+EOS
+        code    => 'my $y = blessed($x) && $x->isa("A")',
+    },
+
     # SUBSTR
     'func::substr::nibble_void' => {
         desc    => 'substr with a zero offset, empty replacement pattern (void)',
