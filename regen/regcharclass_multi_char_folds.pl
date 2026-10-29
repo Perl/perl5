@@ -171,4 +171,11 @@ sub multi_char_folds ($$) {
     return %output_folds;
 }
 
+sub multi_char_fold_starts {
+    my (undef, $folds, $format) = prop_invmap("Case_Folding");
+    die "Unexpected Case_Folding format" unless $format eq 'al';
+    my %heads = map { $_->[0] => 1 } grep { ref $_ } @$folds;
+    return map { sprintf('"\\x{%X}"', $_) => $_ } sort { $a <=> $b } keys %heads;
+}
+
 1

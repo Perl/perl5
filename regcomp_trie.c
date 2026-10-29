@@ -1838,7 +1838,7 @@ S_ac_map_start_codepoint(pTHX_ U8 *map, const UV cp)
 static void
 S_ac_map_folded_starts(pTHX_ const reg_trie_data *trie, const U32 state,
                        U8 *path, const U32 path_len, U8 *map,
-                       SV **first_folds)
+                       SV **first_folds, bool *has_multichar_start)
 {
     const U32 base = trie->states[state].trans.base;
 
@@ -1874,10 +1874,12 @@ S_ac_map_folded_starts(pTHX_ const reg_trie_data *trie, const U32 state,
                     S_ac_map_start_codepoint(aTHX_ map, remaining[i - 1]);
             }
             *first_folds = add_cp_to_invlist(*first_folds, initial);
+            if (is_MULTI_CHAR_FOLD_START_utf8(folded))
+                *has_multichar_start = TRUE;
         }
         else {
             S_ac_map_folded_starts(aTHX_ trie, next, path, path_len + 1,
-                                   map, first_folds);
+                                   map, first_folds, has_multichar_start);
         }
     }
 }
@@ -2151,6 +2153,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
              && !trie->prefixlen_octets && !trie->prefixlen_chars)
     {
         SV *first_folds = NULL;
+        bool has_multichar_start = FALSE;
         U8 path[UTF8_MAXBYTES + 1];
         U8 *start_map;
         UV start, end;
@@ -2161,22 +2164,28 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
         aho->prefilter = (U8 *)PerlMemShared_calloc(
             REG_AC_PREFILTER_SIZE, sizeof(U8));
         start_map = aho->prefilter + REG_AC_PREFILTER_MAP_OFFSET;
-        S_ac_map_folded_starts(aTHX_ trie, 1, path, 0, start_map, &first_folds);
+        S_ac_map_folded_starts(aTHX_ trie, 1, path, 0, start_map,
+                               &first_folds, &has_multichar_start);
 
         /* A single target codepoint can supply several folded characters.
          * Add every such codepoint whose fold begins with a possible first
          * folded character.  We need not compare the rest of its fold: false
          * positives are safe, including folds extending beyond a trie word
          * into its following regex nodes. */
-        invlist_iterinit(PL_HasMultiCharFold);
-        while (invlist_iternext(PL_HasMultiCharFold, &start, &end)) {
-            for (UV cp = start; cp <= end; cp++) {
-                U8 folded[UTF8_MAXBYTES_CASE + 1];
-                STRLEN folded_len;
-                const UV initial = to_uni_fold(cp, folded, &folded_len);
+        if (has_multichar_start) {
+            invlist_iterinit(PL_HasMultiCharFold);
+            while (invlist_iternext(PL_HasMultiCharFold, &start, &end)) {
+                for (UV cp = start; cp <= end; cp++) {
+                    U8 folded[UTF8_MAXBYTES_CASE + 1];
+                    STRLEN folded_len;
+                    const UV initial = to_uni_fold(cp, folded, &folded_len);
 
-                if (first_folds && invlist_contains_cp_(first_folds, initial))
-                    S_ac_map_start_codepoint(aTHX_ start_map, cp);
+                    if (first_folds
+                        && invlist_contains_cp_(first_folds, initial))
+                    {
+                        S_ac_map_start_codepoint(aTHX_ start_map, cp);
+                    }
+                }
             }
         }
         SvREFCNT_dec(first_folds);

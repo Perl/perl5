@@ -1750,6 +1750,55 @@ character sequence actually occupies.
 #endif
 
 /*
+	MULTI_CHAR_FOLD_START: The first character of a multi-character fold for ASCII/Latin1
+
+	%regcharclass_multi_char_folds::multi_char_fold_starts()
+*/
+/*
+=for apidoc_section $casing
+=for apidoc QT|STRLEN|is_MULTI_CHAR_FOLD_START_utf8|const U8 * s
+This character can begin the full fold of a single character that folds to
+multiple characters.  The input is already folded.
+
+This returns non-zero if the
+sequence of the next few bytes starting at C<s>
+form a valid UTF-8 representation of such a character.
+
+Otherwise, it returns zero.
+
+The value returned gives the number of bytes the matched
+character actually occupies.
+
+You need to be sure that the bytes at C<s> comprise at least
+one complete character before calling this; otherwise this
+could read beyond its end.
+
+
+
+=cut
+*/
+
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+/*** GENERATED CODE ***/
+#  define is_MULTI_CHAR_FOLD_START_utf8(s)                                  \
+( (STRLEN)( ( 'a' == ((const U8*)s)[0] || 'f' == ((const U8*)s)[0] || inRANGE_helper_(U8, ((const U8*)s)[0], 'h', 'j') || inRANGE_helper_(U8, ((const U8*)s)[0], 's', 't') || 'w' == ((const U8*)s)[0] || 'y' == ((const U8*)s)[0] ) ? 1\
+: ( 0xCA == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0xBC == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0xCE == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ( ((const U8*)s)[1] & 0xFD ) == 0xAC ) || ( ( ((const U8*)s)[1] & 0xF7 ) == 0xB1 ) || ((const U8*)s)[1] == 0xB7 ) ? 2 : 0 )\
+: ( 0xCF == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ( ((const U8*)s)[1] & 0xFB ) == 0x81 ) || ((const U8*)s)[1] == 0x89 || ((const U8*)s)[1] == 0x8E ) ? 2 : 0 )\
+: ( 0xD5 == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0xA5 == ((const U8*)s)[1] || 0xB4 == ((const U8*)s)[1] || 0xBE == ((const U8*)s)[1] ) ? 2 : 0 )\
+: ( 0xE1 == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0xBC == ((const U8*)s)[1] ) ?                                       \
+	( ( ( ((const U8*)s)[2] & 0xD8 ) == 0x80 ) ? 3 : 0 )                \
+    : ( ( 0xBD == ((const U8*)s)[1] ) && ( ( ( ((const U8*)s)[2] & 0xF8 ) == 0xA0 ) || ( ( ((const U8*)s)[2] & 0xFB ) == 0xB0 ) || ((const U8*)s)[2] == 0xBC ) ) ? 3 : 0 )\
+: 0 ) )
+#endif
+
+/*
 	FOLDS_TO_MULTI: characters that fold to multi-char strings for ASCII/Latin1
 
 	\p{_Perl_Folds_To_Multi_Char}
@@ -3301,6 +3350,31 @@ character actually occupies.
 #endif
 
 /*
+	MULTI_CHAR_FOLD_START: The first character of a multi-character fold for EBCDIC 1047
+
+	%regcharclass_multi_char_folds::multi_char_fold_starts()
+*/
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+/*** GENERATED CODE ***/
+#  define is_MULTI_CHAR_FOLD_START_utf8(s)                                  \
+( (STRLEN)( ( ( ( ((const U8*)s)[0] & 0xEF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'f' ) || ( ( ((const U8*)s)[0] & 0xFE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xFE ) == 's' ) || ((const U8*)s)[0] == 'y' ) ? 1\
+: ( 0xAB == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x70 == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0xB4 == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[1]) & 0xFD ) == 0xAC ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[1]) & 0xF7 ) == 0xB1 ) || ((const U8*)s)[1] == 0x66 ) ? 2 : 0 )\
+: ( 0xB5 == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ( ((const U8*)s)[1] & 0xFB ) == 0x42 ) || ((const U8*)s)[1] == 0x4A || ((const U8*)s)[1] == 0x55 ) ? 2 : 0 )\
+: ( 0xB8 == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( 0x52 == ((const U8*)s)[1] ) && ( 0x46 == ((const U8*)s)[2] || 0x63 == ((const U8*)s)[2] || 0x72 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
+: ( 0xBF == ((const U8*)s)[0] ) ?                                           \
+    ( ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x67, 0x68) ) ?              \
+	( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x48) ) ? 3 : 0 )  \
+    : ( ( 0x6A == ((const U8*)s)[1] ) && ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[2]) & 0xF8 ) == 0xA0 ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[2]) & 0xFB ) == 0xB0 ) || ((const U8*)s)[2] == 0x70 ) ) ? 3 : 0 )\
+: 0 ) )
+#endif
+
+/*
 	FOLDS_TO_MULTI: characters that fold to multi-char strings for EBCDIC 1047
 
 	\p{_Perl_Folds_To_Multi_Char}
@@ -4673,6 +4747,31 @@ character actually occupies.
 #endif
 
 /*
+	MULTI_CHAR_FOLD_START: The first character of a multi-character fold for EBCDIC 037
+
+	%regcharclass_multi_char_folds::multi_char_fold_starts()
+*/
+
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+/*** GENERATED CODE ***/
+#  define is_MULTI_CHAR_FOLD_START_utf8(s)                                  \
+( (STRLEN)( ( ( ( ((const U8*)s)[0] & 0xEF ) == 'a' ) || ( ( ((const U8*)s)[0] & 0xDF ) == 'f' ) || ( ( ((const U8*)s)[0] & 0xFE ) == 'h' ) || ( ( ((const U8*)s)[0] & 0xFE ) == 's' ) || ((const U8*)s)[0] == 'y' ) ? 1\
+: ( 0xAA == ((const U8*)s)[0] ) ?                                           \
+    ( ( 0x6A == ((const U8*)s)[1] ) ? 2 : 0 )                               \
+: ( 0xB3 == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[1]) & 0xFD ) == 0xAC ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[1]) & 0xF7 ) == 0xB1 ) || ((const U8*)s)[1] == 0x65 ) ? 2 : 0 )\
+: ( 0xB4 == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( ( ((const U8*)s)[1] & 0xFB ) == 0x42 ) || ((const U8*)s)[1] == 0x4A || ((const U8*)s)[1] == 0x55 ) ? 2 : 0 )\
+: ( 0xB7 == ((const U8*)s)[0] ) ?                                           \
+    ( ( ( 0x52 == ((const U8*)s)[1] ) && ( 0x46 == ((const U8*)s)[2] || 0x62 == ((const U8*)s)[2] || 0x71 == ((const U8*)s)[2] ) ) ? 3 : 0 )\
+: ( 0xBF == ((const U8*)s)[0] ) ?                                           \
+    ( ( inRANGE_helper_(U8, ((const U8*)s)[1], 0x66, 0x67) ) ?              \
+	( ( inRANGE_helper_(U8, ((const U8*)s)[2], 0x41, 0x48) ) ? 3 : 0 )  \
+    : ( ( 0x69 == ((const U8*)s)[1] ) && ( ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[2]) & 0xF8 ) == 0xA0 ) || ( ( NATIVE_UTF8_TO_I8(((const U8*)s)[2]) & 0xFB ) == 0xB0 ) || ((const U8*)s)[2] == 0x6A ) ) ? 3 : 0 )\
+: 0 ) )
+#endif
+
+/*
 	FOLDS_TO_MULTI: characters that fold to multi-char strings for EBCDIC 037
 
 	\p{_Perl_Folds_To_Multi_Char}
@@ -4942,6 +5041,6 @@ character actually occupies.
  * 94644b4e53ef4f2590ef86a261dcd22ffadf79247fcc7f31c4ebf5b19111fd25 lib/unicore/mktables
  * a0079d7556b20c2de1fdc3d492797a91b8ec8a06006f94460006185cb6380962 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
- * 2f36f8fba175fbda370ce07b6539a26ede81b6c1489df04e62f74ca9c3cecef1 regen/regcharclass.pl
- * 1ce43daf54162d0a267412453ce2a613f60f3a7631365775cc52d34213251a83 regen/regcharclass_multi_char_folds.pl
+ * cf707f1b19b018e6cf8a3e2228f3448ec31b20843d89e388beb471e809d0b5f5 regen/regcharclass.pl
+ * ea16ffd33f6130e7e38a027c21bdea415a7d96efb3741d7cd731243df769581b regen/regcharclass_multi_char_folds.pl
  * ex: set ro ft=c: */
