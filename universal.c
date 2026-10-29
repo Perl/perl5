@@ -218,13 +218,11 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
 {
     PERL_ARGS_ASSERT_SV_ISA_SV;
 
-    GV *isagv;
-
     SV *rv;
     if(!SvROK(sv) || !SvOBJECT((rv = SvRV(sv))))
         return FALSE;
 
-    isagv = gv_fetchmeth_pvn(SvSTASH(rv), "isa", 3, -1, 0);
+    GV *isagv = gv_fetchmeth_pvn(SvSTASH(rv), "isa", 3, -1, 0);
     if (isagv) {
         CV *isacv = isGV(isagv) ? GvCV(isagv) : (CV *)isagv;
 
@@ -232,8 +230,6 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
             goto default_isa;
 
         dSP;
-        SV *retsv;
-        bool ret;
 
         ENTER;
         SAVETMPS;
@@ -247,8 +243,8 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
         call_sv((SV *)isacv, G_SCALAR);
 
         SPAGAIN;
-        retsv = POPs;
-        ret = SvTRUE(retsv);
+        SV *retsv = POPs;
+        bool ret = SvTRUE(retsv);
         PUTBACK;
 
         FREETMPS;
