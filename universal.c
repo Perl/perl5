@@ -220,21 +220,20 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
 
     GV *isagv;
 
-    if(!SvROK(sv) || !SvOBJECT(SvRV(sv)))
+    SV *rv;
+    if(!SvROK(sv) || !SvOBJECT((rv = SvRV(sv))))
         return FALSE;
 
-    isagv = gv_fetchmeth_pvn(SvSTASH(SvRV(sv)), "isa", 3, -1, 0);
+    isagv = gv_fetchmeth_pvn(SvSTASH(rv), "isa", 3, -1, 0);
     if (LIKELY(isagv)) {
-        dSP;
         CV *isacv = isGV(isagv) ? GvCV(isagv) : (CV *)isagv;
 
-        if (CvISXSUB(isacv) && CvXSUB(isacv) == XS_UNIVERSAL_isa)
+        if (LIKELY(CvISXSUB(isacv) && CvXSUB(isacv) == XS_UNIVERSAL_isa))
             goto default_isa;
-        
+
+        dSP;
         SV *retsv;
         bool ret;
-
-        PUTBACK;
 
         ENTER;
         SAVETMPS;
