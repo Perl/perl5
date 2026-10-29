@@ -2205,6 +2205,12 @@ Sometimes we are interested in just the first two of these.
 #=> LATIN1 :safe
 #%regcharclass_multi_char_folds::multi_char_folds('l', 'fm')
 
+MULTI_CHAR_FOLD_START: Q : The first character of a multi-character fold
+This character can begin the full fold of a single character that folds to
+multiple characters.  The input is already folded.
+=> UTF8 :fast
+%regcharclass_multi_char_folds::multi_char_fold_starts()
+
 FOLDS_TO_MULTI: Q : characters that fold to multi-char strings
 $multi_overview
 => UTF8 :fast
