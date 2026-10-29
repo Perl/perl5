@@ -1,4 +1,4 @@
-package B::Concise 1.012;
+package B::Concise 1.013;
 # Copyright (C) 2000-2003 Stephen McCamant. All rights reserved.
 # This program is free software; you can redistribute and/or modify it
 # under the same terms as Perl itself.
@@ -847,14 +847,25 @@ sub concise_op {
         # for my ($q, $r, $s) () {} syntax hijacks the targ of the iter op,
         # (which is the ->next of the enteriter) hence the special cases above
         # and just below:
-	my $count = $h{name} eq 'padrange'
-            ? ($op->private & $B::Op_private::defines{'OPpPADRANGE_COUNTMASK'})
-            : $h{name} eq 'enteriter'
-            ? $op->next->targ + 1
-            : 1;
+        my $count = 1; my $refmask = 0;
+        if ($h{name} eq 'padrange') {
+            $count = $op->private & $B::Op_private::defines{'OPpPADRANGE_COUNTMASK'};
+        }
+        elsif ($h{name} eq 'enteriter') {
+            my $iterop = $op->next;
+            if ($iterop->private & $B::Op_private::defines{'OPpITER_REFALIAS'}) {
+                $count   = ($iterop->targ & 0xFF) + 1;
+                $refmask = ($iterop->targ >> 8);
+            }
+            else {
+                $count = $iterop->targ + 1;
+            }
+        };
 	my (@targarg, @targarglife);
 	for my $i (0..$count-1) {
 	    my ($targarg, $targarglife) = padname($h{targ} + $i);
+            $targarg = "\\$targarg", $targarglife = "\\$targarglife"
+                if $i < 24 and $refmask & (1<<$i);
 	    push @targarg,     $targarg;
 	    push @targarglife, $targarglife;
 	}
