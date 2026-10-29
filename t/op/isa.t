@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature 'isa';
 
-plan 14;
+plan 16;
 
 package BaseClass {}
 package DerivedClass { our @ISA = qw(BaseClass) }
@@ -49,6 +49,21 @@ ok(not([] isa "BaseClass"),    'ARRAYref is not BaseClass');
 ok($baseobj->isa('BaseClass'), '$baseobj isa BaseClass using object method');
 ok(not($baseobj->isa('DerivedClass')), '$baseobj is not BaseClass using object method');
 ok($derivedobj->isa('BaseClass'), '$derivedobj isa BaseClass using object method');
+
+{
+    my $val;
+    # do we believe in magic?
+    package T {
+        sub TIESCALAR { bless {}, shift }
+        sub FETCH { $val }
+    }
+    my $x;
+    tie $x, "T";
+    $val = $baseobj;
+    ok($x isa "BaseClass", "isa believes in magic");
+    $val = 1;
+    ok(!($x isa "BaseClass"), "isa believes for non-refs");
+}
 
 # TODO: Consider 
 #    LHS = other class

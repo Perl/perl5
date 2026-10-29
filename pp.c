@@ -8771,6 +8771,8 @@ PP_wrapped(pp_isa, 2, 0)
 
     right = POPs;
     left  = TOPs;
+    /* sv_isa_sv() doesn't believe in magic - but we have to */
+    SvGETMAGIC(left);
 
     SETs(boolSV(sv_isa_sv(left, right)));
     RETURN;
