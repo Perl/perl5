@@ -95,6 +95,12 @@ Unicode case folding can join neighboring folded literals after the
 optimizer records their fixed substrings.
 L<[GH #19953]|https://github.com/Perl/perl5/issues/19953>
 
+=item *
+
+The C<isa> operator now does a cached lookup of the C<isa> method,
+improving performance when that isa() method happens to be
+C<UNIVERSAL::isa>. [GH #24997]
+
 =back
 
 =head1 Modules and Pragmata
@@ -422,6 +428,12 @@ Z<>
     substr(substr($str, $offset), 0, 1, "replacement");
 
 This bug has now been fixed. [GH #24933]
+
+=item *
+
+The C<isa> operator now calls get magic on its left argument before
+checking if that value is a reference and what it is a reference to.
+[GH #24997]
 
 =back
 
