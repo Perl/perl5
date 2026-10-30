@@ -33,6 +33,7 @@
 #if defined(USE_PERLIO)
 #include "perliol.h" /* For the PERLIO_F_XXX */
 #endif
+#include "XSUB.h"
 
 /*
  * Contributed by Graham Barr  <Graham.Barr@tiuk.ti.com>
@@ -210,24 +211,25 @@ overloaded C<isa()> method, nor will check subclassing.
 
 */
 
+XS(XS_UNIVERSAL_isa); /* defined later */
+
 bool
 Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
 {
     PERL_ARGS_ASSERT_SV_ISA_SV;
 
-    GV *isagv;
-
-    if(!SvROK(sv) || !SvOBJECT(SvRV(sv)))
+    SV *rv;
+    if(!SvROK(sv) || !SvOBJECT((rv = SvRV(sv))))
         return FALSE;
 
-    isagv = gv_fetchmeth_pvn(SvSTASH(SvRV(sv)), "isa", 3, -1, GV_NOUNIVERSAL);
-    if(isagv) {
-        dSP;
+    GV *isagv = gv_fetchmeth_pvn(SvSTASH(rv), "isa", 3, -1, 0);
+    if (isagv) {
         CV *isacv = isGV(isagv) ? GvCV(isagv) : (CV *)isagv;
-        SV *retsv;
-        bool ret;
 
-        PUTBACK;
+        if (LIKELY(CvISXSUB(isacv) && CvXSUB(isacv) == XS_UNIVERSAL_isa))
+            goto default_isa;
+
+        dSP;
 
         ENTER;
         SAVETMPS;
@@ -241,8 +243,8 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
         call_sv((SV *)isacv, G_SCALAR);
 
         SPAGAIN;
-        retsv = POPs;
-        ret = SvTRUE(retsv);
+        SV *retsv = POPs;
+        bool ret = SvTRUE(retsv);
         PUTBACK;
 
         FREETMPS;
@@ -253,6 +255,7 @@ Perl_sv_isa_sv(pTHX_ SV *sv, SV *namesv)
 
     /* TODO: Support namesv being an HV ref to the stash directly? */
 
+ default_isa:
     return sv_derived_from_sv(sv, namesv, 0);
 }
 
@@ -291,8 +294,6 @@ writing.  It only recognizes SVs_TEMP and SVf_UTF8.
 XXX extracted in sv_does_sv is more complicated than the hand waving above
 
 */
-
-#include "XSUB.h"
 
 bool
 Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
