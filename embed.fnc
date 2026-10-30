@@ -2538,7 +2538,7 @@ ARdp	|OP *	|newMETHOP	|I32 type				\
 ARdp	|OP *	|newMETHOP_named|I32 type				\
 				|I32 flags				\
 				|NN SV * const_meth
-Cdp	|CV *	|newMYSUB	|I32 floor				\
+Adp	|CV *	|newMYSUB	|I32 floor				\
 				|NN OP *o				\
 				|NULLOK OP *proto			\
 				|NULLOK OP *attrs			\
