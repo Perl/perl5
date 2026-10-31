@@ -491,6 +491,15 @@ This bug has now been fixed. [GH #24933]
 
 Previously the UTF-8 cache wasn't enabled in new threads, leading to performance issues.
 
+=item *
+
+No longer crashes when using multivariable C<foreach> loops with both
+refaliasing and the C<builtin::indexed> function. [GH #24999]
+
+    foreach my ( $idx, \@arr ) ( builtin::indexed @list_of_arefs ) {
+        say "Array number [$idx] contains <@arr>";
+    }
+
 =back
 
 =head1 Known Problems
