@@ -2158,15 +2158,16 @@ C<localize_mg> trigger function on the C<ScalarVarMagicFunctions>,
 C<ArrayVarMagicFunctions> and C<HashVarMagicFunctions> structures.
 
 In many cases, it is entirely sufficient for localisation purposes to call the
-the L<perlapi/magicv2_localize_copy> function. You can use this function
-directly in your magic functions structure by setting its address as that of
-the C<localize_mg> trigger. Remember that it needs to point to the actual
-function and not the API compatibility wrapper macro, so remember to include
-the leading C<Perl_...> prefix on its name:
+the L<perlapi/magicv2_copy> function, or its two variants
+L<perlapi/magicv2_copy_inc_auxsv> or L<perlapi/magicv2_copy_weak_auxsv>. You
+can use this function directly in your magic functions structure by setting
+its address as that of the C<localize_mg> trigger. Remember that it needs to
+point to the actual function and not the API compatibility wrapper macro, so
+remember to include the leading C<Perl_...> prefix on its name:
 
     const struct ScalarVarMagicFunctions magic_funcs = {
         ...,
-        .localize_mg = &Perl_magicv2_localize_copy,
+        .localize_mg = &Perl_magicv2_copy,
     };
 
 If your magic makes use of the pointer area or the C<MgUSERSTRUCT> area to
@@ -2179,7 +2180,7 @@ stored pointers.
     static MAGIC *
     S_magic_localize(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
     {
-	MAGIC *nmg = magicv2_localize_copy(nsv, osv, omg);
+	MAGIC *nmg = magicv2_copy(nsv, osv, omg);
 
 	SvREFCNT_inc(MgUSERSTRUCT(mg, struct MyExtraData)->othersv);
 

@@ -237,11 +237,11 @@ operation on a variable with this magic attached. It is passed a pointer to
 the new SV that was created as part of the localisation operation. If it
 wishes the magic to also apply to the new SV it can copy itself there.
 
-A convenient API function, L</magicv2_localize_copy>, is provided to cover
-simple cases. It may be sufficient simply to use this function directly
-(remember to include the C<Perl_> prefix on its name):
+A convenient API function, L</magicv2_copy>, is provided to cover simple
+cases. It may be sufficient simply to use this function directly (remember to
+include the C<Perl_> prefix on its name):
 
-    .localize_mg = &Perl_magicv2_localize_copy,
+    .localize_mg = &Perl_magicv2_copy,
 
 If more complex behaviour is required, provide your own function here. You
 may call the provided function to perform the basic copy operation first,
@@ -806,7 +806,7 @@ Perl_mg_propagate(pTHX_ SV *ssv, SV *dsv)
         MAGIC *dmg = NULL;
         if (funcs->flags & MGv2f_SCALARVALUE_AUTOPROPAGATE) {
             dmg = sv_magicv2_attach(dsv, MgFUNCS(smg), MgFLAGS(smg));
-            mgv2_copy(smg, dmg);
+            mgv2_copy(smg, dmg, MGv2f_COPY_DEFAULT);
         }
 
         if (funcs->propagate)
@@ -1004,7 +1004,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
 }
 
 /*
-=for apidoc magicv2_localize_copy
+=for apidoc magicv2_copy
 
 Intended to be called as the C<localize_mg> trigger function of a
 C<ScalarVarMagicFunctions>, C<ArrayVarMagicFunctions> or
@@ -1044,17 +1044,51 @@ area is bytewise copied.
 
 =back
 
+=for apidoc magicv2_copy_inc_auxsv
+
+A variant of L</magicv2_copy> which always clears the C<MgWEAK_AUXSV> flag and
+increments the reference count on C<MgAUXSV>.
+
+=for apidoc magicv2_copy_weak_auxsv
+
+A variant of L</magicv2_copy> which always sets the C<MgWEAK_AUXSV> flag and
+does not increment the reference count on C<MgAUXSV>.
+
 =cut
 */
 
 MAGIC *
-Perl_magicv2_localize_copy(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+Perl_magicv2_copy(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
 {
-    PERL_ARGS_ASSERT_MAGICV2_LOCALIZE_COPY;
+    PERL_ARGS_ASSERT_MAGICV2_COPY;
     PERL_UNUSED_ARG(osv);
 
     MAGIC *nmg = sv_magicv2_attach(nsv, MgFUNCS(omg), MgFLAGS(omg));
-    mgv2_copy(omg, nmg);
+    mgv2_copy(omg, nmg, MGv2f_COPY_DEFAULT);
+
+    return nmg;
+}
+
+MAGIC *
+Perl_magicv2_copy_inc_auxsv(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+{
+    PERL_ARGS_ASSERT_MAGICV2_COPY_INC_AUXSV;
+    PERL_UNUSED_ARG(osv);
+
+    MAGIC *nmg = sv_magicv2_attach(nsv, MgFUNCS(omg), MgFLAGS(omg));
+    mgv2_copy(omg, nmg, MGv2f_COPY_AUXSV_INC);
+
+    return nmg;
+}
+
+MAGIC *
+Perl_magicv2_copy_weak_auxsv(pTHX_ SV *nsv, SV *osv, MAGIC *omg)
+{
+    PERL_ARGS_ASSERT_MAGICV2_COPY_WEAK_AUXSV;
+    PERL_UNUSED_ARG(osv);
+
+    MAGIC *nmg = sv_magicv2_attach(nsv, MgFUNCS(omg), MgFLAGS(omg));
+    mgv2_copy(omg, nmg, MGv2f_COPY_AUXSV_WEAKLY);
 
     return nmg;
 }

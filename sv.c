@@ -6758,13 +6758,12 @@ bad_shape:
 }
 
 void
-Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg)
+Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg, U32 flags)
 {
     PERL_ARGS_ASSERT_MGV2_COPY;
 
     MgFLAGS(dmg) = MgFLAGS(smg);
     MgPRIV(dmg)  = MgPRIV(smg);
-    MgAUXSV_set(dmg, MgAUXSV(smg));
 
     void *sptr = MgPTR(smg);
     STRLEN slen = MgPTRLEN(smg);
@@ -6775,11 +6774,23 @@ Perl_mgv2_copy(pTHX_ const MAGIC *smg, MAGIC *dmg)
     else if(slen)
         MgPTRLEN_set(dmg, slen);
 
-    if(!MgWEAK_AUXSV(smg))
-        MgWEAK_AUXSV_off(dmg);
+    switch (flags & (MGv2f_COPY_AUXSV_INC|MGv2f_COPY_AUXSV_WEAKLY)) {
+        case 0: /* default */
+            if (!MgWEAK_AUXSV(smg))
+                MgWEAK_AUXSV_off(dmg);
+            MgAUXSV_set(dmg, MgAUXSV(smg));
+            if (MgAUXSV(dmg) && !MgWEAK_AUXSV(dmg))
+                SvREFCNT_inc_void_NN(MgAUXSV(dmg));
+            break;
 
-    if(MgAUXSV(dmg) && !MgWEAK_AUXSV(dmg))
-        SvREFCNT_inc_void_NN(MgAUXSV(dmg));
+        case MGv2f_COPY_AUXSV_INC:
+            MgAUXSV_set_inc(dmg, MgAUXSV(smg));
+            break;
+
+        case MGv2f_COPY_AUXSV_WEAKLY:
+            MgAUXSV_set_weak(dmg, MgAUXSV(smg));
+            break;
+    }
 
     switch(MgFLAGS(smg) & MGv2f_WITH_MASK) {
         case 0:
@@ -7041,6 +7052,30 @@ Perl_sv_magicv2_remove_by_funcs(pTHX_ SV *sv, const struct MagicFunctions *funcs
 {
     PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE_BY_FUNCS;
     S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_by_funcs, funcs);
+}
+
+static bool
+S_filter_mgv2_by_shape(pTHX_ MAGIC *mg, const void *key)
+{ 
+    return MgFUNCS(mg)->shape == PTR2IV(key);
+}
+
+/*
+=for apidoc sv_magicv2_remove_by_shape
+
+Removes every magic attachment on the SV whose functions structure has the
+given shape. This is equivalent to calling C<sv_magicv2_remove> on each of
+them in turn, invoking any C<free> trigger functions and decrementing any
+associated SV refcounts.
+
+=cut
+*/
+
+void
+Perl_sv_magicv2_remove_by_shape(pTHX_ SV *sv, enum MagicShape shape)
+{
+    PERL_ARGS_ASSERT_SV_MAGICV2_REMOVE_BY_SHAPE;
+    S_sv_magicv2_remove(aTHX_ sv, &S_filter_mgv2_by_shape, INT2PTR(void *,shape));
 }
 
 #if defined(PERL_USE_VALUEMAGIC)
