@@ -239,7 +239,7 @@ L<https://illumos.org/books/dtrace/preface.html>
 
 =item DTrace: Dynamic Tracing in Oracle Solaris, Mac OS X and FreeBSD
 
-L<https://www.amazon.com/DTrace-Dynamic-Tracing-Solaris-FreeBSD/dp/0132091518/>
+L<https://www.brendangregg.com/dtracebook/>
 
 =back
 
