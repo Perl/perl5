@@ -48,6 +48,7 @@ delete local @ENV{'LANGUAGE', 'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
 delete local $ENV{'PERL_DEBUG_LOCALE_INIT'} unless $debug;
 
 my $has_ctype = grep { $_ eq "LC_CTYPE" } platform_locale_categories();
+my $has_ctime = grep { $_ eq "LC_TIME" } platform_locale_categories();
 
 SKIP: {
     skip("LC_CTYPE not available on the system", 1 ) unless $has_ctype;
@@ -71,6 +72,23 @@ SKIP: {
             print "\\n";
 EOF
         1, { stderr => 'devnull' }, "/l matching of [bracketed] doesn't skip non-first POSIX class");
+
+}
+
+SKIP: {
+    skip("LC_TIME not available on the system", 1 ) unless $has_ctime;
+    fresh_perl_like(<<'EOF',
+            use strict;
+            use warnings;
+            use POSIX;
+            use utf8;
+
+            setlocale(LC_TIME(), "C");
+            setlocale(LC_CTYPE(), "C");
+            print strftime("абв %T\n", localtime);
+EOF
+        qr/^абв /, { 'wide_chars' => 1 },
+        "strftime in C locale with non-ASCII chars works");
 
 }
 
