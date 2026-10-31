@@ -343,6 +343,7 @@ EOF
     $from = $::Config{'cf_email'}
        if !$from && $::Config{'cf_email'} && $::Config{'cf_by'} && $me &&
                ($me eq $::Config{'cf_by'});
+    chomp($from = `git config user.email`) if !$from;
 } # sub Init
 
 sub Query {
