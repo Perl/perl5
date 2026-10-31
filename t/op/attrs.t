@@ -61,8 +61,10 @@ eval q/my $x : Ugly('\(") :Bad;/;
 like $@, qr/^Invalid SCALAR attributes: ["']?Ugly\('\\\("\) : Bad["']? at/;
 eval 'my $x : _5x5;';
 like $@, qr/^Invalid SCALAR attribute: ["']?_5x5["']? at/;
-eval 'my $x : locked method;';
-like $@, qr/^Invalid SCALAR attributes: ["']?locked : method["']? at/;
+eval 'my $x : locked';
+like $@, qr/^Invalid SCALAR attribute: ["']?locked["']? at/;
+eval 'my $x : method;';
+like $@, qr/^Can only apply the :method attribute to CODE at/;
 eval 'my $x : switch(10,foo();';
 like $@, qr/^Unterminated attribute parameter in attribute list at \(eval \d+\) line 1\.$/;
 eval q/my $x : Ugly('(');/;
@@ -348,6 +350,21 @@ foreach my $test (@tests) {
   my ($cows, @go, %bong) : teapots = qw[ jibber jabber joo ];
   ::is $cows, 'jibber', 'list assignment to scalar with attrs';
   ::is "@go", 'jabber joo', 'list assignment to array with attrs';
+}
+
+{
+  package withmultipleattributes;
+  my @attrs_applied;
+  sub MODIFY_SCALAR_ATTRIBUTES {
+    # [0] = this package, [1] = ref to item, [2...] = attrs
+    push @attrs_applied, [ @_[2 .. $#_] ];
+    return ();
+  }
+  our $SCALAR :red :green :blue :yellow;
+  ::is scalar(@attrs_applied), 1,
+    'MODIFY_SCALAR_ATTRIBUTES invoked just once';
+  ::is join("|", $attrs_applied[0]->@*), "red|green|blue|yellow",
+    'MODIFY_SCALAR_ATTRIBUTES invocation received all four attributes';
 }
 
 {
