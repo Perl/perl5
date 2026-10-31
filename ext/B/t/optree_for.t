@@ -9,7 +9,7 @@ BEGIN {
     }
 }
 use OptreeCheck;
-plan tests => 19;
+plan tests => 21;
 
 pass("FOR LOOPS");
 
@@ -286,6 +286,40 @@ EOT_EOT
 4  <1> rv2av[t4] sKRM/1
 5  <{> enteriter(next->6 last->9 redo->6)[$foo:1495,1498; $bar:1495,1498; $baz:1495,1498] KPS/LVINTRO
 7  <0> iter s
+8  <|> and(other->6) K/1
+6      <0> unstack s
+           goto 7
+9  <2> leaveloop K/2
+a  <1> leavesub[1 ref] K/REFC,1
+EONT_EONT
+
+checkOptree ( name => 'for my ($x, \@y) (1..4)',
+              code => sub {
+                  use feature qw( declared_refs refaliasing );
+                  no warnings qw( experimental::declared_refs experimental::refaliasing );
+                  for my ($x, \@y) (1..4) {}
+              },
+              bcopts    => '-exec',
+              strip_open_hints => 1,
+              expect    => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+1  <;> nextstate(main 1652 optree_for.t:300) v:%,{,fea=15
+2  <0> pushmark s
+3  <$> const[IV 1] s
+4  <$> const[IV 4] s
+5  <{> enteriter(next->6 last->9 redo->6)[$x:1653,1656; \@y:1653,1656] KPS/LVINTRO
+7  <0> iter s/REFALIAS
+8  <|> and(other->6) K/1
+6      <0> unstack s
+           goto 7
+9  <2> leaveloop K/2
+a  <1> leavesub[1 ref] K/REFC,1
+EOT_EOT
+1  <;> nextstate(main 1652 optree_for.t:300) v:%,{,fea=15
+2  <0> pushmark s
+3  <$> const(IV 1) s
+4  <$> const(IV 4) s
+5  <{> enteriter(next->6 last->9 redo->6)[$x:1653,1656; \@y:1653,1656] KPS/LVINTRO
+7  <0> iter s/REFALIAS
 8  <|> and(other->6) K/1
 6      <0> unstack s
            goto 7
