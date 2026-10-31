@@ -92,6 +92,21 @@ struct slc_cache_item {
     STRLEN slc_countdown;
 };
 
+/* A lazily allocated & populated cache of S_setup_EXACTISH_ST() results
+ * for EXACTish nodes that do not have locale-dependent folding rules. */
+
+struct exactish_cache_item {
+    U32 offset;     /* offset of the node within the regex "program".
+                     * 0 = unused */
+    struct next_matchable_info info[2]; /* [0] UTF-8 [1] Non-UTF-8 */
+};
+
+struct exactish_cache {
+    U32 size; /* Max number of items[] slots*/
+    U32 used; /* Number of slots currently in use */
+    struct exactish_cache_item items[1]; /* Actually power-of-2 sized */
+};
+
 /*
  * Structure for regexp "program".  This is essentially a linear encoding
  * of a nondeterministic finite-state machine (aka syntax charts or
@@ -148,6 +163,7 @@ typedef struct regexp_internal {
                                    Same type as FLAGS() */
         struct slc_cache_item *slc; /* permanent array of super-linear cache
                                        countdown / bitmap pointer pairs*/
+        struct exactish_cache *exactish_cache; /* lazy EXACTish cache */
 
         regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp_internal;

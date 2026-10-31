@@ -14046,6 +14046,9 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
         Safefree(ri->slc);
     }
 
+    if (ri->exactish_cache)
+        Safefree(ri->exactish_cache);
+
     Safefree(ri);
 }
 
@@ -14312,6 +14315,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
     reti->name_list_idx = ri->name_list_idx;
     reti->slc_whilem_seen = ri->slc_whilem_seen;
     reti->slc             = NULL; /* will be alloced if/when needed */
+    reti->exactish_cache  = NULL; /* will be alloced if/when needed */
     reti->depth           = 0;
 
     SetProgLen(reti, len);
