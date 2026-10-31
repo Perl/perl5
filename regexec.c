@@ -202,8 +202,8 @@ static const char non_utf8_target_but_utf8_required[]
         else if (type == PLUS)                                              \
             rn = REGNODE_AFTER_type(rn,tregnode_PLUS);                      \
         else if (type == IFMATCH)                                           \
-            rn = (FLAGS(rn) == 0) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) \
-                                  : rn + ARG1u(rn);                         \
+            rn = (!IS_LOOKBEHIND(rn)) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) \
+                                  : rn + SUBPATTERN_CONTINUE_OFFSET(rn);                         \
         else rn += NEXT_OFF(rn);                                            \
     }                                                                       \
 } STMT_END
@@ -1888,15 +1888,16 @@ Perl_re_intuit_start(pTHX_
                  trie_latin_utf8_fold, trie_utf8_exactfa_fold,              \
                  trie_latin_utf8_exactfa_fold,                              \
                  trie_flu8, trie_flu8_latin }                               \
-                    trie_type = ((IS_EXACT_OR_NF(FLAGS(scan))              \
-                                  || IS_EXACT_REQ8_OR_NF_REQ8(FLAGS(scan)) \
-                                  || FLAGS(scan) == EXACTL)                \
+                    trie_type = ((IS_EXACT_OR_NF(TRIE_LITERAL_TYPE(scan))  \
+                                  || IS_EXACT_REQ8_OR_NF_REQ8(              \
+                                         TRIE_LITERAL_TYPE(scan))          \
+                                  || TRIE_LITERAL_TYPE(scan) == EXACTL)    \
                                  ? trie_plain                              \
-                                    : (FLAGS(scan) == EXACTFAA)             \
+                                    : (TRIE_LITERAL_TYPE(scan) == EXACTFAA) \
                                       ? (utf8_target                        \
                                          ? trie_utf8_exactfa_fold           \
                                          : trie_latin_utf8_exactfa_fold)    \
-                                      : (FLAGS(scan) == EXACTFLU8           \
+                                      : (TRIE_LITERAL_TYPE(scan) == EXACTFLU8 \
                                          ? (utf8_target                     \
                                            ? trie_flu8                      \
                                            : trie_flu8_latin)               \
@@ -2637,10 +2638,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-      case ANYOFM_tb_pb: /* ARG1u() is the base byte; FLAGS() the mask byte */
+      case ANYOFM_tb_pb: /* ANYOFM_MATCH_VALUE() is the base byte; ANYOFM_MASK() the mask byte */
       case ANYOFM_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG1u(c), FLAGS(c)));
+             find_next_masked((U8 *) s, (U8 *) strend, (U8) ANYOFM_MATCH_VALUE(c), ANYOFM_MASK(c)));
         break;
 
       case ANYOFM_t8_pb:
@@ -2649,13 +2650,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * we do anyway for performance reasons, as otherwise we would have to
          * examine all the continuation characters */
         REXEC_FBC_UTF8_FIND_NEXT_SCAN(
-             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG1u(c), FLAGS(c)));
+             find_next_masked((U8 *) s, (U8 *) strend, (U8) ANYOFM_MATCH_VALUE(c), ANYOFM_MASK(c)));
         break;
 
       case NANYOFM_tb_pb:
       case NANYOFM_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-           find_span_end_mask((U8 *) s, (U8 *) strend, (U8) ARG1u(c), FLAGS(c)));
+           find_span_end_mask((U8 *) s, (U8 *) strend, (U8) ANYOFM_MATCH_VALUE(c), ANYOFM_MASK(c)));
         break;
 
       case NANYOFM_t8_pb:
@@ -2663,19 +2664,19 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                   variants. */
         REXEC_FBC_UTF8_FIND_NEXT_SCAN(
             (char *) find_span_end_mask((U8 *) s, (U8 *) strend,
-                                        (U8) ARG1u(c), FLAGS(c)));
+                                        (U8) ANYOFM_MATCH_VALUE(c), ANYOFM_MASK(c)));
         break;
 
       case NEXACTb_tb_pb:
       case NEXACTb_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-           find_span_end((U8 *) s, (U8 *) strend, (U8) ARG1u(c)));
+           find_span_end((U8 *) s, (U8 *) strend, (U8) NEXACTb_BYTE(c)));
         break;
 
       case NEXACTb_t8_pb:
       case NEXACTb_t8_p8:
         REXEC_FBC_UTF8_CLASS_SCAN(
-           ! (UTF8SKIP(s) == 1 && (U8) *s == (U8) ARG1u(c)));
+           ! (UTF8SKIP(s) == 1 && (U8) *s == (U8) NEXACTb_BYTE(c)));
         break;
 
       /* These nodes all require at least one code point to be in UTF-8 to
@@ -2711,7 +2712,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFHb_t8_p8:
         {
             /* We know what the first byte of any matched string should be. */
-            U8 first_byte = FLAGS(c);
+            U8 first_byte = FIRST_BYTE(c);
 
             anyofh_list = GET_ANYOFH_INVLIST(prog, c);
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
@@ -2726,7 +2727,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFHbbm_t8_p8:
         {
             /* We know what the first byte of any matched string should be. */
-            U8 first_byte = FLAGS(c);
+            U8 first_byte = FIRST_BYTE(c);
 
             /* And a bitmap defines all the legal 2nd byte matches */
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
@@ -2755,7 +2756,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         REXEC_FBC_FIND_NEXT_UTF8_STRING_SCAN(
                         ((struct regnode_anyofhs *) c)->string,
                         /* Note FLAGS is the string length in this regnode */
-                        ((struct regnode_anyofhs *) c)->string + FLAGS(c),
+                        ((struct regnode_anyofhs *) c)->string + STR_LEN_U8(c),
                         invlist_contains_cp_(anyofh_list,
                                              utf8_to_uv_or_die((U8 *) s,
                                                                (U8 *) strend,
@@ -2787,7 +2788,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case ANYOFRb_t8_pb:
       case ANYOFRb_t8_p8:
         {   /* We know what the first byte of any matched string should be */
-            U8 first_byte = FLAGS(c);
+            U8 first_byte = FIRST_BYTE(c);
 
             REXEC_FBC_FIND_NEXT_UTF8_BYTE_SCAN(first_byte,
                                 withinCOUNT(utf8_to_uv_or_die((U8 *) s,
@@ -3024,7 +3025,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUND_tb_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         FBC_BOUND_A_NON_UTF8(isWORDCHAR_A);
         break;
@@ -3033,7 +3034,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUNDA_t8_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         FBC_BOUND_A_UTF8(isWORDCHAR_A);
         break;
@@ -3044,7 +3045,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUND_tb_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         FBC_NBOUND_A_NON_UTF8(isWORDCHAR_A);
         break;
@@ -3053,14 +3054,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUNDA_t8_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         FBC_NBOUND_A_UTF8(isWORDCHAR_A);
         break;
 
       case NBOUNDU_tb_pb:
       case NBOUNDU_tb_p8:
-        if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
+        if ((bound_type) BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_NON_UTF8(isWORDCHAR_L1);
             break;
         }
@@ -3071,7 +3072,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUNDL_tb_pb:
       case NBOUNDL_tb_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-        if (FLAGS(c) == TRADITIONAL_BOUND) {
+        if (BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_NON_UTF8(isWORDCHAR_LC);
             break;
         }
@@ -3084,7 +3085,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUNDL_tb_pb:
       case BOUNDL_tb_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-        if (FLAGS(c) == TRADITIONAL_BOUND) {
+        if (BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_NON_UTF8(isWORDCHAR_LC);
             break;
         }
@@ -3095,7 +3096,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
       case BOUNDU_tb_pb:
       case BOUNDU_tb_p8:
-        if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
+        if ((bound_type) BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_NON_UTF8(isWORDCHAR_L1);
             break;
         }
@@ -3114,7 +3115,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             }
         }
 
-        switch((bound_type) FLAGS(c)) {
+        switch((bound_type) BOUNDARY_TYPE(c)) {
           case TRADITIONAL_BOUND: /* Should have already been handled */
             assert(0);
             break;
@@ -3215,7 +3216,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUNDL_t8_pb:
       case BOUNDL_t8_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-        if (FLAGS(c) == TRADITIONAL_BOUND) {
+        if (BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_UTF8(isWORDCHAR_LC, isWORDCHAR_LC_uvchr,
                            isWORDCHAR_LC_utf8_safe);
             break;
@@ -3229,7 +3230,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUNDL_t8_pb:
       case NBOUNDL_t8_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-        if (FLAGS(c) == TRADITIONAL_BOUND) {
+        if (BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_UTF8(isWORDCHAR_LC, isWORDCHAR_LC_uvchr,
                             isWORDCHAR_LC_utf8_safe);
             break;
@@ -3244,13 +3245,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case NBOUND_t8_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         /* FALLTHROUGH */
 
       case NBOUNDU_t8_pb:
       case NBOUNDU_t8_p8:
-        if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
+        if ((bound_type) BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_NBOUND_UTF8(isWORDCHAR_L1, isWORDCHAR_uni,
                             isWORDCHAR_utf8_safe);
             break;
@@ -3263,13 +3264,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case BOUND_t8_p8:
         /* regcomp.c makes sure that these only have the traditional \b
          * meaning. */
-        assert(FLAGS(c) == TRADITIONAL_BOUND);
+        assert(BOUNDARY_TYPE(c) == TRADITIONAL_BOUND);
 
         /* FALLTHROUGH */
 
       case BOUNDU_t8_pb:
       case BOUNDU_t8_p8:
-        if ((bound_type) FLAGS(c) == TRADITIONAL_BOUND) {
+        if ((bound_type) BOUNDARY_TYPE(c) == TRADITIONAL_BOUND) {
             FBC_BOUND_UTF8(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8_safe);
             break;
         }
@@ -3288,7 +3289,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
             }
         }
 
-        switch((bound_type) FLAGS(c)) {
+        switch((bound_type) BOUNDARY_TYPE(c)) {
           case TRADITIONAL_BOUND: /* Should have already been handled */
             assert(0);
             break;
@@ -3436,7 +3437,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case POSIXL_t8_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         REXEC_FBC_UTF8_CLASS_SCAN(
-            to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(c), (U8 *) s,
+            to_complement ^ cBOOL(isFOO_utf8_lc(POSIX_CLASS(c), (U8 *) s,
                                                           (U8 *) strend)));
         break;
 
@@ -3449,7 +3450,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case POSIXL_tb_p8:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         REXEC_FBC_NON_UTF8_CLASS_SCAN(
-                                to_complement ^ cBOOL(isFOO_lc(FLAGS(c), *s)));
+                                to_complement ^ cBOOL(isFOO_lc(POSIX_CLASS(c), *s)));
         break;
 
       case NPOSIXA_t8_pb:
@@ -3457,7 +3458,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         /* The complement of something that matches only ASCII matches all
          * non-ASCII, plus everything in ASCII that isn't in the class. */
         REXEC_FBC_UTF8_CLASS_SCAN(   ! isASCII_utf8_safe(s, strend)
-                                  || ! generic_isCC_A_(*s, FLAGS(c)));
+                                  || ! generic_isCC_A_(*s, POSIX_CLASS(c)));
         break;
 
       case POSIXA_t8_pb:
@@ -3466,7 +3467,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * byte invariant character.  But we do anyway for performance reasons,
          * as otherwise we would have to examine all the continuation
          * characters */
-        REXEC_FBC_UTF8_CLASS_SCAN(generic_isCC_A_(*s, FLAGS(c)));
+        REXEC_FBC_UTF8_CLASS_SCAN(generic_isCC_A_(*s, POSIX_CLASS(c)));
         break;
 
       case NPOSIXD_tb_pb:
@@ -3481,7 +3482,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case POSIXA_tb_pb:
       case POSIXA_tb_p8:
         REXEC_FBC_NON_UTF8_CLASS_SCAN(
-                        to_complement ^ cBOOL(generic_isCC_A_(*s, FLAGS(c))));
+                        to_complement ^ cBOOL(generic_isCC_A_(*s, POSIX_CLASS(c))));
         break;
 
       case NPOSIXU_tb_pb:
@@ -3493,7 +3494,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case POSIXU_tb_p8:
             REXEC_FBC_NON_UTF8_CLASS_SCAN(
                                  to_complement ^ cBOOL(generic_isCC_(*s,
-                                                                    FLAGS(c))));
+                                                                    POSIX_CLASS(c))));
         break;
 
       case NPOSIXD_t8_pb:
@@ -3507,7 +3508,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
       case POSIXD_t8_p8:
       case POSIXU_t8_pb:
       case POSIXU_t8_p8:
-        classnum = (char_class_number_) FLAGS(c);
+        classnum = (char_class_number_) POSIX_CLASS(c);
         switch (classnum) {
           default:
             REXEC_FBC_UTF8_CLASS_SCAN(
@@ -5126,7 +5127,7 @@ S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
 
     I32 n;
     RXi_GET_DECL(rex,rexi);
-    SV *sv_dat= MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+    SV *sv_dat= MUTABLE_SV(rexi->data->data[ NAMED_CAPTURE_LIST_SLOT( scan ) ]);
     I32 *nums = (I32*)SvPVX(sv_dat);
 
     for ( n = 0; n < SvIVX(sv_dat); n++ ) {
@@ -6940,7 +6941,7 @@ S_backup_one_WB_but_over_Extend_FO(pTHX_ WB_enum * previous,
                 REGNODE_BEFORE(regnext(cur_curlyx->u.curlyx.me));      \
             re_exec_indentf(                                           \
                 "WHILEM[%d/%d]: (cache) marking failure at pos %" UVuf "\n",  \
-                depth, (int)FLAGS(whilem), (int)rexi->slc_whilem_seen, \
+                depth, (int)WHILEM_CACHE_SLOT(whilem), (int)rexi->slc_whilem_seen, \
                 (UV)(locinput - reginfo->strbeg));                     \
         });                                                            \
        *ST.slc_byte |= ST.slc_mask;                                    \
@@ -7436,12 +7437,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 U32 state = trie->startstate;
 
-                if (FLAGS(scan) == EXACTL || FLAGS(scan) == EXACTFLU8) {
+                if (   TRIE_LITERAL_TYPE(scan) == EXACTL
+                    || TRIE_LITERAL_TYPE(scan) == EXACTFLU8)
+                {
                     CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
                     if (utf8_target
                         && ! NEXTCHR_IS_EOS
                         && UTF8_IS_ABOVE_LATIN1(nextbyte)
-                        && FLAGS(scan) == EXACTL)
+                        && TRIE_LITERAL_TYPE(scan) == EXACTL)
                     {
                         /* We only output for EXACTL, as we let the folder
                          * output this message for EXACTFLU8 to avoid
@@ -8051,7 +8054,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             bool b1, b2;
             CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
 
-            if (FLAGS(scan) != TRADITIONAL_BOUND) {
+            if (BOUNDARY_TYPE(scan) != TRADITIONAL_BOUND) {
                 CHECK_AND_WARN_NON_UTF8_CTYPE_LOCALE_IN_BOUND;
                 goto boundu;
             }
@@ -8135,7 +8138,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             else if (utf8_target) {
               bound_utf8:
-                switch((bound_type) FLAGS(scan)) {
+                switch((bound_type) BOUNDARY_TYPE(scan)) {
                     case TRADITIONAL_BOUND:
                     {
                         bool b1, b2;
@@ -8239,7 +8242,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
             }
             else {  /* Not utf8 target */
-                switch((bound_type) FLAGS(scan)) {
+                switch((bound_type) BOUNDARY_TYPE(scan)) {
                     case TRADITIONAL_BOUND:
                     {
                         bool b1, b2;
@@ -8349,7 +8352,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case ANYOFM:
             if (   NEXTCHR_IS_EOS
-                || (UCHARAT(locinput) & FLAGS(scan)) != ARG1u(scan)
+                || (UCHARAT(locinput) & ANYOFM_MASK(scan)) != ANYOFM_MATCH_VALUE(scan)
                 || locinput >= loceol)
             {
                 sayNO;
@@ -8359,7 +8362,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case NANYOFM:
             if (   NEXTCHR_IS_EOS
-                || (UCHARAT(locinput) & FLAGS(scan)) == ARG1u(scan)
+                || (UCHARAT(locinput) & ANYOFM_MASK(scan)) == ANYOFM_MATCH_VALUE(scan)
                 || locinput >= loceol)
             {
                 sayNO;
@@ -8369,7 +8372,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case NEXACTb: /*  /[^x]/ : single excluded byte  */
             if (   NEXTCHR_IS_EOS
-                || (U8) ARG1u(scan) == UCHARAT(locinput)
+                || (U8) NEXACTb_BYTE(scan) == UCHARAT(locinput)
                 || locinput >= loceol)
             {
                 sayNO;
@@ -8440,8 +8443,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case ANYOFHs:
             if (   ! utf8_target
                 ||   NEXTCHR_IS_EOS
-                ||   loceol - locinput < FLAGS(scan)
-                ||   memNE(locinput, ((struct regnode_anyofhs *) scan)->string, FLAGS(scan))
+                ||   loceol - locinput < STR_LEN_U8(scan)
+                ||   memNE(locinput, ((struct regnode_anyofhs *) scan)->string, STR_LEN_U8(scan))
                 || ! (anyofh_list = GET_ANYOFH_INVLIST(rex, scan))
                 || ! invlist_contains_cp_(anyofh_list,
                                           utf8_to_uv_or_die((U8 *) locinput,
@@ -8519,7 +8522,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              * UTF8_IS_INVARIANT works even on non-UTF-8 strings, or else
              * wouldn't be invariant) */
             if (UTF8_IS_INVARIANT(nextbyte) || ! utf8_target) {
-                if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan), (U8) nextbyte)))) {
+                if (! (to_complement ^ cBOOL(isFOO_lc(POSIX_CLASS(scan), (U8) nextbyte)))) {
                     sayNO;
                 }
 
@@ -8536,7 +8539,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             /* Here is a UTF-8 variant code point below 256 and the target is
              * UTF-8 */
-            if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan),
+            if (! (to_complement ^ cBOOL(isFOO_lc(POSIX_CLASS(scan),
                                             EIGHT_BIT_UTF8_TO_NATIVE(nextbyte,
                                             *(locinput + 1))))))
             {
@@ -8583,7 +8586,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
           join_nposixa:
 
             if (! (to_complement ^ cBOOL(generic_isCC_A_(nextbyte,
-                                                                FLAGS(scan)))))
+                                                                POSIX_CLASS(scan)))))
             {
                 sayNO;
             }
@@ -8608,7 +8611,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              * wouldn't be invariant) */
             if (UTF8_IS_INVARIANT(nextbyte) || ! utf8_target) {
                 if (! (to_complement ^ cBOOL(generic_isCC_(nextbyte,
-                                                           FLAGS(scan)))))
+                                                           POSIX_CLASS(scan)))))
                 {
                     sayNO;
                 }
@@ -8618,7 +8621,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 if (! (to_complement
                        ^ cBOOL(generic_isCC_(EIGHT_BIT_UTF8_TO_NATIVE(nextbyte,
                                                                *(locinput + 1)),
-                                             FLAGS(scan)))))
+                                             POSIX_CLASS(scan)))))
                 {
                     sayNO;
                 }
@@ -8626,7 +8629,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             else {  /* Handle above Latin-1 code points */
               utf8_posix_above_latin1:
-                classnum = (char_class_number_) FLAGS(scan);
+                classnum = (char_class_number_) POSIX_CLASS(scan);
                 switch (classnum) {
                     default:
                         if (! (to_complement
@@ -8815,7 +8818,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
           do_ref:
             type = OP(scan);
-            n = ARG1u(scan);  /* which paren pair */
+            n = REF_CAPTURE(scan);  /* which paren pair */
             if (rex->logical_to_parno) {
                 /* The compiler has already mapped this from logical to
                  * physical; only search the other physical buffers sharing
@@ -8889,8 +8892,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             locinput += ln;
         }
         ref_yes:
-            if (FLAGS(scan)) { /* == VOLATILE_REF but only other value is 0 */
-                ST.cp = regcppush(rex, ARG2u(scan) - 1, maxopenparen);
+            if (REF_IS_VOLATILE(scan)) { /* == VOLATILE_REF but only other value is 0 */
+                ST.cp = regcppush(rex, REF_CAPTURE_SAVE_START(scan) - 1, maxopenparen);
                 REGCP_SET(ST.lastcp);
                 PUSH_STATE_GOTO(REF_next, next, locinput, loceol,
                                 script_run_begin);
@@ -8927,7 +8930,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             U32 arg;
 
         case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
-            arg = ARG1u(scan);
+            arg = GOSUB_CAPTURE(scan);
             if (cur_eval && cur_eval->locinput == locinput) {
                 if ( ++nochange_depth > max_nochange_depth )
                     croak(
@@ -8939,7 +8942,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             re_sv = rex_sv;
             re = rex;
             rei = rexi;
-            startpoint = scan + ARG2i(scan);
+            startpoint = scan + GOSUB_TARGET_OFFSET(scan);
             EVAL_CLOSE_PAREN_SET( st, arg );
             /* Detect infinite recursion
              *
@@ -9000,7 +9003,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 if (!caller_cv)
                     caller_cv = find_runcv(NULL);
 
-                n = ARG1u(scan);
+                n = EVAL_CODE_DATA_SLOT(scan);
 
                 if (rexi->data->what[n] == 'r') { /* code from an external qr */
                     newcv = (ReANY(
@@ -9235,11 +9238,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         /* if we got here, it should be an engine which
                          * supports compiling code blocks and stuff */
                         assert(rex->engine && rex->engine->op_comp);
-                        assert(!(FLAGS(scan) & ~RXf_PMf_COMPILETIME));
+                        assert(!(EVAL_NODE_FLAGS(scan) & ~RXf_PMf_COMPILETIME));
                         re_sv = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
                                     rex->engine, NULL, NULL,
                                     /* copy /msixn etc to inner pattern */
-                                    ARG2i(scan),
+                                    EVAL_COMPILE_FLAGS(scan),
                                     pm_flags);
 
                         if (!(SvFLAGS(ret)
@@ -9426,9 +9429,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case ACCEPT:  /*  (*ACCEPT)  */
             is_accepted = true;
-            if (FLAGS(scan))
-                sv_yes_mark = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
-            utmp = ARG2u(scan);
+            if (VERB_HAS_ARG(scan))
+                sv_yes_mark = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
+            utmp = ACCEPT_CLOSE_TO_CAPTURE(scan);
 
             if ( utmp ) {
                 regnode *cursor;
@@ -9461,7 +9464,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* NOTREACHED */
 
         case GROUPP:  /*  (?(1))  */
-            n = ARG1u(scan);  /* which paren pair */
+            n = GROUPP_CAPTURE(scan);  /* which paren pair */
             sw = cBOOL(RXp_LASTPAREN(rex) >= n && RXp_OFFS_END(rex,n) != -1);
             break;
 
@@ -9471,7 +9474,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             break;
 
         case INSUBP:   /*  (?(R))  */
-            n = ARG1u(scan);
+            n = INSUBP_CAPTURE(scan);
             /* this does not need to use EVAL_CLOSE_PAREN macros, as the arg
              * of SCAN is already set up as matches a eval.close_paren */
             sw = cur_eval && (n == 0 || CUR_EVAL.close_paren == n);
@@ -9487,14 +9490,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (sw)
                 next = REGNODE_AFTER_type(scan,tregnode_IFTHEN);
             else {
-                next = scan + ARG1u(scan);
+                next = scan + IFTHEN_ELSE_OFFSET(scan);
                 if (OP(next) == IFTHEN) /* Fake one. */
                     next = REGNODE_AFTER_type(next,tregnode_IFTHEN);
             }
             break;
 
         case LOGICAL:  /* modifier for EVAL and IFMATCH */
-            logical = FLAGS(scan) & EVAL_FLAGS_MASK; /* reserve a bit for optimistic eval */
+            logical = LOGICAL_MODE(scan) & EVAL_FLAGS_MASK; /* reserve a bit for optimistic eval */
             break;
 
 /*******************************************************************
@@ -9585,11 +9588,11 @@ NULL
         case CURLYX:    /* start of /A*B/  (for complex A) */
         {
             /* No need to save/restore up to this paren */
-            I32 parenfloor = FLAGS(scan);
+            I32 parenfloor = CURLYX_CAPTURE_FLOOR(scan);
 
             assert(next); /* keep Coverity happy */
             if (OP(REGNODE_BEFORE(next)) == NOTHING) /* LONGJMP */
-                next += ARG1u(next);
+                next += REGNODE_NEXT_OFFSET(next);
 
             /* XXXX Probably it is better to teach regpush to support
                parenfloor > maxopenparen ... */
@@ -9677,7 +9680,7 @@ NULL
                 goto do_whilem_B_max;
             }
 
-            if (   FLAGS(scan)
+            if (   WHILEM_CACHE_SLOT(scan)
                    /* not running a (??{...}) or (?N) sub-pattern */
                 && !cur_eval)
             {
@@ -9687,7 +9690,7 @@ NULL
                  * background on how this works.
                  *
                  * For WHILEM nodes which can participate in the cache
-                 * (FLAGS() is non-zero), the processing at this point is
+                 * (WHILEM_CACHE_SLOT() is non-zero), the processing at this point is
                  * to first initiate a countdown. Then when on subsequent
                  * iterations that reaches zero, the match has likely gone
                  * super-linear and the per-WHILEM cache is allocated and
@@ -9696,7 +9699,7 @@ NULL
                 assert(rexi->slc);
                 assert(reginfo->info_aux->slc);
                 struct slc_cache_item *item =
-                                &reginfo->info_aux->slc[FLAGS(scan)-1];
+                                &reginfo->info_aux->slc[WHILEM_CACHE_SLOT(scan)-1];
 
                 if (item->slc_bitmap) {
                     /* Cache is live */
@@ -9712,7 +9715,7 @@ NULL
                         DEBUG_EXECUTE_r( re_exec_indentf(
                             "WHILEM[%d/%d]: (cache) already failed at pos %"
                                                                     UVuf "\n",
-                            depth, (int)FLAGS(scan),
+                            depth, (int)WHILEM_CACHE_SLOT(scan),
                             (int)rexi->slc_whilem_seen,
                             (UV)(locinput - reginfo->strbeg))
                         );
@@ -9741,7 +9744,7 @@ NULL
                         DEBUG_EXECUTE_r( re_exec_indentf(
                             "%sWHILEM[%d/%d]: detected a super-linear match, enabling cache%s...\n",
                             depth, PL_colors[4],
-                            (int)FLAGS(scan),
+                            (int)WHILEM_CACHE_SLOT(scan),
                             (int)rexi->slc_whilem_seen,
                             PL_colors[5]
                         ));
@@ -9914,17 +9917,17 @@ NULL
 #define ST st->u.branch
 
         case BRANCHJ:	    /*  /(...|A|...)/ with long next pointer */
-            next = scan + ARG1u(scan);
+            next = scan + REGNODE_NEXT_OFFSET(scan);
             if (next == scan)
                 next = NULL;
-            ST.before_paren = ARG2a(scan);
-            ST.after_paren = ARG2b(scan);
+            ST.before_paren = BRANCH_CAPTURE_FLOOR(scan);
+            ST.after_paren = BRANCH_LAST_CAPTURE(scan);
             goto branch_logic;
             NOT_REACHED; /* NOTREACHED */
 
         case BRANCH:	    /*  /(...|A|...)/ */
-            ST.before_paren = ARG1a(scan);
-            ST.after_paren = ARG1b(scan);
+            ST.before_paren = BRANCH_CAPTURE_FLOOR(scan);
+            ST.after_paren = BRANCH_LAST_CAPTURE(scan);
           branch_logic:
             scan = REGNODE_AFTER_opcode(scan,state_num); /* scan now points to inner node */
             assert(scan);
@@ -9948,8 +9951,8 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case CUTGROUP:  /*  /(*THEN)/  */
-            sv_yes_mark = st->u.mark.mark_name = FLAGS(scan)
-                ? MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ])
+            sv_yes_mark = st->u.mark.mark_name = VERB_HAS_ARG(scan)
+                ? MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ])
                 : NULL;
             PUSH_STATE_GOTO(CUTGROUP_next, next, locinput, loceol,
                             script_run_begin);
@@ -10015,8 +10018,8 @@ NULL
             ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
 
             /* if paren positive, emulate an OPEN/CLOSE around A */
-            if (FLAGS(ST.me)) {
-                U32 paren = FLAGS(ST.me);
+            if (CURLY_CAPTURE_PARENS(ST.me)) {
+                U32 paren = CURLY_CAPTURE_PARENS(ST.me);
                 lastopen = paren;
                 if (paren > maxopenparen)
                     maxopenparen = paren;
@@ -10063,15 +10066,15 @@ NULL
                           depth, (IV) ST.count, (IV)ST.alen)
             );
 
-            if (FLAGS(ST.me)) {
+            if (CURLY_CAPTURE_PARENS(ST.me)) {
                 /* emulate CLOSE: mark current A as captured */
-                U32 paren = (U32)FLAGS(ST.me);
+                U32 paren = (U32)CURLY_CAPTURE_PARENS(ST.me);
                 CLOSE_CAPTURE(rex, paren,
                     HOPc(locinput, -ST.alen) - reginfo->strbeg,
                     locinput - reginfo->strbeg);
             }
 
-            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
+            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)CURLY_CAPTURE_PARENS(ST.me)))
                 goto fake_end;
 
 
@@ -10088,7 +10091,7 @@ NULL
 
 
             if (ST.minmod || ST.count < CURLY_MIN_REPEAT(ST.me)
-                || EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
+                || EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)CURLY_CAPTURE_PARENS(ST.me)))
                 sayNO;
 
           curlym_do_B: /* execute the B in /A{m,n}B/  */
@@ -10137,9 +10140,9 @@ NULL
             }
 
           curlym_close_B:
-            if (FLAGS(ST.me)) {
+            if (CURLY_CAPTURE_PARENS(ST.me)) {
                 /* emulate CLOSE: mark current A as captured */
-                U32 paren = (U32)FLAGS(ST.me);
+                U32 paren = (U32)CURLY_CAPTURE_PARENS(ST.me);
                 if (ST.count || is_accepted) {
                     CLOSE_CAPTURE(rex, paren,
                         HOPc(locinput, -ST.alen) - reginfo->strbeg,
@@ -10148,7 +10151,7 @@ NULL
                 else
                     RXp_OFFSp(rex)[paren].end = -1;
 
-                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
+                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)CURLY_CAPTURE_PARENS(ST.me)))
                 {
                     if (ST.count || is_accepted)
                         goto fake_end;
@@ -10211,7 +10214,7 @@ NULL
             goto repeat;
 
         case CURLYN:		/*  /(A){m,n}B/ where A is width 1 char */
-            ST.paren = FLAGS(scan);     /* Which paren to set */
+            ST.paren = CURLY_CAPTURE_PARENS(scan);     /* Which paren to set */
             ST.lastparen      = RXp_LASTPAREN(rex);
             ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
             if (ST.paren > maxopenparen)
@@ -10603,10 +10606,10 @@ NULL
             ST.wanted = 1;
           ifmatch_trivial_fail_test:
             ST.prev_match_end= match_end;
-            ST.count = NEXT_OFF(scan) + 1; /* next_off repurposed to be
+            ST.count = LOOKBEHIND_EXTRA_STARTS(scan) + 1; /* next_off repurposed to be
                                               lookbehind count, requires
                                               non-zero flags */
-            if (! FLAGS(scan)) {    /* 'flags' zero means lookahed */
+            if (! LOOKBEHIND_MAX_CHARS(scan)) {    /* 'flags' zero means lookahed */
 
                 /* Lookahead starts here and ends at the normal place */
                 ST.start = locinput;
@@ -10614,7 +10617,7 @@ NULL
                 match_end = NULL;
             }
             else {
-                PERL_UINT_FAST8_T back_count = FLAGS(scan);
+                PERL_UINT_FAST8_T back_count = LOOKBEHIND_MAX_CHARS(scan);
                 char * s;
                 match_end = locinput;
 
@@ -10642,7 +10645,7 @@ NULL
                     sayNO;
 
                 /* Here, we didn't want it to match, so is actually success */
-                next = scan + ARG1u(scan);
+                next = scan + SUBPATTERN_CONTINUE_OFFSET(scan);
                 if (next == scan)
                     next = NULL;
                 break;
@@ -10704,7 +10707,7 @@ NULL
                 loceol = st->loceol;
                 script_run_begin = st->sr0;
             }
-            scan = ST.me + ARG1u(ST.me);
+            scan = ST.me + SUBPATTERN_CONTINUE_OFFSET(ST.me);
             if (scan == ST.me)
                 scan = NULL;
             continue; /* execute B */
@@ -10714,7 +10717,7 @@ NULL
 
         case LONGJMP: /*  alternative with many branches compiles to
                        * (BRANCHJ; EXACT ...; LONGJMP ) x N */
-            next = scan + ARG1u(scan);
+            next = scan + REGNODE_NEXT_OFFSET(scan);
             if (next == scan)
                 next = NULL;
             break;
@@ -10724,8 +10727,8 @@ NULL
             /* FALLTHROUGH */
 
         case PRUNE:   /*  (*PRUNE)   */
-            if (FLAGS(scan))
-                sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+            if (VERB_HAS_ARG(scan))
+                sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
             PUSH_STATE_GOTO(COMMIT_next, next, locinput, loceol,
                             script_run_begin);
             NOT_REACHED; /* NOTREACHED */
@@ -10737,8 +10740,8 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case OPFAIL:   /* (*FAIL)  */
-            if (FLAGS(scan))
-                sv_commit = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+            if (VERB_HAS_ARG(scan))
+                sv_commit = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
             if (logical) {
                 /* deal with (?(?!)X|Y) properly,
                  * make sure we trigger the no branch
@@ -10754,7 +10757,7 @@ NULL
         case MARKPOINT: /*  (*MARK:foo)  */
             ST.prev_mark = mark_state;
             ST.mark_name = sv_commit = sv_yes_mark
-                = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+                = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
             mark_state = st;
             ST.mark_loc = locinput;
             PUSH_YES_STATE_GOTO(MARKPOINT_next, next, locinput, loceol,
@@ -10787,7 +10790,7 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case SKIP:  /*  (*SKIP)  */
-            if (!FLAGS(scan)) {
+            if (!VERB_HAS_ARG(scan)) {
                 /* (*SKIP) : if we fail we cut here*/
                 ST.mark_name = NULL;
                 ST.mark_loc = locinput;
@@ -10798,7 +10801,7 @@ NULL
                    otherwise do nothing.  Meaning we need to scan
                  */
                 regmatch_state *cur = mark_state;
-                SV *find = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+                SV *find = MUTABLE_SV(rexi->data->data[ VERB_ARG_DATA_SLOT( scan ) ]);
 
                 while (cur) {
                     if ( sv_eq( cur->u.mark.mark_name,
@@ -11399,13 +11402,13 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case ANYOFM_tb:
         scan = (char *) find_span_end_mask((U8 *) scan, (U8 *) this_eol,
-                                           (U8) ARG1u(p), FLAGS(p));
+                                           (U8) ANYOFM_MATCH_VALUE(p), ANYOFM_MASK(p));
         break;
 
       case NANYOFM_t8:
         while (     hardcount < max
                &&   scan < this_eol
-               &&  (*scan & FLAGS(p)) != ARG1u(p))
+               &&  (*scan & ANYOFM_MASK(p)) != ANYOFM_MATCH_VALUE(p))
         {
             scan += UTF8SKIP(scan);
             hardcount++;
@@ -11414,12 +11417,12 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case NANYOFM_tb:
         scan = (char *) find_next_masked((U8 *) scan, (U8 *) this_eol,
-                                         (U8) ARG1u(p), FLAGS(p));
+                                         (U8) ANYOFM_MATCH_VALUE(p), ANYOFM_MASK(p));
         break;
 
       case NEXACTb_t8:
         {
-          const U8 nchar = (U8) ARG1u(p);
+          const U8 nchar = (U8) NEXACTb_BYTE(p);
           while (     hardcount < max
                  &&   scan < this_eol
                  &&  (UTF8SKIP(scan) != 1 || (U8) *scan != nchar))
@@ -11432,7 +11435,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case NEXACTb_tb:
         {
-          char * found = (char *) memchr(scan, (U8) ARG1u(p),
+          char * found = (char *) memchr(scan, (U8) NEXACTb_BYTE(p),
                                          this_eol - scan);
           scan = found ? found : this_eol;
         }
@@ -11509,8 +11512,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
       case ANYOFHs_t8:
         anyofh_list = GET_ANYOFH_INVLIST(prog, p);
         while (   hardcount < max
-               && scan + FLAGS(p) < this_eol
-               && memEQ(scan, ((struct regnode_anyofhs *) p)->string, FLAGS(p))
+               && scan + STR_LEN_U8(p) < this_eol
+               && memEQ(scan, ((struct regnode_anyofhs *) p)->string, STR_LEN_U8(p))
                && invlist_contains_cp_(anyofh_list,
                                        utf8_to_uv_or_die((U8 *) scan,
                                                          (U8 *) this_eol,
@@ -11578,7 +11581,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
       case POSIXL_tb:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         while (   scan < this_eol
-               && to_complement ^ cBOOL(isFOO_lc(FLAGS(p), *scan)))
+               && to_complement ^ cBOOL(isFOO_lc(POSIX_CLASS(p), *scan)))
         {
             scan++;
         }
@@ -11590,7 +11593,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case POSIXL_t8:
         while (   hardcount < max && scan < this_eol
-               && to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(p),
+               && to_complement ^ cBOOL(isFOO_utf8_lc(POSIX_CLASS(p),
                                                       (U8 *) scan,
                                                       (U8 *) this_eol)))
         {
@@ -11613,7 +11616,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case POSIXA_tb:
-        while (scan < this_eol && generic_isCC_A_((U8) *scan, FLAGS(p))) {
+        while (scan < this_eol && generic_isCC_A_((U8) *scan, POSIX_CLASS(p))) {
             scan++;
         }
         break;
@@ -11622,7 +11625,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
       case NPOSIXA_tb:
-        while (scan < this_eol && ! generic_isCC_A_((U8) *scan, FLAGS(p))) {
+        while (scan < this_eol && ! generic_isCC_A_((U8) *scan, POSIX_CLASS(p))) {
             scan++;
         }
         break;
@@ -11633,7 +11636,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
          * non-ASCII, plus everything in ASCII that isn't in the class. */
         while (   hardcount < max && scan < this_eol
                && (   ! isASCII_utf8_safe(scan, loceol)
-                   || ! generic_isCC_A_((U8) *scan, FLAGS(p))))
+                   || ! generic_isCC_A_((U8) *scan, POSIX_CLASS(p))))
             {
                 scan += UTF8SKIP(scan);
                 hardcount++;
@@ -11646,7 +11649,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case POSIXU_tb:
         while (   scan < this_eol
-               && to_complement ^ cBOOL(generic_isCC_((U8) *scan, FLAGS(p))))
+               && to_complement ^ cBOOL(generic_isCC_((U8) *scan, POSIX_CLASS(p))))
         {
             scan++;
         }
@@ -11659,7 +11662,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case POSIXD_t8:
       case POSIXU_t8:
-        classnum = (char_class_number_) FLAGS(p);
+        classnum = (char_class_number_) POSIX_CLASS(p);
         switch (classnum) {
           default:
             while (   hardcount < max && scan < this_eol
@@ -11884,7 +11887,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         {
             /* In this case, the ARG is set up so that the final bit indicates
              * whether it matches or not */
-            match = ARG1u(n) & 1;
+            match = ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(n);
         }
         else
             /* Here, the main way it could match is if the code point is

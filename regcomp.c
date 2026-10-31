@@ -2016,7 +2016,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             if (OP(first) == OPEN)
                 sawopen = 1;
             else
-            if (OP(first) == IFMATCH && !FLAGS(first))
+            if (OP(first) == IFMATCH && !IS_LOOKBEHIND(first))
                 /* for now we can't handle lookbehind IFMATCH */
                 sawlookahead = 1;
             else
@@ -2402,7 +2402,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          */
         if (REGNODE_TYPE(fop) == NOTHING && nop == END)
             RExC_rx->extflags |= RXf_NULL;
-        else if ((fop == MBOL || (fop == SBOL && !FLAGS(first))) && nop == END)
+        else if ((fop == MBOL || (fop == SBOL && !SBOL_IS_ABSOLUTE(first))) && nop == END)
             /* when fop is SBOL first->flags will be true only when it was
              * produced by parsing /\A/, and not when parsing /^/. This is
              * very important for the split code as there we want to
@@ -2410,7 +2410,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
              * See rt #122761 for more details. -- Yves */
             RExC_rx->extflags |= RXf_START_ONLY;
         else if (fop == PLUS
-                 && REGNODE_TYPE(nop) == POSIXD && FLAGS(next) == CC_SPACE_
+                 && REGNODE_TYPE(nop) == POSIXD && POSIX_CLASS(next) == CC_SPACE_
                  && OP(regnext(first)) == END)
             RExC_rx->extflags |= RXf_WHITE;
         else if ( RExC_rx->extflags & RXf_SPLIT
@@ -2445,11 +2445,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          *
          * If for some reason someone writes code that optimises
          * away a GOSUB opcode then the assert should be changed to
-         * an if(scan) to guard the ARG2i_SET() - Yves
+         * an if(scan) to guard GOSUB_TARGET_OFFSET_SET() - Yves
          *
          */
         assert(scan && OP(scan) == GOSUB);
-        ARG2i_SET( scan, RExC_open_parens[ARG1u(scan)] - REGNODE_OFFSET(scan));
+        GOSUB_TARGET_OFFSET_SET( scan, RExC_open_parens[GOSUB_CAPTURE(scan)] - REGNODE_OFFSET(scan));
     }
     if (RExC_logical_total_parens != RExC_total_parens) {
         Newxz(RExC_parno_to_logical_next, RExC_total_parens, I32);
@@ -2941,7 +2941,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
                            : REFFN),
                     num, RExC_nestroot);
     if (RExC_nestroot && num >= (U32)RExC_nestroot)
-        FLAGS(REGNODE_p(ret)) = VOLATILE_REF;
+        REF_IS_VOLATILE_SET(REGNODE_p(ret), TRUE);
     *flagp |= HASWIDTH;
 
     nextchar(pRExC_state);
@@ -3677,15 +3677,15 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             RExC_seen |= REG_VERBARG_SEEN;
             if (start_arg) {
                 SV *sv = newSVpvn( start_arg, RExC_parse - start_arg);
-                ARG1u(REGNODE_p(ret)) = reg_add_data( pRExC_state,
-                                        STR_WITH_LEN("S"));
-                RExC_rxi->data->data[ARG1u(REGNODE_p(ret))]=(void*)sv;
-                FLAGS(REGNODE_p(ret)) = 1;
+                VERB_ARG_DATA_SLOT_SET(REGNODE_p(ret), reg_add_data( pRExC_state,
+                                        STR_WITH_LEN("S")));
+                RExC_rxi->data->data[VERB_ARG_DATA_SLOT(REGNODE_p(ret))]=(void*)sv;
+                VERB_HAS_ARG_SET(REGNODE_p(ret), TRUE);
             } else {
-                FLAGS(REGNODE_p(ret)) = 0;
+                VERB_HAS_ARG_SET(REGNODE_p(ret), FALSE);
             }
             if ( internal_argval != -1 )
-                ARG2i_SET(REGNODE_p(ret), internal_argval);
+                ACCEPT_CLOSE_TO_CAPTURE_SET(REGNODE_p(ret), internal_argval);
             nextchar(pRExC_state);
             return ret;
         }
@@ -4018,7 +4018,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 }
 
                 /* We keep track how many GOSUB items we have produced.
-                   To start off the ARG2i() of the GOSUB holds its "id",
+                   Initially GOSUB_FIXUP_INDEX() holds its fixup index,
                    which is used later in conjunction with RExC_recurse
                    to calculate the offset we need to jump for the GOSUB,
                    which it will store in the final representation.
@@ -4030,8 +4030,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 DEBUG_OPTIMISE_MORE_r(re_printf(
                     "%*s%*s Recurse #%" UVuf " to %" IVdf "\n",
                             22, "|    |", (int)(depth * 2 + 1), "",
-                            (UV)ARG1u(REGNODE_p(ret)),
-                            (IV)ARG2i(REGNODE_p(ret))));
+                            (UV)GOSUB_CAPTURE(REGNODE_p(ret)),
+                            (IV)GOSUB_FIXUP_INDEX(REGNODE_p(ret))));
                 RExC_seen |= REG_RECURSE_SEEN;
 
                 *flagp |= POSTPONED;
@@ -4097,7 +4097,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 if (is_logical) {
                     regnode_offset eval;
                     ret = reg_node(pRExC_state, LOGICAL);
-                    FLAGS(REGNODE_p(ret)) = 2;
+                    LOGICAL_MODE_SET(REGNODE_p(ret), 2);
 
                     eval = reg2node(pRExC_state, EVAL,
                                        n,
@@ -4106,14 +4106,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                         * return value */
                                        RExC_flags & RXf_PMf_COMPILETIME
                                       );
-                    FLAGS(REGNODE_p(eval)) = is_optimistic * EVAL_OPTIMISTIC_FLAG;
+                    EVAL_IS_OPTIMISTIC_SET(REGNODE_p(eval), is_optimistic);
                     if (! REGTAIL(pRExC_state, ret, eval)) {
                         REQUIRE_BRANCHJ(flagp, 0);
                     }
                     return ret;
                 }
                 ret = reg2node(pRExC_state, EVAL, n, 0);
-                FLAGS(REGNODE_p(ret)) = is_optimistic * EVAL_OPTIMISTIC_FLAG;
+                EVAL_IS_OPTIMISTIC_SET(REGNODE_p(ret), is_optimistic);
 
                 return ret;
             }
@@ -4158,7 +4158,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     regnode_offset tail;
 
                     ret = reg_node(pRExC_state, LOGICAL);
-                    FLAGS(REGNODE_p(ret)) = 1;
+                    LOGICAL_MODE_SET(REGNODE_p(ret), 1);
 
                     tail = reg(pRExC_state, 1, &flag, depth+1);
                     RETURN_FAIL_ON_RESTART(flag, flagp);
@@ -4468,13 +4468,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     if (*RExC_parse == '|') {
         if (RExC_use_BRANCHJ) {
             reginsert(pRExC_state, BRANCHJ, br, depth+1);
-            ARG2a_SET(REGNODE_p(br), npar_before_regbranch);
-            ARG2b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
+            BRANCH_CAPTURE_FLOOR_SET(REGNODE_p(br), npar_before_regbranch);
+            BRANCH_LAST_CAPTURE_SET(REGNODE_p(br), (U16)RExC_npar - 1);
         }
         else {
             reginsert(pRExC_state, BRANCH, br, depth+1);
-            ARG1a_SET(REGNODE_p(br), (U16)npar_before_regbranch);
-            ARG1b_SET(REGNODE_p(br), (U16)RExC_npar - 1);
+            BRANCH_CAPTURE_FLOOR_SET(REGNODE_p(br), (U16)npar_before_regbranch);
+            BRANCH_LAST_CAPTURE_SET(REGNODE_p(br), (U16)RExC_npar - 1);
         }
         have_branch = 1;
     }
@@ -4519,19 +4519,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         }
         assert(OP(REGNODE_p(br)) == BRANCH || OP(REGNODE_p(br))==BRANCHJ);
         assert(OP(REGNODE_p(lastbr)) == BRANCH || OP(REGNODE_p(lastbr))==BRANCHJ);
-        if (OP(REGNODE_p(br)) == BRANCH) {
-            if (OP(REGNODE_p(lastbr)) == BRANCH)
-                ARG1b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
-            else
-                ARG2b_SET(REGNODE_p(lastbr),ARG1a(REGNODE_p(br)));
-        }
-        else
-        if (OP(REGNODE_p(br)) == BRANCHJ) {
-            if (OP(REGNODE_p(lastbr)) == BRANCH)
-                ARG1b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
-            else
-                ARG2b_SET(REGNODE_p(lastbr),ARG2a(REGNODE_p(br)));
-        }
+        BRANCH_LAST_CAPTURE_SET(REGNODE_p(lastbr),
+                                BRANCH_CAPTURE_FLOOR(REGNODE_p(br)));
 
         lastbr = br;
         *flagp |= flags & (HASWIDTH | POSTPONED);
@@ -4607,11 +4596,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             );
         });
         if (OP(REGNODE_p(lastbr)) == BRANCH) {
-            ARG1b_SET(REGNODE_p(lastbr),(U16)RExC_npar-1);
+            BRANCH_LAST_CAPTURE_SET(REGNODE_p(lastbr),(U16)RExC_npar-1);
         }
         else
         if (OP(REGNODE_p(lastbr)) == BRANCHJ) {
-            ARG2b_SET(REGNODE_p(lastbr),(U16)RExC_npar-1);
+            BRANCH_LAST_CAPTURE_SET(REGNODE_p(lastbr),(U16)RExC_npar-1);
         }
 
         if (! REGTAIL(pRExC_state, lastbr, ender)) {
@@ -4718,7 +4707,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
 
             reginsert(pRExC_state, node, ret, depth+1);
-            FLAGS(REGNODE_p(ret)) = flag;
+            if (node != SUSPEND)
+                LOOKBEHIND_MAX_CHARS_SET(REGNODE_p(ret), flag);
             if (! REGTAIL_STUDY(pRExC_state, ret, reg_node(pRExC_state, TAIL)))
             {
                 REQUIRE_BRANCHJ(flagp, 0);
@@ -4790,11 +4780,11 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
         if (RExC_use_BRANCHJ) {
             ret = reg2node(pRExC_state, BRANCHJ, 0, 0);
             branch_node = REGNODE_p(ret);
-            ARG2a_SET(branch_node, (U16)RExC_npar-1);
+            BRANCH_CAPTURE_FLOOR_SET(branch_node, (U16)RExC_npar-1);
         } else {
             ret = reg1node(pRExC_state, BRANCH, 0);
             branch_node = REGNODE_p(ret);
-            ARG1a_SET(branch_node, (U16)RExC_npar-1);
+            BRANCH_CAPTURE_FLOOR_SET(branch_node, (U16)RExC_npar-1);
         }
     }
 
@@ -5978,7 +5968,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 ret = reg_node(pRExC_state, SBOL);
                 /* SBOL is shared with /^/ so we set the flags so we can tell
                  * /\A/ from /^/ in split. */
-                FLAGS(REGNODE_p(ret)) = 1;
+                SBOL_IS_ABSOLUTE_SET(REGNODE_p(ret), TRUE);
             }
             goto finish_meta_pat;
         case 'G':
@@ -6150,7 +6140,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             }
 
             ret = reg_node(pRExC_state, op);
-            FLAGS(REGNODE_p(ret)) = flags;
+            BOUNDARY_TYPE_SET(REGNODE_p(ret), flags);
 
             goto finish_meta_pat;
           }
@@ -6457,7 +6447,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                        : REFF),
                                 num, RExC_nestroot);
                 if (RExC_nestroot && num >= RExC_nestroot)
-                    FLAGS(REGNODE_p(ret)) = VOLATILE_REF;
+                    REF_IS_VOLATILE_SET(REGNODE_p(ret), TRUE);
                 if (OP(REGNODE_p(ret)) == REFF) {
                     RExC_seen_d_op = true;
                 }
@@ -8974,7 +8964,7 @@ redo_curchar:
                     {
                         vFAIL("Expecting interpolated extended charclass");
                     }
-                    resultant_invlist = (SV *) ARGp(REGNODE_p(node));
+                    resultant_invlist = REGEX_SET_INVLIST(REGNODE_p(node));
                     current = invlist_clone(resultant_invlist, NULL);
                     SvREFCNT_dec(resultant_invlist);
 
@@ -11788,7 +11778,7 @@ S_optimize_regclass(pTHX_
 
                 op = POSIXL + *invert * (NPOSIXL - POSIXL);
                 *ret = reg_node(pRExC_state, op);
-                FLAGS(REGNODE_p(*ret)) = classnum;
+                POSIX_CLASS_SET(REGNODE_p(*ret), classnum);
                 return op;
             }
         }
@@ -12266,7 +12256,7 @@ S_optimize_regclass(pTHX_
 
                     /* The argument is the lowest code point */
                     *ret = reg1node(pRExC_state, op, lowest_cp);
-                    FLAGS(REGNODE_p(*ret)) = ANYOFM_mask;
+                    ANYOFM_MASK_SET(REGNODE_p(*ret), ANYOFM_mask);
                 }
             }
 
@@ -12406,7 +12396,7 @@ S_optimize_regclass(pTHX_
                             ? type + NPOSIXA - POSIXA
                             : type;
                         *ret = reg_node(pRExC_state, op);
-                        FLAGS(REGNODE_p(*ret)) = posix_class;
+                        POSIX_CLASS_SET(REGNODE_p(*ret), posix_class);
                         SvREFCNT_dec(d_invlist);
                         SvREFCNT_dec(intersection);
                         return op;
@@ -12647,7 +12637,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
              *  1)  there is no list of code points matched outside the bitmap
              */
             if (! cp_list) {
-                ARG1u_SET(node, ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE);
+                ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_SET(node);
                 return;
             }
 
@@ -12656,7 +12646,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
                 && invlist_highest_range_start(cp_list)
                                                        <= NUM_ANYOF_CODE_POINTS)
             {
-                ARG1u_SET(node, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
+                ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_SET(node);
                 return;
             }
 
@@ -12729,7 +12719,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
             /* Here, the existence and contents of both compile-time lists
              * are identical between the new and existing data.  Re-use the
              * existing one */
-            ARG1u_SET(node, i);
+            ANYOF_AUX_DATA_SLOT_SET(node, i);
             return;
         } /* end of loop through existing classes */
     }
@@ -12761,7 +12751,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
     rv = newRV_noinc(MUTABLE_SV(av));
     n = reg_add_data(pRExC_state, STR_WITH_LEN("s"));
     RExC_rxi->data->data[n] = (void*)rv;
-    ARG1u_SET(node, n);
+    ANYOF_AUX_DATA_SLOT_SET(node, n);
 }
 #endif /* PERL_RE_BUILD_AUX */
 
@@ -12819,7 +12809,7 @@ Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const regnode* node, bool 
     const struct reg_data * const data = prog ? progi->data : NULL;
 
     if (data && data->count) {
-        const U32 n = ARG1u(node);
+        const U32 n = ANYOF_AUX_DATA_SLOT(node);
 
         if (data->what[n] == 's') {
             SV * const rv = MUTABLE_SV(data->data[n]);
@@ -13494,7 +13484,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
     assert(val >= scan);
     if (REGNODE_OFF_BY_ARG(OP(REGNODE_p(scan)))) {
         assert((UV) (val - scan) <= U32_MAX);
-        ARG1u_SET(REGNODE_p(scan), val - scan);
+        REGNODE_NEXT_OFFSET_SET(REGNODE_p(scan), val - scan);
     }
     else {
         if (val - scan > U16_MAX) {
@@ -13594,7 +13584,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
     });
     if (REGNODE_OFF_BY_ARG(OP(REGNODE_p(scan)))) {
         assert((UV) (val - scan) <= U32_MAX);
-        ARG1u_SET(REGNODE_p(scan), val - scan);
+        REGNODE_NEXT_OFFSET_SET(REGNODE_p(scan), val - scan);
     }
     else {
         if (val - scan > U16_MAX) {
@@ -13622,15 +13612,15 @@ Perl_get_ANYOFM_contents(pTHX_ const regnode * n)
      * ANYOFM/NANYOFM node 'n' */
 
     SV * cp_list = new_invlist_(-1);
-    const U8 lowest = (U8) ARG1u(n);
+    const U8 lowest = (U8) ANYOFM_MATCH_VALUE(n);
     unsigned int i;
     U8 count = 0;
-    U8 needed = 1U << PL_bitcount[ (U8) ~ FLAGS(n)];
+    U8 needed = 1U << PL_bitcount[ (U8) ~ ANYOFM_MASK(n)];
 
     /* Starting with the lowest code point, any code point that ANDed with the
      * mask yields the lowest code point is in the set */
     for (i = lowest; i <= 0xFF; i++) {
-        if ((i & FLAGS(n)) == ARG1u(n)) {
+        if ((i & ANYOFM_MASK(n)) == ANYOFM_MATCH_VALUE(n)) {
             cp_list = add_cp_to_invlist(cp_list, i);
             count++;
 

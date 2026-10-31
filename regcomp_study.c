@@ -60,7 +60,7 @@ S_rck_elide_nothing(pTHX_ regnode *node)
                         ? I32_MAX
                           /* I32 may be smaller than U16 on CRAYs! */
                         : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
-        int off = (REGNODE_OFF_BY_ARG(OP(node)) ? ARG1u(node) : NEXT_OFF(node));
+        int off = REGNODE_NEXT_OFFSET(node);
         int noff;
         regnode *n = node;
 
@@ -69,14 +69,14 @@ S_rck_elide_nothing(pTHX_ regnode *node)
             (n = regnext(n))
             && (
                 (REGNODE_TYPE(OP(n)) == NOTHING && (noff = NEXT_OFF(n)))
-                || ((OP(n) == LONGJMP) && (noff = ARG1u(n)))
+                || ((OP(n) == LONGJMP) && (noff = REGNODE_NEXT_OFFSET(n)))
             )
             && off + noff < max
         ) {
             off += noff;
         }
         if (REGNODE_OFF_BY_ARG(OP(node)))
-            ARG1u(node) = off;
+            REGNODE_NEXT_OFFSET_SET(node, off);
         else
             NEXT_OFF_set(node, off);
     }
@@ -379,7 +379,7 @@ Perl_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     Zero(ssc, 1, regnode_ssc);
     set_ANYOF_SYNTHETIC(ssc);
-    ARG1u_SET(ssc, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
+    ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_SET(ssc);
     ssc_anything(ssc);
 
     /* If any portion of the regex is to operate under locale rules that aren't
@@ -456,7 +456,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         invlist = add_range_to_invlist_(invlist, NUM_ANYOF_CODE_POINTS, UV_MAX);
     }
     else if (ANYOF_HAS_AUX(node)) {
-        const U32 n = ARG1u(node);
+        const U32 n = ANYOF_AUX_DATA_SLOT(node);
         SV * const rv = MUTABLE_SV(RExC_rxi->data->data[n]);
         AV * const av = AV_FROM_REF(rv);
         SV **const ary = AvARRAY(av);
@@ -1285,7 +1285,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         if (flags && !NEXT_OFF(n)) {
             DEBUG_PEEP("atch", val, depth, 0);
             if (REGNODE_OFF_BY_ARG(OP(n))) {
-                ARG1u_SET(n, val - n);
+                REGNODE_NEXT_OFFSET_SET(n, val - n);
             }
             else {
                 NEXT_OFF_set(n, val - n);
@@ -2200,8 +2200,8 @@ Perl_study_chunk(pTHX_
                  * the rest of this block. Specifically setting
                  * RExC_recurse[] must happen at least once during
                  * study_chunk(). */
-                paren = ARG1u(scan);
-                RExC_recurse[ARG2i(scan)] = scan;
+                paren = GOSUB_CAPTURE(scan);
+                RExC_recurse[GOSUB_FIXUP_INDEX(scan)] = scan;
                 start = REGNODE_p(RExC_open_parens[paren]);
                 end   = REGNODE_p(RExC_close_parens[paren]);
 
@@ -2401,8 +2401,8 @@ Perl_study_chunk(pTHX_
                 U8 mask = ~ ('A' ^ 'a'); /* These differ in just one bit */
 
                 OP(scan) = ANYOFM;
-                ARG1u_SET(scan, *s & mask);
-                FLAGS(scan) = mask;
+                ANYOFM_MATCH_VALUE_SET(scan, *s & mask);
+                ANYOFM_MASK_SET(scan, mask);
                 /* We're not EXACTFish any more, so restudy.
                  * Search for "restudy" in this file to find
                  * a comment with details. */
@@ -2528,8 +2528,8 @@ Perl_study_chunk(pTHX_
                     * case, and the lowest code point of the
                     * pair (which the '&' forces) */
                     OP(next) = ANYOFM;
-                    ARG1u_SET(next, *STRING(next) & mask);
-                    FLAGS(next) = mask;
+                    ANYOFM_MATCH_VALUE_SET(next, *STRING(next) & mask);
+                    ANYOFM_MASK_SET(next, mask);
                 }
 
                 if (flags & SCF_DO_STCLASS) {
@@ -2549,7 +2549,7 @@ Perl_study_chunk(pTHX_
                 goto optimize_curly_tail;
             case CURLY:
                 if (stopparen > 0 && (OP(scan) == CURLYN || OP(scan) == CURLYM)
-                    && (FLAGS(scan) == stopparen))
+                    && (CURLY_CAPTURE_PARENS(scan) == stopparen))
                 {
                     mincount = 1;
                     maxcount = 1;
@@ -2560,7 +2560,7 @@ Perl_study_chunk(pTHX_
                 next = regnext(scan);
                 if (OP(scan) == CURLYX) {
                     I32 lp = (data ? *(data->last_closep) : 0);
-                    FLAGS(scan) = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
+                    CURLYX_CAPTURE_FLOOR_SET(scan, ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX));
                 }
                 scan = REGNODE_AFTER(scan);
                 next_is_eval = (OP(scan) == EVAL);
@@ -2725,8 +2725,8 @@ Perl_study_chunk(pTHX_
                         RExC_close_parens[PARNO(nxt1)] = REGNODE_OFFSET(nxt) + 2;
                     }
                     /* Now we know that nxt2 is the only contents: */
-                    FLAGS(oscan) = (U8)PARNO(nxt);
                     OP(oscan) = CURLYN;
+                    CURLY_CAPTURE_PARENS_SET(oscan, (U8)PARNO(nxt));
                     OP(nxt1) = NOTHING; /* was OPEN. */
 
 #ifdef DEBUGGING
@@ -2783,7 +2783,7 @@ Perl_study_chunk(pTHX_
                         /* note that we have changed the type of oscan to CURLYM here */
                         regnode *nxt1 = REGNODE_AFTER_type(oscan, tregnode_CURLYM); /* OPEN*/
 
-                        FLAGS(oscan) = (U8)PARNO(nxt);
+                        CURLY_CAPTURE_PARENS_SET(oscan, (U8)PARNO(nxt));
                         if (RExC_open_parens) {
                              /*open->CURLYM*/
                             RExC_open_parens[PARNO(nxt1)] = REGNODE_OFFSET(oscan);
@@ -2806,7 +2806,7 @@ Perl_study_chunk(pTHX_
                             regnode *nnxt = regnext(nxt1);
                             if (nnxt == nxt) {
                                 if (REGNODE_OFF_BY_ARG(OP(nxt1)))
-                                    ARG1u_SET(nxt1, nxt2 - nxt1);
+                                    REGNODE_NEXT_OFFSET_SET(nxt1, nxt2 - nxt1);
                                 else if (nxt2 - nxt1 < U16_MAX)
                                     NEXT_OFF_set(nxt1, nxt2 - nxt1);
                                 else
@@ -2822,7 +2822,7 @@ Perl_study_chunk(pTHX_
                                     depth+1, mutate_ok);
                     }
                     else
-                        FLAGS(oscan) = 0;
+                        CURLY_CAPTURE_PARENS_SET(oscan, 0);
                 }
                 else if ((OP(oscan) == CURLYX)
                         /* Possibly mark the corresponding WHILEM node as
@@ -2842,17 +2842,17 @@ Perl_study_chunk(pTHX_
                     regnode *nxt = oscan + NEXT_OFF(oscan);
 
                     if (OP(REGNODE_BEFORE(nxt)) == NOTHING) /* LONGJMP */
-                        nxt += ARG1u(nxt);
+                        nxt += REGNODE_NEXT_OFFSET(nxt);
                     nxt = REGNODE_BEFORE(nxt);
                     if (
                         /* we've not already set WHILEM count on this node */
-                        !FLAGS(nxt)
+                        !WHILEM_CACHE_SLOT(nxt)
                         /* max supported number of WHILEM nodes that can
                          * participate in super-linear cache */
                       && RExC_rxi->slc_whilem_seen < SLC_MAX_WHILEM_NODES)
                     {
                         ++RExC_rxi->slc_whilem_seen;
-                        FLAGS(nxt) = RExC_rxi->slc_whilem_seen; /* On WHILEM */
+                        WHILEM_CACHE_SLOT_SET(nxt, RExC_rxi->slc_whilem_seen); /* On WHILEM */
                     }
                 }
                 if (data && fl & (SF_HAS_PAR|SF_IN_PAR))
@@ -3156,7 +3156,7 @@ Perl_study_chunk(pTHX_
                   {
                     SV* Nb_invlist = new_invlist_(2);
                     Nb_invlist = add_cp_to_invlist(Nb_invlist,
-                                                   (U8) ARG1u(scan));
+                                                   (U8) NEXACTb_BYTE(scan));
                     if (flags & SCF_DO_STCLASS_OR) {
                         ssc_union(data->start_class, Nb_invlist, true);
                     }
@@ -3173,7 +3173,7 @@ Perl_study_chunk(pTHX_
                     /* FALLTHROUGH */
 
                 case POSIXL:
-                    namedclass = classnum_to_namedclass(FLAGS(scan)) + invert;
+                    namedclass = classnum_to_namedclass(POSIX_CLASS(scan)) + invert;
                     if (flags & SCF_DO_STCLASS_AND) {
                         bool was_there = cBOOL(
                                           ANYOF_POSIXL_TEST(data->start_class,
@@ -3213,7 +3213,7 @@ Perl_study_chunk(pTHX_
                     invert = 1;
                     /* FALLTHROUGH */
                 case POSIXA:
-                    my_invlist = invlist_clone(PL_Posix_ptrs[FLAGS(scan)], NULL);
+                    my_invlist = invlist_clone(PL_Posix_ptrs[POSIX_CLASS(scan)], NULL);
                     goto join_posix_and_ascii;
 
                 case NPOSIXD:
@@ -3222,7 +3222,7 @@ Perl_study_chunk(pTHX_
                     /* FALLTHROUGH */
                 case POSIXD:
                 case POSIXU:
-                    my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(scan)], NULL);
+                    my_invlist = invlist_clone(PL_XPosix_ptrs[POSIX_CLASS(scan)], NULL);
 
                     /* NPOSIXD matches all upper Latin1 code points unless the
                      * target string being matched is UTF-8, which is
@@ -3258,10 +3258,9 @@ Perl_study_chunk(pTHX_
             scan_commit(pRExC_state, data, minlenp, is_inf);
 
         }
-        else if (  REGNODE_TYPE(OP(scan)) == BRANCHJ
+        else if (  (OP(scan) == IFMATCH || OP(scan) == UNLESSM)
                  /* Lookbehind, or need to calculate parens/evals/stclass: */
-                   && (FLAGS(scan) || data || (flags & SCF_DO_STCLASS))
-                   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM))
+                   && (IS_LOOKBEHIND(scan) || data || (flags & SCF_DO_STCLASS)))
         {
             if ( !PERL_ENABLE_POSITIVE_ASSERTION_STUDY
                 || OP(scan) == UNLESSM )
@@ -3296,7 +3295,7 @@ Perl_study_chunk(pTHX_
                 cur_last_close_op = *(data_fake.last_close_opp);
 
                 data_fake.pos_delta = delta;
-                if ( flags & SCF_DO_STCLASS && !FLAGS(scan)
+                if ( flags & SCF_DO_STCLASS && !LOOKBEHIND_MAX_CHARS(scan)
                      && OP(scan) == IFMATCH ) { /* Lookahead */
                     ssc_init(pRExC_state, &intrnl);
                     data_fake.start_class = &intrnl;
@@ -3319,7 +3318,7 @@ Perl_study_chunk(pTHX_
                 if ((f & SCF_DO_STCLASS_AND) && minnext == 0)
                     ssc_init(pRExC_state, &intrnl);
 
-                if (FLAGS(scan)) {
+                if (LOOKBEHIND_MAX_CHARS(scan)) {
                     if (   deltanext < 0
                         || deltanext > (I32) U8_MAX
                         || minnext > (I32)U8_MAX
@@ -3335,7 +3334,7 @@ Perl_study_chunk(pTHX_
                      * matches to avoid breakage for those not using this
                      * extension) */
                     if (deltanext)  {
-                        NEXT_OFF_set(scan, deltanext);
+                        LOOKBEHIND_EXTRA_STARTS_SET(scan, deltanext);
                         if (
                             /* See a CLOSE op inside this lookbehind? */
                             cur_last_close_op != *(data_fake.last_close_opp)
@@ -3350,7 +3349,7 @@ Perl_study_chunk(pTHX_
                                 is_positive ? "positive" : "negative");
                         }
                     }
-                    FLAGS(scan) = (U8)minnext + deltanext;
+                    LOOKBEHIND_MAX_CHARS_SET(scan, (U8)minnext + deltanext);
                 }
                 if (data) {
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
@@ -3406,7 +3405,7 @@ Perl_study_chunk(pTHX_
                     StructCopy(data, &data_fake, scan_data_t);
                     if ((flags & SCF_DO_SUBSTR) && data->last_found) {
                         f |= SCF_DO_SUBSTR;
-                        if (FLAGS(scan))
+                        if (LOOKBEHIND_MAX_CHARS(scan))
                             scan_commit(pRExC_state, &data_fake, minlenp, is_inf);
                         data_fake.last_found = newSVsv(data->last_found);
                     }
@@ -3421,7 +3420,7 @@ Perl_study_chunk(pTHX_
                 data_fake.pos_delta = delta;
                 if (is_inf)
                     data_fake.flags |= SF_IS_INF;
-                if ( flags & SCF_DO_STCLASS && !FLAGS(scan)
+                if ( flags & SCF_DO_STCLASS && !LOOKBEHIND_MAX_CHARS(scan)
                      && OP(scan) == IFMATCH ) { /* Lookahead */
                     ssc_init(pRExC_state, &intrnl);
                     data_fake.start_class = &intrnl;
@@ -3439,7 +3438,7 @@ Perl_study_chunk(pTHX_
                                         f, depth+1, mutate_ok);
                 if ((f & SCF_DO_STCLASS_AND) && *minnextp == 0)
                     ssc_init(pRExC_state, &intrnl);
-                if (FLAGS(scan)) {
+                if (LOOKBEHIND_MAX_CHARS(scan)) {
                     assert(0);  /* This code has never been tested since this
                                    is normally not compiled */
                     if (   deltanext < 0
@@ -3452,9 +3451,9 @@ Perl_study_chunk(pTHX_
                     }
 
                     if (deltanext) {
-                        NEXT_OFF_set(scan, deltanext);
+                        LOOKBEHIND_EXTRA_STARTS_SET(scan, deltanext);
                     }
-                    FLAGS(scan) = (U8)*minnextp + deltanext;
+                    LOOKBEHIND_MAX_CHARS_SET(scan, (U8)*minnextp + deltanext);
                 }
 
                 *minnextp += min;
@@ -3483,7 +3482,7 @@ Perl_study_chunk(pTHX_
                                             data_fake.substrs[i].max_offset;
                                 data->substrs[i].minlenp =
                                             data_fake.substrs[i].minlenp;
-                                data->substrs[i].lookbehind += FLAGS(scan);
+                                data->substrs[i].lookbehind += LOOKBEHIND_MAX_CHARS(scan);
                             }
                         }
                     }
@@ -3511,7 +3510,7 @@ Perl_study_chunk(pTHX_
             }
         }
         else if (OP(scan) == EVAL) {
-            if (data && !(FLAGS(scan) & EVAL_OPTIMISTIC_FLAG) )
+            if (data && !(EVAL_IS_OPTIMISTIC(scan)) )
                 data->flags |= SF_HAS_EVAL;
         }
         else if ( REGNODE_TYPE(OP(scan)) == ENDLIKE ) {
@@ -3538,7 +3537,7 @@ Perl_study_chunk(pTHX_
                 flags &= ~SCF_DO_SUBSTR;
             }
         }
-        else if (OP(scan) == LOGICAL && FLAGS(scan) == 2) /* Embedded follows */
+        else if (OP(scan) == LOGICAL && LOGICAL_MODE(scan) == 2) /* Embedded follows */
         {
                 if (flags & SCF_DO_SUBSTR) {
                     scan_commit(pRExC_state, data, minlenp, is_inf);

@@ -574,11 +574,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     sv_catpv(sv, REGNODE_NAME(op)); /* Take off const! */
 
     k = REGNODE_TYPE(op);
-    if (op == BRANCH) {
-        sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG1a(o),(IV)ARG1b(o));
-    }
-    else if (op == BRANCHJ) {
-        sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG2a(o),(IV)ARG2b(o));
+    if (op == BRANCH || op == BRANCHJ) {
+        sv_catpvf(sv, " (buf:%" IVdf "/%" IVdf ")",
+                    (IV)BRANCH_CAPTURE_FLOOR(o), (IV)BRANCH_LAST_CAPTURE(o));
     }
     else if (k == EXACT) {
         sv_catpvs(sv, " ");
@@ -603,7 +601,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         const reg_trie_data * const trie
             = (reg_trie_data*)progi->data->data[!IS_TRIE_AC(op) ? n : ac->trie];
 
-        sv_catpvf(sv, "-%s", REGNODE_NAME(FLAGS(o)));
+        sv_catpvf(sv, "-%s", REGNODE_NAME(TRIE_LITERAL_TYPE(o)));
         DEBUG_TRIE_COMPILE_r({
           if (trie->jump)
             sv_catpvs(sv, "(JUMP)");
@@ -637,8 +635,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (CURLY_HAS_CAPTURES(o))
             sv_catpvf(sv, "<%d:%d>", CURLY_FIRST_CAPTURE(o),
                                    CURLY_LAST_CAPTURE(o));
-        if (op == CURLYM || op == CURLYN || op == CURLYX)
-            sv_catpvf(sv, "[%d]", FLAGS(o)); /* Parenth number */
+        if (op == CURLYM || op == CURLYN)
+            sv_catpvf(sv, "[%d]", CURLY_CAPTURE_PARENS(o));
+        else if (op == CURLYX)
+            sv_catpvf(sv, "[%d]", CURLYX_CAPTURE_FLOOR(o));
         sv_catpvf(sv, "{%u,", (unsigned) lo);
         if (hi == REG_INFTY)
             sv_catpvs(sv, "INFTY");
@@ -646,15 +646,16 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             sv_catpvf(sv, "%u", (unsigned) hi);
         sv_catpvs(sv, "}");
     }
-    else if (k == WHILEM && FLAGS(o))                   /* Ordinal/of */
-        sv_catpvf(sv, "[%d/%d]", (int)FLAGS(o), (int)progi->slc_whilem_seen);
+    else if (k == WHILEM && WHILEM_CACHE_SLOT(o))                   /* Ordinal/of */
+        sv_catpvf(sv, "[%d/%d]", (int)WHILEM_CACHE_SLOT(o), (int)progi->slc_whilem_seen);
     else if (k == REF || k == OPEN || k == CLOSE
              || k == GROUPP || op == ACCEPT)
     {
         AV *name_list= NULL;
-        U32 parno = (op == ACCEPT)              ? ARG2u(o) :
+        U32 parno = (op == ACCEPT)              ? ACCEPT_CLOSE_TO_CAPTURE(o) :
                    (op == OPEN || op == CLOSE) ? PARNO(o) :
-                                                 ARG1u(o);
+                   (k == GROUPP) ? GROUPP_CAPTURE(o) :
+                   (op >= REFN) ? NAMED_CAPTURE_LIST_SLOT(o) : REF_CAPTURE(o);
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list = MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
@@ -706,10 +707,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         }
         if ( k == REF ) {
-            sv_catpvf(sv, " <%" IVdf ">", (IV)ARG2i(o));
+            sv_catpvf(sv, " <%" IVdf ">", (IV)REF_CAPTURE_SAVE_START(o));
         }
         if ( k == REF && reginfo) {
-            U32 n = ARG1u(o);  /* which paren pair */
+            U32 n = op >= REFN ? NAMED_CAPTURE_LIST_SLOT(o) : REF_CAPTURE(o);
             I32 ln = RXp_OFFS_START(prog,n);
             if (RXp_LASTPAREN(prog) < n || ln == -1 || RXp_OFFS_END(prog,n) == -1)
                 sv_catpvf(sv, ": FAIL");
@@ -729,7 +730,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
     } else if (k == GOSUB) {
         AV *name_list= NULL;
-        IV parno = ARG1u(o);
+        IV parno = GOSUB_CAPTURE(o);
         IV logical_parno = (parno && prog->parno_to_logical)
                          ? prog->parno_to_logical[parno]
                          : parno;
@@ -744,17 +745,17 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (logical_parno != parno)
             sv_catpvf(sv, "/%" IVdf, parno);
 
-        sv_catpvf(sv, "[%+d:%d]", (int)ARG2i(o),
-                (int)((o + (int)ARG2i(o)) - progi->program) );
+        sv_catpvf(sv, "[%+d:%d]", (int)GOSUB_TARGET_OFFSET(o),
+                (int)((o + (int)GOSUB_TARGET_OFFSET(o)) - progi->program) );
         if (name_list) {
-            SV **name= av_fetch_simple(name_list, ARG1u(o), 0 );
+            SV **name= av_fetch_simple(name_list, GOSUB_CAPTURE(o), 0 );
             if (name)
                 sv_catpvf(sv, " '%" SVf "'", SVfARG(*name));
         }
     }
     else if (k == LOGICAL)
         /* 2: embedded, otherwise 1 */
-        sv_catpvf(sv, "[%d]", FLAGS(o));
+        sv_catpvf(sv, "[%d]", LOGICAL_MODE(o));
     else if (k == ANYOF || k == ANYOFH || k == ANYOFR) {
         U8 flags;
         U8 * bitmap;
@@ -969,14 +970,16 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (op == ANYOFHs) {
             sv_catpvf(sv, " (Leading UTF-8 bytes = %s", 
                 byte_dump_string_((U8 *) ((struct regnode_anyofhs *) o)->string,
-                FLAGS(o), 1));
+                STR_LEN_U8(o), 1));
         }
         else if (REGNODE_TYPE(op) != ANYOF) {
-            U8 lowest = (op != ANYOFHr)
-                         ? FLAGS(o)
-                         : LOWEST_ANYOF_HRx_BYTE(FLAGS(o));
+            U8 lowest = op == ANYOFHr
+                         ? LOWEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(o))
+                         : (op == ANYOFH || op == ANYOFR)
+                           ? ANYOF_FLAGS(o)
+                           : FIRST_BYTE(o);
             U8 highest = (op == ANYOFHr)
-                         ? HIGHEST_ANYOF_HRx_BYTE(FLAGS(o))
+                         ? HIGHEST_ANYOF_HRx_BYTE(ANYOF_FLAGS(o))
                          : (op == ANYOFH || op == ANYOFR)
                            ? 0xFF
                            : lowest;
@@ -1009,7 +1012,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (op == NEXACTb) {
         sv_catpvf(sv, "[%s%c%s]",
-                       PL_colors[0], (int) ARG1u(o), PL_colors[1]);
+                       PL_colors[0], (int) NEXACTb_BYTE(o), PL_colors[1]);
     }
     else if (k == ANYOFHbbm) {
         SV * cp_list = get_ANYOFHbbm_contents(o);
@@ -1023,7 +1026,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         SvREFCNT_dec(cp_list);
     }
     else if (k == POSIXD || k == NPOSIXD) {
-        U8 index = FLAGS(o) * 2;
+        U8 index = POSIX_CLASS(o) * 2;
         if (index < C_ARRAY_LENGTH(anyofs)) {
             if (*anyofs[index] != '[')  {
                 sv_catpvs(sv, "[");
@@ -1046,28 +1049,28 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             "{sb}",
             "{wb}"
         };
-        assert(FLAGS(o) < C_ARRAY_LENGTH(bounds));
-        sv_catpv(sv, bounds[FLAGS(o)]);
+        assert(BOUNDARY_TYPE(o) < C_ARRAY_LENGTH(bounds));
+        sv_catpv(sv, bounds[BOUNDARY_TYPE(o)]);
     }
     else if (k == BRANCHJ && (op == UNLESSM || op == IFMATCH)) {
-        sv_catpvf(sv, "[%d", -(FLAGS(o)));
-        if (NEXT_OFF(o)) {
-            sv_catpvf(sv, "..-%d", FLAGS(o) - NEXT_OFF(o));
+        sv_catpvf(sv, "[%d", -(LOOKBEHIND_MAX_CHARS(o)));
+        if (LOOKBEHIND_EXTRA_STARTS(o)) {
+            sv_catpvf(sv, "..-%d", LOOKBEHIND_MAX_CHARS(o) - LOOKBEHIND_EXTRA_STARTS(o));
         }
         sv_catpvf(sv, "]");
     }
     else if (op == SBOL)
-        sv_catpvf(sv, " /%s/", FLAGS(o) ? "\\A" : "^");
+        sv_catpvf(sv, " /%s/", SBOL_IS_ABSOLUTE(o) ? "\\A" : "^");
     else if (op == EVAL) {
-        if (FLAGS(o) & EVAL_OPTIMISTIC_FLAG)
+        if (EVAL_IS_OPTIMISTIC(o))
             sv_catpvf(sv, " optimistic");
     }
 
     /* add on the verb argument if there is one */
-    if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && FLAGS(o)) {
-        if ( ARG1u(o) )
+    if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && VERB_HAS_ARG(o)) {
+        if ( VERB_ARG_DATA_SLOT(o) )
             sv_catpvf(sv, ":%" SVf,
-                       SVfARG((MUTABLE_SV(progi->data->data[ ARG1u( o ) ]))));
+                       SVfARG((MUTABLE_SV(progi->data->data[ VERB_ARG_DATA_SLOT( o ) ]))));
         else
             sv_catpvs(sv, ":NULL");
     }

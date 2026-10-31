@@ -502,6 +502,286 @@ struct regnode_ssc {
 #define CURLY_FIRST_CAPTURE_SET(p, val) ARG3a_SET((p), (val))
 #define CURLY_LAST_CAPTURE_SET(p, val)  ARG3b_SET((p), (val))
 
+/* Named properties for arguments and overloaded header fields. Capture
+ * numbers are physical. Offsets are relative to the node, in regnode units.
+ * GOSUB_FIXUP_INDEX and GOSUB_TARGET_OFFSET name the same field before and
+ * after final fixup. Generic node construction uses the ARG primitives.
+ */
+#define BRANCH_CAPTURE_FLOOR(p)                                               \
+    (assert(OP(p) == BRANCH || OP(p) == BRANCHJ), PREVENT_LVALUE((OP(p) ==    \
+        BRANCH ? ARG1a(p) : ARG2a(p))))
+#define BRANCH_CAPTURE_FLOOR_SET(p, val) STMT_START {                         \
+    assert(OP(p) == BRANCH || OP(p) == BRANCHJ);                              \
+    if (OP(p) == BRANCH) ARG1a_SET((p), (val));                               \
+    else ARG2a_SET((p), (val));                                               \
+} STMT_END
+
+#define BRANCH_LAST_CAPTURE(p)                                                \
+    (assert(OP(p) == BRANCH || OP(p) == BRANCHJ), PREVENT_LVALUE((OP(p) ==    \
+        BRANCH ? ARG1b(p) : ARG2b(p))))
+#define BRANCH_LAST_CAPTURE_SET(p, val) STMT_START {                          \
+    assert(OP(p) == BRANCH || OP(p) == BRANCHJ);                              \
+    if (OP(p) == BRANCH) ARG1b_SET((p), (val));                               \
+    else ARG2b_SET((p), (val));                                               \
+} STMT_END
+
+#define REF_CAPTURE(p)                                                        \
+    (assert(REGNODE_TYPE(OP(p)) == REF && OP(p) < REFN),                      \
+        PREVENT_LVALUE(ARG1u(p)))
+#define REF_CAPTURE_SET(p, val) STMT_START {                                  \
+    assert(REGNODE_TYPE(OP(p)) == REF && OP(p) < REFN);                       \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define NAMED_CAPTURE_LIST_SLOT(p)                                            \
+    (assert((REGNODE_TYPE(OP(p)) == REF && OP(p) >= REFN) || OP(p) ==         \
+        GROUPPN), PREVENT_LVALUE(ARG1u(p)))
+#define NAMED_CAPTURE_LIST_SLOT_SET(p, val) STMT_START {                      \
+    assert((REGNODE_TYPE(OP(p)) == REF && OP(p) >= REFN) || OP(p) == GROUPPN);\
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define REF_CAPTURE_SAVE_START(p)                                             \
+    (assert(REGNODE_TYPE(OP(p)) == REF), PREVENT_LVALUE(ARG2u(p)))
+#define REF_CAPTURE_SAVE_START_SET(p, val) STMT_START {                       \
+    assert(REGNODE_TYPE(OP(p)) == REF);                                       \
+    ARG2u_SET((p), (val));                                                    \
+} STMT_END
+
+#define GROUPP_CAPTURE(p)                                                     \
+    (assert(OP(p) == GROUPP), PREVENT_LVALUE(ARG1u(p)))
+#define GROUPP_CAPTURE_SET(p, val) STMT_START {                               \
+    assert(OP(p) == GROUPP);                                                  \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define INSUBP_CAPTURE(p)                                                     \
+    (assert(OP(p) == INSUBP), PREVENT_LVALUE(ARG1u(p)))
+#define INSUBP_CAPTURE_SET(p, val) STMT_START {                               \
+    assert(OP(p) == INSUBP);                                                  \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define GOSUB_CAPTURE(p)                                                      \
+    (assert(OP(p) == GOSUB), PREVENT_LVALUE(ARG1u(p)))
+#define GOSUB_CAPTURE_SET(p, val) STMT_START {                                \
+    assert(OP(p) == GOSUB);                                                   \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define GOSUB_FIXUP_INDEX(p)                                                  \
+    (assert(OP(p) == GOSUB), PREVENT_LVALUE(ARG2i(p)))
+#define GOSUB_FIXUP_INDEX_SET(p, val) STMT_START {                            \
+    assert(OP(p) == GOSUB);                                                   \
+    ARG2i_SET((p), (val));                                                    \
+} STMT_END
+
+#define GOSUB_TARGET_OFFSET(p)                                                \
+    (assert(OP(p) == GOSUB), PREVENT_LVALUE(ARG2i(p)))
+#define GOSUB_TARGET_OFFSET_SET(p, val) STMT_START {                          \
+    assert(OP(p) == GOSUB);                                                   \
+    ARG2i_SET((p), (val));                                                    \
+} STMT_END
+
+#define EVAL_CODE_DATA_SLOT(p)                                                \
+    (assert(OP(p) == EVAL), PREVENT_LVALUE(ARG1u(p)))
+#define EVAL_CODE_DATA_SLOT_SET(p, val) STMT_START {                          \
+    assert(OP(p) == EVAL);                                                    \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define EVAL_COMPILE_FLAGS(p)                                                 \
+    (assert(OP(p) == EVAL), PREVENT_LVALUE(ARG2i(p)))
+#define EVAL_COMPILE_FLAGS_SET(p, val) STMT_START {                           \
+    assert(OP(p) == EVAL);                                                    \
+    ARG2i_SET((p), (val));                                                    \
+} STMT_END
+
+#define VERB_ARG_DATA_SLOT(p)                                                 \
+    (assert(REGNODE_TYPE(OP(p)) == VERB || OP(p) == ACCEPT || OP(p) ==        \
+        OPFAIL), PREVENT_LVALUE(ARG1u(p)))
+#define VERB_ARG_DATA_SLOT_SET(p, val) STMT_START {                           \
+    assert(REGNODE_TYPE(OP(p)) == VERB || OP(p) == ACCEPT || OP(p) == OPFAIL);\
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define ACCEPT_CLOSE_TO_CAPTURE(p)                                            \
+    (assert(OP(p) == ACCEPT), PREVENT_LVALUE(ARG2u(p)))
+#define ACCEPT_CLOSE_TO_CAPTURE_SET(p, val) STMT_START {                      \
+    assert(OP(p) == ACCEPT);                                                  \
+    ARG2u_SET((p), (val));                                                    \
+} STMT_END
+
+#define ANYOF_AUX_DATA_SLOT(p)                                                \
+    (assert(ANYOF_HAS_AUX(p)), PREVENT_LVALUE(ARG1u(p)))
+#define ANYOF_AUX_DATA_SLOT_SET(p, val) STMT_START {                          \
+    assert(((val) & ANYOF_ONLY_HAS_BITMAP_MASK) !=                            \
+        ANYOF_ONLY_HAS_BITMAP_MASK);                                          \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define ANYOFM_MATCH_VALUE(p)                                                 \
+    (assert(OP(p) == ANYOFM || OP(p) == NANYOFM), PREVENT_LVALUE(ARG1u(p)))
+#define ANYOFM_MATCH_VALUE_SET(p, val) STMT_START {                           \
+    assert(OP(p) == ANYOFM || OP(p) == NANYOFM);                              \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define NEXACTb_BYTE(p)                                                       \
+    (assert(OP(p) == NEXACTb), PREVENT_LVALUE(ARG1u(p)))
+#define NEXACTb_BYTE_SET(p, val) STMT_START {                                 \
+    assert(OP(p) == NEXACTb);                                                 \
+    ARG1u_SET((p), (val));                                                    \
+} STMT_END
+
+#define REGEX_SET_INVLIST(p)                                                  \
+    (assert(OP(p) == REGEX_SET), ARGp(p))
+#define REGEX_SET_INVLIST_SET(p, val) STMT_START {                            \
+    assert(OP(p) == REGEX_SET);                                               \
+    ARGp_SET((p), (val));                                                     \
+} STMT_END
+
+#define REGNODE_NEXT_OFFSET(p)                                                \
+    (PREVENT_LVALUE((REGNODE_OFF_BY_ARG(OP(p)) ? ARG1u(p) : NEXT_OFF(p))))
+#define REGNODE_NEXT_OFFSET_SET(p, val) STMT_START {                          \
+    if (REGNODE_OFF_BY_ARG(OP(p))) ARG1u_SET((p), (val));                     \
+    else NEXT_OFF_set((p), (val));                                            \
+} STMT_END
+
+#define IFTHEN_ELSE_OFFSET(p)                                                 \
+    (assert(OP(p) == IFTHEN), PREVENT_LVALUE(REGNODE_NEXT_OFFSET(p)))
+#define IFTHEN_ELSE_OFFSET_SET(p, val) STMT_START {                           \
+    assert(OP(p) == IFTHEN);                                                  \
+    REGNODE_NEXT_OFFSET_SET((p), (val));                                      \
+} STMT_END
+
+#define SUBPATTERN_CONTINUE_OFFSET(p)                                         \
+    (assert(OP(p) == IFMATCH || OP(p) == UNLESSM || OP(p) == SUSPEND),        \
+        PREVENT_LVALUE(REGNODE_NEXT_OFFSET(p)))
+#define SUBPATTERN_CONTINUE_OFFSET_SET(p, val) STMT_START {                   \
+    assert(OP(p) == IFMATCH || OP(p) == UNLESSM || OP(p) == SUSPEND);         \
+    REGNODE_NEXT_OFFSET_SET((p), (val));                                      \
+} STMT_END
+
+#define CURLY_CAPTURE_PARENS(p)                                               \
+    (assert(OP(p) == CURLYN || OP(p) == CURLYM), PREVENT_LVALUE(FLAGS(p)))
+#define CURLY_CAPTURE_PARENS_SET(p, val) STMT_START {                         \
+    assert(OP(p) == CURLYN || OP(p) == CURLYM);                               \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define CURLYX_CAPTURE_FLOOR(p)                                               \
+    (assert(OP(p) == CURLYX), PREVENT_LVALUE(FLAGS(p)))
+#define CURLYX_CAPTURE_FLOOR_SET(p, val) STMT_START {                         \
+    assert(OP(p) == CURLYX);                                                  \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define WHILEM_CACHE_SLOT(p)                                                  \
+    (assert(OP(p) == WHILEM), PREVENT_LVALUE(FLAGS(p)))
+#define WHILEM_CACHE_SLOT_SET(p, val) STMT_START {                            \
+    assert(OP(p) == WHILEM);                                                  \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define LOOKBEHIND_MAX_CHARS(p)                                               \
+    (assert(OP(p) == IFMATCH || OP(p) == UNLESSM), PREVENT_LVALUE(FLAGS(p)))
+#define LOOKBEHIND_MAX_CHARS_SET(p, val) STMT_START {                         \
+    assert(OP(p) == IFMATCH || OP(p) == UNLESSM);                             \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define LOGICAL_MODE(p)                                                       \
+    (assert(OP(p) == LOGICAL), PREVENT_LVALUE(FLAGS(p) & EVAL_FLAGS_MASK))
+#define LOGICAL_MODE_SET(p, val) STMT_START {                                 \
+    assert(OP(p) == LOGICAL);                                                 \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define TRIE_LITERAL_TYPE(p)                                                  \
+    (assert(REGNODE_TYPE(OP(p)) == TRIE || OP(p) == AHOCORASICK),             \
+        PREVENT_LVALUE(FLAGS(p)))
+#define TRIE_LITERAL_TYPE_SET(p, val) STMT_START {                            \
+    assert(REGNODE_TYPE(OP(p)) == TRIE || OP(p) == AHOCORASICK);              \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define POSIX_CLASS(p)                                                        \
+    (assert(REGNODE_TYPE(OP(p)) == POSIXD || REGNODE_TYPE(OP(p)) ==           \
+        NPOSIXD), PREVENT_LVALUE(FLAGS(p)))
+#define POSIX_CLASS_SET(p, val) STMT_START {                                  \
+    assert(REGNODE_TYPE(OP(p)) == POSIXD || REGNODE_TYPE(OP(p)) == NPOSIXD);  \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define BOUNDARY_TYPE(p)                                                      \
+    (assert(REGNODE_TYPE(OP(p)) == BOUND || REGNODE_TYPE(OP(p)) == NBOUND),   \
+        PREVENT_LVALUE(FLAGS(p)))
+#define BOUNDARY_TYPE_SET(p, val) STMT_START {                                \
+    assert(REGNODE_TYPE(OP(p)) == BOUND || REGNODE_TYPE(OP(p)) == NBOUND);    \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define ANYOFM_MASK(p)                                                        \
+    (assert(OP(p) == ANYOFM || OP(p) == NANYOFM), PREVENT_LVALUE(FLAGS(p)))
+#define ANYOFM_MASK_SET(p, val) STMT_START {                                  \
+    assert(OP(p) == ANYOFM || OP(p) == NANYOFM);                              \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define REF_IS_VOLATILE(p)                                                    \
+    (assert(REGNODE_TYPE(OP(p)) == REF), PREVENT_LVALUE((FLAGS(p) &           \
+        VOLATILE_REF) != 0))
+#define REF_IS_VOLATILE_SET(p, val) STMT_START {                              \
+    assert(REGNODE_TYPE(OP(p)) == REF);                                       \
+    FLAGS(p) = (val) ? VOLATILE_REF : 0;                                      \
+} STMT_END
+
+#define VERB_HAS_ARG(p)                                                       \
+    (assert(REGNODE_TYPE(OP(p)) == VERB || OP(p) == ACCEPT || OP(p) ==        \
+        OPFAIL), PREVENT_LVALUE(FLAGS(p) != 0))
+#define VERB_HAS_ARG_SET(p, val) STMT_START {                                 \
+    assert(REGNODE_TYPE(OP(p)) == VERB || OP(p) == ACCEPT || OP(p) == OPFAIL);\
+    FLAGS(p) = cBOOL(val);                                                    \
+} STMT_END
+
+#define EVAL_NODE_FLAGS(p)                                                    \
+    (assert(OP(p) == EVAL), PREVENT_LVALUE(FLAGS(p)))
+#define EVAL_NODE_FLAGS_SET(p, val) STMT_START {                              \
+    assert(OP(p) == EVAL);                                                    \
+    FLAGS(p) = (val);                                                         \
+} STMT_END
+
+#define EVAL_IS_OPTIMISTIC(p)                                                 \
+    (assert(OP(p) == EVAL), PREVENT_LVALUE((FLAGS(p) & EVAL_OPTIMISTIC_FLAG)  \
+        != 0))
+#define EVAL_IS_OPTIMISTIC_SET(p, val) STMT_START {                           \
+    assert(OP(p) == EVAL);                                                    \
+    FLAGS(p) = (FLAGS(p) & ~EVAL_OPTIMISTIC_FLAG) | ((val) ?                  \
+        EVAL_OPTIMISTIC_FLAG : 0);                                            \
+} STMT_END
+
+#define SBOL_IS_ABSOLUTE(p)                                                   \
+    (assert(OP(p) == SBOL), PREVENT_LVALUE(FLAGS(p) != 0))
+#define SBOL_IS_ABSOLUTE_SET(p, val) STMT_START {                             \
+    assert(OP(p) == SBOL);                                                    \
+    FLAGS(p) = cBOOL(val);                                                    \
+} STMT_END
+
+#define LOOKBEHIND_EXTRA_STARTS(p)                                            \
+    (assert(OP(p) == IFMATCH || OP(p) == UNLESSM),                            \
+        PREVENT_LVALUE(NEXT_OFF(p)))
+#define LOOKBEHIND_EXTRA_STARTS_SET(p, val) STMT_START {                      \
+    assert(OP(p) == IFMATCH || OP(p) == UNLESSM);                             \
+    NEXT_OFF_set((p), (val));                                                 \
+} STMT_END
+
+#define IS_LOOKBEHIND(p) (LOOKBEHIND_MAX_CHARS(p) != 0)
+#define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_SET(p)                               \
+    ARG1u_SET((p), ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE)
+#define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_SET(p)                              \
+    ARG1u_SET((p), ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE)
+
 /* the following define was set to 0xde in 075abff3
  * as part of some linting logic. I have set it to 0
  * as otherwise in every place where we /might/ set flags
