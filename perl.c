@@ -1228,6 +1228,18 @@ perl_destruct(pTHXx)
         PL_setlocale_buf = NULL;
     }
 
+#if defined(USE_LOCALE) && (   defined(WIN32)                               \
+                            || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES))
+    if (PL_win_bstring == NULL) {
+        Safefree(PL_win_bstring);
+        PL_win_bstring = NULL;
+    }
+    if (PL_win_wstring == NULL) {
+        Safefree(PL_win_wstring);
+        PL_win_wstring = NULL;
+    }
+#endif
+
     SvREFCNT_dec(PL_langinfo_sv);
     PL_langinfo_sv = NULL;
     SvREFCNT_dec(PL_scratch_langinfo);
