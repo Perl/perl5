@@ -294,7 +294,7 @@ If enabled by the C<try> feature, the following may also be used
     try BLOCK catch (VAR) BLOCK
     try BLOCK catch (VAR) BLOCK finally BLOCK
 
-The experimental C<given> statement is I<not automatically enabled>; see
+The C<given> statement is I<not automatically enabled>; see
 L</"Switch Statements"> below for how to do so, and the attendant caveats.
 
 Unlike in C and Pascal, in Perl these are all defined in terms of BLOCKs,
@@ -949,7 +949,7 @@ precisely, but in general, it tries to guess what you want done.  Sometimes
 it is interpreted as C<< $_ ~~ I<EXPR> >>, and sometimes it is not.  It
 also behaves differently when lexically enclosed by a C<given> block than
 it does when dynamically enclosed by a C<foreach> loop.  The rules are far
-too difficult to understand to be described here.  See L</"Experimental Details
+too difficult to understand to be described here.  See L</"Details
 on given and when"> later on.
 
 Due to an unfortunate bug in how C<given> was implemented between Perl 5.10
@@ -1173,14 +1173,14 @@ shell:
     __END__
     foo at goop line 345.
 
-=head2 Experimental Details on given and when
+=head2 Details on given and when
 
-As previously mentioned, the "switch" feature is considered highly
-experimental (it is also scheduled to be removed in perl 5.42.0);
-it is subject to change with little notice.  In particular,
-C<when> has tricky behaviours that are expected to change to become less
-tricky in the future.  Do not rely upon its current (mis)implementation.
-Before Perl 5.18, C<given> also had tricky behaviours that you should still
+As previously mentioned, the "switch" feature is considered a failed
+experiment; and is not expected to change beyond bug fixes.
+
+It is retained for backward compatibility.
+
+Before Perl 5.18, C<given> had tricky behaviours that you should still
 beware of if your code must run on older versions of Perl.
 
 Here is a longer example of C<given>:
@@ -1416,9 +1416,8 @@ evaluate to an empty list.
         }
     };
 
-Currently, C<given> blocks can't always
-be used as proper expressions.  This
-may be addressed in a future version of Perl.
+C<given> blocks can't always
+be used as proper expressions.
 
 =head3 Switching in a loop
 
