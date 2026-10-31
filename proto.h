@@ -19146,13 +19146,6 @@ Perl_dtrace_probe_op(pTHX_ const OP *op)
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
-PERL_CALLCONV void
-Perl_dtrace_probe_phase(pTHX_ enum perl_phase phase)
-        Perl_attribute_nonnull_aTHX;
-# define PERL_ARGS_ASSERT_DTRACE_PROBE_PHASE    \
-     STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
 #endif /* defined(USE_DTRACE) */
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PADOFFSET
