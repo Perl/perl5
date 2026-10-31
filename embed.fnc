@@ -1015,14 +1015,38 @@ p	|void	|boot_core_mro
 p	|void	|boot_core_PerlIO
 : Used in perl.c
 p	|void	|boot_core_UNIVERSAL
+dp	|OP *	|build_array_element					\
+				|NN OP *target				\
+				|NN OP *selector
+dp	|OP *	|build_array_length					\
+				|NN OP *array
 dp	|OP *	|build_function_invocation				\
 				|I32 flags				\
 				|NN OP *code				\
 				|NULLOK OP *arguments
+dp	|OP *	|build_hash_element					\
+				|NN OP *target				\
+				|NN OP *selector
 p	|OP *	|build_infix_plugin					\
 				|NN OP *lhs				\
 				|NN OP *rhs				\
 				|NN void *tokendata
+dp	|OP *	|build_list_slice					\
+				|I32 operation				\
+				|NN OP *target				\
+				|NN OP *selector
+dp	|OP *	|build_list_slice_array 				\
+				|NN OP *target				\
+				|NN OP *selector
+dp	|OP *	|build_list_slice_hash					\
+				|NN OP *target				\
+				|NN OP *selector
+dp	|OP *	|build_list_slice_kv_array				\
+				|NN OP *target				\
+				|NN OP *selector
+dp	|OP *	|build_list_slice_kv_hash				\
+				|NN OP *target				\
+				|NN OP *selector
 dp	|OP *	|build_method_invocation				\
 				|NN OP *target				\
 				|NN OP *method				\
@@ -1030,6 +1054,13 @@ dp	|OP *	|build_method_invocation				\
 dp	|OP *	|build_method_invocation_arguments			\
 				|NN OP *target				\
 				|NULLOK OP *arguments
+dp	|OP *	|build_typeglob |NN OP *target
+dp	|OP *	|build_typeglob_element 				\
+				|NN OP *target				\
+				|NN OP *selector
+dp	|OP *	|build_typeglob_element 				\
+				|NN OP *target				\
+				|NN OP *selector
 EXp	|const char *|byte_dump_string_ 				\
 				|NULLOK const U8 * const start		\
 				|const STRLEN len			\
