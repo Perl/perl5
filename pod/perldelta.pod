@@ -405,6 +405,14 @@ Given GCC 3.3 20030304 (Apple Computer, Inc. build 1435) from the June 2003 GCC
 update or newer, it should be possible to build current Perl on Mac OS X 10.2
 Jaguar (Darwin 6) once again.
 
+=item FreeBSD
+
+Removed the workaround for FreeBSD renameat() bug
+L<222258|https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=222258>
+which was fixed in FreeBSD 13.  On older releases we simply disable
+renameat() and fallback to another implementation that doesn't handle
+race conditions as well.
+
 =back
 
 =head1 Internal Changes
