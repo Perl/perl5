@@ -4893,6 +4893,66 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 }
 
 /*
+=for apidoc build_array_element
+
+    build_array_element ($target, $selector);
+
+Builds C<OP *> representing an element of an array.
+
+Represents:
+
+    $array[$index]
+    $term->[$index]
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_array_element (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_ARRAY_ELEMENT;
+
+    return newBINOP (OP_AELEM, 0, target, scalar (selector));
+}
+
+/*
+=for apidoc build_array_length
+
+Returns a C<OP *> representing OP_AV2ARYLEN.
+
+Designed to handle syntax:
+- C<< $#array >>
+- C<< $#{ array } >>
+- C<< $arrayref->$#* >>
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_array_length (pTHX_ OP *array)
+{
+    PERL_ARGS_ASSERT_BUILD_ARRAY_LENGTH;
+
+    /* Collected actions from:
+     * arylen:
+     *   { $$ = newAVREF($indirob); }
+     *   { $$ = newAVREF($term); }
+     * term:
+     * { $$ = newUNOP(OP_AV2ARYLEN, 0, ref($arylen, OP_AV2ARYLEN));}
+     */
+
+    return newUNOP (
+        OP_AV2ARYLEN,
+        0,
+        ref (newAVREF (array), OP_AV2ARYLEN)
+    );
+}
+
+/*
 =for apidoc build_function_invocation
 
     build_function_invocation (flags, $function, $arguments);
@@ -4913,6 +4973,188 @@ Perl_build_function_invocation (pTHX_ I32 flags, OP *code, OP *arguments)
         flags,
         op_append_elem (OP_LIST, arguments, code)
     );
+}
+
+/*
+=for apidoc build_typeglob_element
+
+    build_typeglob_element ($target, $selector);
+
+Build C<OP *> matching grammar:
+
+    *target:: {selector}
+    target->$* {selector}
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_typeglob_element (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_TYPEGLOB_ELEMENT;
+
+    return newBINOP (OP_GELEM, 0, target, scalar (selector));
+}
+
+/*
+=for apidoc build_hash_element
+
+    build_hash_element ($target, $selector);
+
+Builds C<OP *> representing an element of a hash.
+
+Represents:
+
+    $hash{$key}
+    $term->{$key}
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_hash_element (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_HASH_ELEMENT;
+
+    return newBINOP (OP_HELEM, 0, target, jmaybe (selector));
+}
+
+/*
+=for apidoc build_list_slice
+
+    build_list_slice (operation, $target, $selector);
+
+Generic C<OP *> builder for list slices.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice (pTHX_ I32 operation, OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE;
+
+    OP *op = op_prepend_elem (
+        operation,
+        newOP (OP_PUSHMARK, 0),
+        newLISTOP (
+            operation,
+            0,
+            list (selector),
+            ref (target, operation)
+        )
+    );
+
+    if (op && target)
+        op->op_private |= target->op_private & OPpSLICEWARNING;
+
+    return op;
+}
+
+/*
+=for apidoc build_list_slice_array
+
+    build_list_slice_array ($target, $selector);
+
+Builds C<OP *> representing value slice of an array.
+
+Represents:
+
+    @array[@indexes]
+    $term->@[@indexes]
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_array (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_ARRAY;
+
+    return build_list_slice (OP_ASLICE, target, selector);
+}
+
+/*
+=for apidoc build_list_slice_hash
+
+    build_list_slice_hash ($target, $selector);
+
+Builds C<OP *> representing value slice of a hash.
+
+Represents:
+
+    @hash{@keys}
+    $term->@{@keys}
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_hash (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_HASH;
+
+    return build_list_slice (OP_HSLICE, oopsHV (target), selector);
+}
+
+/*
+=for apidoc build_list_slice_kv_array
+
+    build_list_slice_kv_array ($target, $selector);
+
+Builds C<OP *> representing key/value slice of an array.
+
+Represents:
+
+    %array[@indexes]
+    $term->%[@indexes]
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_kv_array (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_KV_ARRAY;
+
+    return build_list_slice (OP_KVASLICE, oopsAV (target), selector);
+}
+
+/*
+=for apidoc build_list_slice_kv_hash
+
+    build_list_slice_kv_hash ($target, $selector);
+
+Builds C<OP *> representing key/value slice of a hash.
+
+Represents:
+
+    %hash{@keys}
+    $term->%{@keys}
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_kv_hash (pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_KV_HASH;
+
+    return build_list_slice (OP_KVHSLICE, target, selector);
 }
 
 /*
@@ -4998,6 +5240,29 @@ Perl_build_method_invocation_arguments (pTHX_ OP *target, OP *arguments)
         ? op_prepend_elem (OP_LIST, target, arguments)
         : target
         ;
+}
+
+/*
+=for apidoc build_typeglob
+
+Returns a C<OP *> representing typeglob dereference.
+
+Designed to handle syntax:
+- C<< *target >>
+- C<< *{ target } >>
+- C<< $target->** >>
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_typeglob (pTHX_ OP *target)
+{
+    PERL_ARGS_ASSERT_BUILD_TYPEGLOB;
+
+    return newGVREF (0, target);
 }
 
 /*
