@@ -45,6 +45,7 @@ sub configure {
     }
     elsif(exists $arg->{Peer}) {
 	my $addr = sockaddr_un($arg->{Peer});
+	${*$sock}{'io_socket_peername'} = $arg->{Peer};
 	$sock->connect($addr) or
 	    return undef;
     }
