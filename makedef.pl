@@ -429,6 +429,17 @@ unless ($define{USE_LOCALE} && (     $define{WIN32}
     );
 }
 
+unless ($define{USE_LOCALE} && (   $define{WIN32}
+                                || $define{WIN32_USE_FAKE_OLD_MINGW_LOCALES}))
+{
+    ++$skip{$_} foreach qw(
+        PL_win_bstring
+        PL_win_bstring_size
+        PL_win_wstring
+        PL_win_wstring_size
+    );
+}
+
 unless ($define{EMULATE_THREAD_SAFE_LOCALES})
 {
     ++$skip{$_} foreach qw(
