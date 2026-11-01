@@ -414,6 +414,20 @@ package FetchStoreCounter {
         'foreach + builtin::indexed LIST' );
 }
 
+# indexed + foreach + refalias (GH#24999)
+{
+    use feature qw( refaliasing declared_refs );
+    no warnings qw( experimental::refaliasing experimental::declared_refs );
+
+    my @output;
+    foreach my ( $idx, \@arr ) ( builtin::indexed( [qw( a b c )], [qw( d e f )] ) ) {
+        push @output, "[$idx]=<@arr>";
+    }
+
+    ok(eq_array(\@output, ['[0]=<a b c>', '[1]=<d e f>']),
+        'foreach + builtin::indexed + refalias');
+}
+
 # Vanilla trim tests
 {
     use builtin qw( trim );
