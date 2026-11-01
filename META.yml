@@ -24,6 +24,7 @@ no_index:
     - dist/Dumpvalue
     - dist/encoding-warnings
     - dist/Env
+    - dist/experimental
     - dist/Exporter
     - dist/ExtUtils-CBuilder
     - dist/ExtUtils-ParseXS
