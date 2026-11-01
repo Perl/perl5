@@ -6,7 +6,7 @@ BEGIN {
 	skip_all_without_perlio();
 }
 
-plan tests => 48;
+plan tests => 56;
 
 use_ok('PerlIO');
 
@@ -244,6 +244,41 @@ EOP
     local $SIG{__WARN__} = sub {};
     PerlIO->import('via; $main::PerlIO_code_injection = 1');
     ok !$main::PerlIO_code_injection, "Can't inject code via PerlIO->import";
+}
+
+SKIP:
+{
+    skip_without_dynamic_extension("IO", 8);
+
+    skip("Win32 can't make a pipe non-blocking", 8)
+        if $^O eq "MSWin32";
+
+    $Config{d_pipe}
+       or skip("No pipe", 8);
+
+    require IO::Select;
+
+    my ($in, $out);
+    pipe($in, $out)
+      or skip("Cannot pipe: $!", 8);
+
+    $in->blocking(0)
+      or skip("Cannot make pipe non-blocking", 8);
+
+    my $line = <$in>;
+    is($line, undef, "error reading (readline)");
+    ok(!$in->error, "but did not set error flag (readline)");
+    {
+        local $::TODO = "read() uses the error flag to detect errors";
+        is(read($in, my $buf, 10), undef, "error reading (read)");
+    }
+    ok(!$in->error, "but did not set error flag (read)");
+    close $out;
+    $line = <$in>;
+    is($line, undef, "nothing to read, but eof");
+    ok(!$in->error, "still did not set error flag");
+    ok($in->eof, "did set eof");
+    ok(close($in), "close success");
 }
 
 END {
