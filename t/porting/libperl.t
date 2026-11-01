@@ -92,7 +92,7 @@ my $nm;
 my $nm_opt = '';
 my $nm_style;
 my $nm_fh;
-my $nm_err_tmp = "libperl$$";
+my $nm_err_tmp = "tmp_libperl$$";
 
 END {
     # this is still executed when we skip_all above, avoid a warning
