@@ -4863,7 +4863,7 @@ struct Perl_OpDumpContext;
 
 #include "sv.h"
 #include "regexp.h"
-#include "util.h"
+#include "perl_util.h"
 #include "form.h"
 #include "gv.h"
 #include "pad.h"
