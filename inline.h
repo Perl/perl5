@@ -399,6 +399,38 @@ S_MgBYTEPOS(pTHX_ MAGIC *mg, SV *sv, const char *s, STRLEN len)
 }
 #endif
 
+PERL_STATIC_INLINE void
+Perl_MgAUXSV_set(pTHX_ MAGIC *mg, SV *sv)
+{
+    PERL_ARGS_ASSERT_MGAUXSV_SET;
+
+    if (MgAUXSV(mg) && !MgWEAK_AUXSV(mg))
+        SvREFCNT_dec(MgAUXSV(mg));
+    mg->mg_obj = sv;
+}
+
+PERL_STATIC_INLINE void
+Perl_MgAUXSV_set_inc(pTHX_ MAGIC *mg, SV *sv)
+{
+    PERL_ARGS_ASSERT_MGAUXSV_SET_INC;
+
+    if (MgAUXSV(mg) && !MgWEAK_AUXSV(mg))
+        SvREFCNT_dec(MgAUXSV(mg));
+    MgWEAK_AUXSV_off(mg);
+    mg->mg_obj = SvREFCNT_inc(sv);
+}
+
+PERL_STATIC_INLINE void
+Perl_MgAUXSV_set_weak(pTHX_ MAGIC *mg, SV *sv)
+{
+    PERL_ARGS_ASSERT_MGAUXSV_SET_WEAK;
+
+    if (MgAUXSV(mg) && !MgWEAK_AUXSV(mg))
+        SvREFCNT_dec(MgAUXSV(mg));
+    MgWEAK_AUXSV_on(mg);
+    mg->mg_obj = sv;
+}
+
 /* ------------------------------- pad.h ------------------------------ */
 
 #if defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)

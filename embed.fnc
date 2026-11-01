@@ -2273,7 +2273,14 @@ p	|int	|magic_setvec	|NN SV *sv				\
 				|NN MAGIC *mg
 p	|U32	|magic_sizepack |NN SV *sv				\
 				|NN MAGIC *mg
-Adp	|MAGIC *|magicv2_localize_copy					\
+Adp	|MAGIC *|magicv2_copy	|NN SV *nsv				\
+				|NN SV *osv				\
+				|NN MAGIC *omg
+Adp	|MAGIC *|magicv2_copy_inc_auxsv 				\
+				|NN SV *nsv				\
+				|NN SV *osv				\
+				|NN MAGIC *omg
+Adp	|MAGIC *|magicv2_copy_weak_auxsv				\
 				|NN SV *nsv				\
 				|NN SV *osv				\
 				|NN MAGIC *omg
@@ -2290,6 +2297,14 @@ Adfpt	|SV *	|mess		|NN const char *pat			\
 Adp	|SV *	|mess_sv	|NN SV *basemsg 			\
 				|bool consume
 CTdop	|Free_t |mfree		|Malloc_t where
+
+Adipx	|void	|MgAUXSV_set	|NN MAGIC *mg				\
+				|NULLOK SV *sv
+Adipx	|void	|MgAUXSV_set_inc|NN MAGIC *mg				\
+				|NULLOK SV *sv
+Adipx	|void	|MgAUXSV_set_weak					\
+				|NN MAGIC *mg				\
+				|NULLOK SV *sv
 Adp	|int	|mg_clear	|NN SV *sv
 Adp	|int	|mg_copy	|NN SV *sv				\
 				|NN SV *nsv				\
@@ -4549,6 +4564,9 @@ p	|void	|parser_free_nexttoke_ops				\
 RTi	|bool	|should_warn_nl |NN const char *pv
 Mp	|bool	|sv_has_valuemagic					\
 				|NN const SV *sv
+Adpx	|void	|sv_magicv2_remove_by_shape				\
+				|NN SV *sv				\
+				|enum MagicShape shape
 # if defined(PERL_DEBUG_READONLY_OPS)
 ep	|void	|Slab_to_ro	|NN OPSLAB *slab
 ep	|void	|Slab_to_rw	|NN OPSLAB * const slab
@@ -5237,7 +5255,8 @@ Tp	|bool	|translate_substr_offsets				\
 p	|void	|mg_free_struct |NN SV *sv				\
 				|NN MAGIC *mg
 p	|void	|mgv2_copy	|NN const MAGIC *smg			\
-				|NN MAGIC *dmg
+				|NN MAGIC *dmg				\
+				|U32 flags
 p	|MAGIC *|sv_magicv2_attach					\
 				|NN SV *sv				\
 				|NN const struct MagicFunctions *funcs	\

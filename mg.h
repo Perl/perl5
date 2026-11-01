@@ -303,20 +303,33 @@ Mutator macros to turn on or off the L</MgWEAK_AUXSV> flag.
 #define MgWEAK_AUXSV_off(mg)  (MgFLAGS(mg) |=  MGv2f_REFCOUNTED_AUXSV)
 
 /*
-=for apidoc Am|void|MgAUXSV_set|MAGIC *mg|SV *auxsv
+=for apidoc MgAUXSV_set
 Sets a new value of the stored auxilliary SV pointer in the Magic v2
 structure. This does I<not> increment the reference count of the new value.
 It will decrement the count from the old value, if the L</MgWEAK_AUXSV> flag is
 not set.
 
+=for apidoc MgAUXSV_set_inc
+Sets a new value of the stored auxilliary SV pointer in the Magic v2
+structure, marking that it is not weak (i.e. the L</MgWEAK_AUXSV> flag is
+cleared), and increments the reference count of the stored pointer.
+
+It will decrement the reference count from the old value, if the weak flag
+was previously clear.
+
+=for apidoc MgAUXSV_set_weak
+Sets a new value of the stored auxilliary SV pointer in the Magic v2
+structure, marking that it is weak (i.e. the L</MgWEAK_AUXSV> flag is
+set). It does not increments the reference count of the stored pointer.
+
+It will decrement the reference count from the old value, if the weak flag
+was previously clear.
+
 =cut
+
+The above three API functions are implemented in inline.h
+
 */
-#define MgAUXSV_set(mg, sv) \
-    STMT_START { \
-        MAGIC *mg_ = (mg); \
-        if(MgAUXSV(mg_) && !MgWEAK_AUXSV(mg_)) SvREFCNT_dec(MgAUXSV(mg_)); \
-        (mg_)->mg_obj = (sv); \
-    } STMT_END
 
 /*
 =for apidoc      Am|void *|MgPTR|MAGIC *mg
@@ -443,6 +456,15 @@ L</MgKEYIV> or L</MgKEYSV> fields, and wish to manage their own storage.
 =cut
 */
 #define MgUSERSTRUCT(mg, type)  ((type)(((char *)(mg)) + MgSIZEOF(mg)))
+
+#ifdef PERL_CORE
+/* Flags used by mgv2_copy() */
+enum {
+    MGv2f_COPY_DEFAULT      = 0,      /* MgAUXSV is copied with same strength as original */
+    MGv2f_COPY_AUXSV_INC    = (1<<0), /* MgAUXSV is copied strongly with inc refcount */
+    MGv2f_COPY_AUXSV_WEAKLY = (1<<1), /* MgAUXSV is copied weakly */
+};
+#endif
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

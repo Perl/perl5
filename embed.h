@@ -96,6 +96,9 @@
 
 # define AvFILL_(a)                             Perl_AvFILL_(aTHX_ a)
 # define Gv_AMupdate(a,b)                       Perl_Gv_AMupdate(aTHX_ a,b)
+# define MgAUXSV_set(a,b)                       Perl_MgAUXSV_set(aTHX_ a,b)
+# define MgAUXSV_set_inc(a,b)                   Perl_MgAUXSV_set_inc(aTHX_ a,b)
+# define MgAUXSV_set_weak(a,b)                  Perl_MgAUXSV_set_weak(aTHX_ a,b)
 # define SvAMAGIC_off                           Perl_SvAMAGIC_off
 # define SvAMAGIC_on                            Perl_SvAMAGIC_on
 # define SvGETMAGIC(a)                          Perl_SvGETMAGIC(aTHX_ a)
@@ -361,7 +364,9 @@
 # define looks_like_number(a)                   Perl_looks_like_number(aTHX_ a)
 # define lsbit_pos32                            Perl_lsbit_pos32
 # define magic_dump(a)                          Perl_magic_dump(aTHX_ a)
-# define magicv2_localize_copy(a,b,c)           Perl_magicv2_localize_copy(aTHX_ a,b,c)
+# define magicv2_copy(a,b,c)                    Perl_magicv2_copy(aTHX_ a,b,c)
+# define magicv2_copy_inc_auxsv(a,b,c)          Perl_magicv2_copy_inc_auxsv(aTHX_ a,b,c)
+# define magicv2_copy_weak_auxsv(a,b,c)         Perl_magicv2_copy_weak_auxsv(aTHX_ a,b,c)
 # define markstack_grow()                       Perl_markstack_grow(aTHX)
 # define mess_sv(a,b)                           Perl_mess_sv(aTHX_ a,b)
 # define mg_clear(a)                            Perl_mg_clear(aTHX_ a)
@@ -979,6 +984,7 @@
 #   define sv_setsv_cow(a,b)                    Perl_sv_setsv_cow(aTHX_ a,b)
 # endif
 # if defined(PERL_CORE)
+#   define sv_magicv2_remove_by_shape(a,b)      Perl_sv_magicv2_remove_by_shape(aTHX_ a,b)
 #   define PerlLIO_dup2_cloexec(a,b)            Perl_PerlLIO_dup2_cloexec(aTHX_ a,b)
 #   define PerlLIO_dup_cloexec(a)               Perl_PerlLIO_dup_cloexec(aTHX_ a)
 #   define PerlLIO_open3_cloexec(a,b,c)         Perl_PerlLIO_open3_cloexec(aTHX_ a,b,c)
@@ -1517,7 +1523,7 @@
 #   endif
 #   if defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
 #     define mg_free_struct(a,b)                Perl_mg_free_struct(aTHX_ a,b)
-#     define mgv2_copy(a,b)                     Perl_mgv2_copy(aTHX_ a,b)
+#     define mgv2_copy(a,b,c)                   Perl_mgv2_copy(aTHX_ a,b,c)
 #     define sv_magicv2_attach(a,b,c)           Perl_sv_magicv2_attach(aTHX_ a,b,c)
 #   endif
 #   if defined(PERL_IN_MRO_C)
