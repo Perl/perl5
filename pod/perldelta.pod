@@ -503,6 +503,15 @@ The C<isa> operator now calls get magic on its left argument before
 checking if that value is a reference and what it is a reference to.
 [GH #24997]
 
+=item *
+
+No longer crashes when using multivariable C<foreach> loops with both
+refaliasing and the C<builtin::indexed> function. [GH #24999]
+
+    foreach my ( $idx, \@arr ) ( builtin::indexed @list_of_arefs ) {
+        say "Array number [$idx] contains <@arr>";
+    }
+
 =back
 
 =head1 Known Problems
