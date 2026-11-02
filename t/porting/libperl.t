@@ -92,12 +92,7 @@ my $nm;
 my $nm_opt = '';
 my $nm_style;
 my $nm_fh;
-my $nm_err_tmp = "libperl$$";
-
-END {
-    # this is still executed when we skip_all above, avoid a warning
-    unlink $nm_err_tmp if $nm_err_tmp;
-}
+my $nm_err_tmp = tempfile();
 
 my $fake_input;
 my $fake_style;
