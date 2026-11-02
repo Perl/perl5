@@ -17838,10 +17838,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #if defined(USE_LOCALE) && (   defined(WIN32)                               \
                             || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES))
-    PL_win_bstring = NULL;
-    PL_win_bstring_size = 0;
-    PL_win_wstring = NULL;
-    PL_win_wstring_size = 0;
+    PL_win_bscratch = NULL;
+    PL_win_bscratch_size = 0;
+    PL_wrap_wsetlocale_wlocale = NULL;
+    PL_wrap_wsetlocale_wlocale_size = 0;
+    PL_wrap_wsetlocale_result = NULL;
+    PL_wrap_wsetlocale_result_size = 0;
 #endif
 
 #if defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)

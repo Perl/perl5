@@ -5178,15 +5178,19 @@ S	|const char *|less_dicey_setlocale_r				\
 				|NULLOK const char *locale
 #   endif
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
-S	|const wchar_t *|Win_byte_string_to_wstring			\
+S	|bool	|Win_byte_string_to_wstring				\
 				|const UINT code_page			\
-				|NULLOK const char *byte_string
+				|NULLOK const char *byte_string 	\
+				|NN wchar_t **dest_ptr			\
+				|NN Size_t *dest_size_ptr
 S	|const char *|win32_setlocale					\
 				|int category				\
 				|NULLOK const char *locale
-S	|const char *|Win_wstring_to_byte_string			\
+S	|bool	|Win_wstring_to_byte_string				\
 				|const UINT code_page			\
-				|NULLOK const wchar_t *wstring
+				|NULLOK const wchar_t *wstring		\
+				|NN char **dest_ptr			\
+				|NN Size_t *dest_size_ptr
 S	|const char *|wrap_wsetlocale					\
 				|const int category			\
 				|NULLOK const char *locale

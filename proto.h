@@ -13297,18 +13297,26 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char *locale)
              !defined(USE_POSIX_2008_LOCALE) &&
              !defined(USE_THREAD_SAFE_LOCALE) */
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
-static const wchar_t *
-S_Win_byte_string_to_wstring(pTHX_ const UINT code_page, const char *byte_string)
-        Perl_attribute_nonnull_aTHX;
+static bool
+S_Win_byte_string_to_wstring(pTHX_ const UINT code_page, const char *byte_string, wchar_t **dest_ptr, Size_t *dest_size_ptr)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_3)
+        Perl_attribute_nonnull(pTHX_4);
 #     define PERL_ARGS_ASSERT_WIN_BYTE_STRING_TO_WSTRING \
-         STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+         STMT_START { Perl_assert_aTHX; assert(dest_ptr);   \
+                      assert(dest_size_ptr);                \
+                      PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
-static const char *
-S_Win_wstring_to_byte_string(pTHX_ const UINT code_page, const wchar_t *wstring)
-        Perl_attribute_nonnull_aTHX;
+static bool
+S_Win_wstring_to_byte_string(pTHX_ const UINT code_page, const wchar_t *wstring, char **dest_ptr, Size_t *dest_size_ptr)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_3)
+        Perl_attribute_nonnull(pTHX_4);
 #     define PERL_ARGS_ASSERT_WIN_WSTRING_TO_BYTE_STRING \
-         STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+         STMT_START { Perl_assert_aTHX; assert(dest_ptr);   \
+                      assert(dest_size_ptr);                \
+                      PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
 static const char *

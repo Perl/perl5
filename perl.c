@@ -1230,13 +1230,17 @@ perl_destruct(pTHXx)
 
 #if defined(USE_LOCALE) && (   defined(WIN32)                               \
                             || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES))
-    if (PL_win_bstring == NULL) {
-        Safefree(PL_win_bstring);
-        PL_win_bstring = NULL;
+    if (PL_win_bscratch) {
+        Safefree(PL_win_bscratch);
+        PL_win_bscratch = NULL;
     }
-    if (PL_win_wstring == NULL) {
-        Safefree(PL_win_wstring);
-        PL_win_wstring = NULL;
+    if (PL_wrap_wsetlocale_wlocale) {
+        Safefree(PL_wrap_wsetlocale_wlocale);
+        PL_wrap_wsetlocale_wlocale = NULL;
+    }
+    if (PL_wrap_wsetlocale_result) {
+        Safefree(PL_wrap_wsetlocale_result);
+        PL_wrap_wsetlocale_result = NULL;
     }
 #endif
 

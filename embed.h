@@ -1489,8 +1489,8 @@
 #         define less_dicey_setlocale_r(a,b)    S_less_dicey_setlocale_r(aTHX_ a,b)
 #       endif
 #       if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
-#         define Win_byte_string_to_wstring(a,b) S_Win_byte_string_to_wstring(aTHX_ a,b)
-#         define Win_wstring_to_byte_string(a,b) S_Win_wstring_to_byte_string(aTHX_ a,b)
+#         define Win_byte_string_to_wstring(a,b,c,d) S_Win_byte_string_to_wstring(aTHX_ a,b,c,d)
+#         define Win_wstring_to_byte_string(a,b,c,d) S_Win_wstring_to_byte_string(aTHX_ a,b,c,d)
 #         define win32_setlocale(a,b)           S_win32_setlocale(aTHX_ a,b)
 #         define wrap_wsetlocale(a,b)           S_wrap_wsetlocale(aTHX_ a,b)
 #       endif
