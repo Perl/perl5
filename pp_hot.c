@@ -5154,6 +5154,8 @@ PP(pp_iter)
 
                 ++i;
                 ++itersvp;
+
+                refalias_this = refalias_mask & (1<<i);
             }
 
             av = NULL;
