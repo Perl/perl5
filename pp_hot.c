@@ -5374,8 +5374,7 @@ pp_match is just a simpler version of the above.
 PP(pp_subst)
 {
     dTARG;
-    PMOP *pm = cPMOP;
-    PMOP *rpm = pm;
+    const PMOP *rpm = cPMOP;
     char *s;
     char *strend;
     const char *c;
@@ -5387,7 +5386,7 @@ PP(pp_subst)
                         See "how taint works" above */
     char *orig;
     U8 r_flags;
-    REGEXP *rx = PM_GETRE(pm);
+    REGEXP *rx = PM_GETRE(rpm);
     regexp *prog = ReANY(rx);
     STRLEN len;
     int force_on_match = 0;
@@ -5402,7 +5401,7 @@ PP(pp_subst)
 
     PERL_ASYNC_CHECK();
 
-    if (pm->op_pmflags & PMf_CONST) {
+    if (rpm->op_pmflags & PMf_CONST) {
         /* known replacement string */
         dstr = *PL_stack_sp;
         sp_offset++;
@@ -5459,23 +5458,13 @@ PP(pp_subst)
         rxtainted  = (
             (SvTAINTED(TARG) ? SUBST_TAINT_STR : 0)
           | (RXp_ISTAINTED(prog) ? SUBST_TAINT_PAT : 0)
-          | ((pm->op_pmflags & PMf_RETAINT) ? SUBST_TAINT_RETAINT : 0)
+          | ((rpm->op_pmflags & PMf_RETAINT) ? SUBST_TAINT_RETAINT : 0)
           | ((  (once && !(rpm->op_pmflags & PMf_NONDESTRUCT))
              || (PL_op->op_private & OPpTRUEBOOL)) ? SUBST_TAINT_BOOLRET : 0));
         TAINT_NOT;
     }
 
-  force_it:
-    if (!pm || !orig)
-        DIE(aTHX_ "panic: pp_subst, pm=%p, orig=%p", pm, orig);
-
-    strend = orig + len;
-    /* We can match twice at each position, once with zero-length,
-     * second time with non-zero.
-     * Don't handle utf8 specially; we can use length-in-bytes as an
-     * upper bound on length-in-characters, and avoid the cpu-cost of
-     * computing a tighter bound. */
-    maxiters = 2 * len + 10;
+    PMOP *pm = cPMOP;
 
     /* handle the empty pattern */
     if (!RX_PRELEN(rx) && PL_curpm && !prog->mother_re) {
@@ -5505,6 +5494,18 @@ PP(pp_subst)
 #else
     r_flags = REXEC_COPY_STR;
 #endif
+
+  force_it:
+    if (!pm || !orig)
+        DIE(aTHX_ "panic: pp_subst, pm=%p, orig=%p", pm, orig);
+
+    strend = orig + len;
+    /* We can match twice at each position, once with zero-length,
+     * second time with non-zero.
+     * Don't handle utf8 specially; we can use length-in-bytes as an
+     * upper bound on length-in-characters, and avoid the cpu-cost of
+     * computing a tighter bound. */
+    maxiters = 2 * len + 10;
 
     if (!CALLREGEXEC(rx, orig, strend, orig, 0, TARG, NULL, r_flags))
     {
