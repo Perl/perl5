@@ -5381,20 +5381,15 @@ PP(pp_subst)
     STRLEN clen;
     SSize_t iters = 0;
     SSize_t maxiters;
-    bool once;
     U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits.
                         See "how taint works" above */
     char *orig;
-    U8 r_flags;
     REGEXP *rx = PM_GETRE(rpm);
     regexp *prog = ReANY(rx);
     STRLEN len;
     int force_on_match = 0;
     const I32 oldsave = PL_savestack_ix;
     bool doutf8 = FALSE; /* whether replacement is in utf8 */
-#ifdef PERL_ANY_COW
-    bool was_cow;
-#endif
     SSize_t sp_offset = 0; /* number of items left on stack */
     SV *dstr;
     SV *retval;
@@ -5429,7 +5424,7 @@ PP(pp_subst)
     SvGETMAGIC(TARG); /* must come before cow check */
 #ifdef PERL_ANY_COW
     /* note that a string might get converted to COW during matching */
-    was_cow = cBOOL(SvIsCOW(TARG));
+    const bool was_cow = cBOOL(SvIsCOW(TARG));
 #endif
     if (!(rpm->op_pmflags & PMf_NONDESTRUCT)) {
 #ifndef PERL_ANY_COW
@@ -5451,7 +5446,7 @@ PP(pp_subst)
         force_on_match = 1;
 
     /* only replace once? */
-    once = !(rpm->op_pmflags & PMf_GLOBAL);
+    const bool once = !(rpm->op_pmflags & PMf_GLOBAL);
 
     /* See "how taint works" above */
     if (TAINTING_get) {
@@ -5484,7 +5479,7 @@ PP(pp_subst)
     }
 
 #ifdef PERL_SAWAMPERSAND
-    r_flags = (    RXp_NPARENS(prog)
+    const U8 r_flags = (    RXp_NPARENS(prog)
                 || PL_sawampersand
                 || (RXp_EXTFLAGS(prog) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
                 || (rpm->op_pmflags & PMf_KEEPCOPY)
@@ -5492,7 +5487,7 @@ PP(pp_subst)
           ? REXEC_COPY_STR
           : 0;
 #else
-    r_flags = REXEC_COPY_STR;
+    const U8 r_flags = REXEC_COPY_STR;
 #endif
 
   force_it:
