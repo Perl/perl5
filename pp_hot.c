@@ -5378,7 +5378,7 @@ PP(pp_subst)
     char *s;
     char *strend;
     const char *c;
-    STRLEN clen;
+    STRLEN clen = 0;
     SSize_t iters = 0;
     SSize_t maxiters;
     U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits.
@@ -5523,7 +5523,7 @@ PP(pp_subst)
 
         if (DO_UTF8(TARG) && !doutf8) {
             c = (const char *)bytes_to_utf8_temp_pv((const U8 *)c, &clen);
-            doutf8 = TRUE;
+            doutf8 = true;
         }
 
         if (UNLIKELY(TAINT_get))
@@ -5531,7 +5531,7 @@ PP(pp_subst)
     }
     else {
         c = NULL;
-        doutf8 = FALSE;
+        doutf8 = false;
     }
     
     if (c
@@ -5662,8 +5662,26 @@ PP(pp_subst)
             rxtainted |= SUBST_TAINT_PAT;
         repl = dstr;
         s = RXp_OFFS_START(prog,0) + orig;
-        dstr = newSVpvn_flags(orig, s-orig,
-                    SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
+
+        dstr = sv_2mortal(newSV(
+            (once && c && cBOOL(DO_UTF8(TARG) == doutf8))
+                /* We can exactly size this buffer */
+                ? len - (RXp_OFFS_END(prog,0) - RXp_OFFS_START(prog,0))
+                  + clen + 1 /* +1 for COW byte */
+
+                /* Final buffer size is unknowable. For a /g substitution,
+                 * it seems better to initially match size with the source
+                 * and shrink at the end, rather than start small but
+                 * potentially incur multiple calls to Renew() - which
+                 * could result in an unnecessarily large final allocation
+                 * that is either wasteful or has to be shrunk. */
+                : len + clen + 1 /* +1 for COW byte */
+        ));
+        SvCUR_set(dstr, s-orig);
+        *SvEND(dstr) = '\0';
+        SvFLAGS(dstr) |= SVf_POK|SVp_POK|(DO_UTF8(TARG) ? SVf_UTF8 : 0);
+        Copy(orig, SvPVX(dstr), s-orig, char);
+
         if (!c) {
         /* not known replacement string - call out to ops and OP_SUBSTCONT */
             PERL_CONTEXT *cx;
@@ -5715,6 +5733,8 @@ PP(pp_subst)
                     REXEC_NOT_FIRST|REXEC_IGNOREPOS|REXEC_FAIL_ON_UNDERFLOW));
         assert(strend >= s);
         sv_catpvn_nomg_maybeutf8(dstr, s, strend - s, DO_UTF8(TARG));
+
+        SvPV_shrink_to_cur(dstr);
 
         if (rpm->op_pmflags & PMf_NONDESTRUCT) {
             /* From here on down we're using the copy, and leaving the original
