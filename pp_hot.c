@@ -5566,7 +5566,7 @@ PP(pp_subst)
             /* redo the first match, this time with the orig var
              * forced into being a string */
             force_on_match = 0;
-            orig = SvPV_force_nomg(TARG, len);
+            orig = sv_pvn_force_flags(TARG, &len, 0);
             goto force_it;
         }
 
@@ -5657,7 +5657,7 @@ PP(pp_subst)
                  * earlier COW check. Don't double-GET. */
                 TARG = sv_mortalcopy_flags(TARG, SV_NOSTEAL);
             }
-            orig = SvPV_force_nomg(TARG, len);
+            orig = sv_pvn_force_flags(TARG, &len, 0);
             goto force_it;
         }
 #ifdef PERL_ANY_COW
