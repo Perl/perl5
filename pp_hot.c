@@ -5417,11 +5417,10 @@ PP(pp_subst)
     STRLEN len;
     int force_on_match = 0;
     const I32 oldsave = PL_savestack_ix;
-    bool doutf8 = FALSE; /* whether replacement is in utf8 */
+    bool do_utf8 = false; /* whether replacement is in utf8 */
 #ifdef PERL_ANY_COW
     bool was_cow;
 #endif
-    SV *nsv = NULL;
     SSize_t sp_offset = 0; /* number of items left on stack */
     SV *dstr;
     SV *retval;
@@ -5548,16 +5547,13 @@ PP(pp_subst)
 
     /* known replacement string? */
     if (dstr) {
-        /* replacement needing upgrading? */
-        if (DO_UTF8(TARG) && !doutf8) {
-             nsv = sv_mortalcopy_flags(dstr, SV_GMAGIC|SV_DO_COW_SVSETSV);
-             sv_utf8_upgrade(nsv);
-             c = SvPV_const(nsv, clen);
-             doutf8 = TRUE;
-        }
-        else {
-            c = SvPV_const(dstr, clen);
-            doutf8 = DO_UTF8(dstr);
+        /* Stringify once to avoid duplicate calls to GET magic/overloads */
+        c = SvPV_const(dstr, clen);
+        do_utf8 = DO_UTF8(dstr);
+
+        if (DO_UTF8(TARG) && !do_utf8) {
+            c = (const char *)bytes_to_utf8_temp_pv((const U8 *)c, &clen);
+            do_utf8 = true;
         }
 
         if (UNLIKELY(TAINT_get))
@@ -5565,9 +5561,9 @@ PP(pp_subst)
     }
     else {
         c = NULL;
-        doutf8 = FALSE;
+        do_utf8 = false;
     }
-    
+
     if (c
 #ifdef PERL_ANY_COW
         && !was_cow
@@ -5578,7 +5574,7 @@ PP(pp_subst)
            || (!SvGMAGICAL(dstr) && !(RXp_EXTFLAGS(prog) & RXf_EVAL_SEEN))
            )
         && !(RXp_EXTFLAGS(prog) & RXf_NO_INPLACE_SUBST)
-        && (!doutf8 || SvUTF8(TARG))
+        && (!do_utf8 || SvUTF8(TARG))
         && !(rpm->op_pmflags & PMf_NONDESTRUCT))
     {
         /* known replacement string and can do in-place substitution */
@@ -5735,7 +5731,7 @@ PP(pp_subst)
             if (first) {
                 /* replacement already stringified */
               if (clen)
-                sv_catpvn_nomg_maybeutf8(dstr, c, clen, doutf8);
+                sv_catpvn_nomg_maybeutf8(dstr, c, clen, do_utf8);
               first = FALSE;
             }
             else {
