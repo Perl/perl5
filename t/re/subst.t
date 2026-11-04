@@ -10,7 +10,7 @@ BEGIN {
 use Config;
 use constant constcow => *Config::{NAME};
 
-plan(tests => 281);
+plan(tests => 285);
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1199,4 +1199,18 @@ __EOF__
         "Issue #20690 - s/b{0}//gr on non-utf8 string should not remove anything");
     is( $ret[1], $str,
         "Issue #20690 - s/b{0}//gr on utf8 string should not remove anything");
+}
+
+{
+    # Note: these tests are only likely to fail on non-COW builds
+    my $r = "\xe9";
+    my $v = v256.97.98;
+    $v =~ s/a/$r/;
+    is($v, "\x{100}\x{e9}b", "byte replacement, UTF-8 v-string target");
+    ok(utf8::valid($v), "... result is valid UTF-8");
+
+    my $g = *{"main::\x{100}a"};
+    $g =~ s/a/$r/;
+    is($g, "*m\xe9in::\x{100}a", "byte replacement, UTF-8 glob copy target");
+    ok(utf8::valid($g), "... result is valid UTF-8");
 }

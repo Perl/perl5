@@ -5396,7 +5396,6 @@ PP(pp_subst)
 #ifdef PERL_ANY_COW
     bool was_cow;
 #endif
-    SV *nsv = NULL;
     SSize_t sp_offset = 0; /* number of items left on stack */
     SV *dstr;
     SV *retval;
@@ -5523,16 +5522,13 @@ PP(pp_subst)
 
     /* known replacement string? */
     if (dstr) {
-        /* replacement needing upgrading? */
+        /* Stringify once to avoid duplicate calls to GET magic/overloads */
+        c = SvPV_const(dstr, clen);
+        doutf8 = DO_UTF8(dstr);
+
         if (DO_UTF8(TARG) && !doutf8) {
-             nsv = sv_mortalcopy_flags(dstr, SV_GMAGIC|SV_DO_COW_SVSETSV);
-             sv_utf8_upgrade(nsv);
-             c = SvPV_const(nsv, clen);
-             doutf8 = TRUE;
-        }
-        else {
-            c = SvPV_const(dstr, clen);
-            doutf8 = DO_UTF8(dstr);
+            c = (const char *)bytes_to_utf8_temp_pv((const U8 *)c, &clen);
+            doutf8 = TRUE;
         }
 
         if (UNLIKELY(TAINT_get))
