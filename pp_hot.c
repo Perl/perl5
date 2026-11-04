@@ -5758,8 +5758,7 @@ PP(pp_subst)
     if (PL_op->op_private & OPpTRUEBOOL)
         retval = &PL_sv_yes;
     else {
-        retval = sv_newmortal();
-        sv_setiv(retval, iters);
+        retval = sv_2mortal(newSViv(iters));
     }
 
   ret:
