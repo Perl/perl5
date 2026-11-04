@@ -5491,8 +5491,7 @@ PP(pp_subst)
 #endif
 
   force_it:
-    if (!pm || !orig)
-        DIE(aTHX_ "panic: pp_subst, pm=%p, orig=%p", pm, orig);
+    assert(pm || orig); /* pm should always be non-NULL here anyway. */
 
     strend = orig + len;
     /* We can match twice at each position, once with zero-length,
