@@ -233,6 +233,9 @@ struct CodeMagicFunctions {
      * around its compiletime, and callchecker
      */
 
+    OP *(*pre_newcv)(pTHX_ SV *cv, OP *o, MAGIC *mg);
+    MAGIC *(*post_newcv)(pTHX_ SV *cv, SV *compcv, MAGIC *compmg);
+
     MAGIC *(*clone_cv)(pTHX_ SV *ncv, SV *protocv, MAGIC *protomg);
 };
 

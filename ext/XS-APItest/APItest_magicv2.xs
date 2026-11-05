@@ -23,6 +23,13 @@ sv_magicv2_add(SV *sv, SV *magicname, SV *auxsvref, U16 priv = 0)
             user->y = 456;
         }
 
+SV *
+PL_compcv()
+    CODE:
+        RETVAL = newRV_inc((SV *)PL_compcv);
+    OUTPUT:
+        RETVAL
+
 bool
 sv_magicv2_exists(SV *sv, SV *magicname)
     CODE:

@@ -2072,6 +2072,10 @@ Perl_do_magicv2_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I
             case MGv2s_CODE:
             {
                 const struct CodeMagicFunctions *funcs = MgCODEFUNCS(mg);
+                if (funcs->pre_newcv)
+                    dump_indent(level, file, "      PRE_NEWCV\n");
+                if (funcs->post_newcv)
+                    dump_indent(level, file, "      POST_NEWCV\n");
                 if (funcs->clone_cv)
                     dump_indent(level, file, "      CLONE_CV\n");
                 break;

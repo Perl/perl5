@@ -341,6 +341,9 @@ to subroutines - i.e. those whose type is C<SVt_PVCV>.
     struct CodeMagicFunctions {
         ...
 
+        OP *(*pre_newcv)(pTHX_ SV *cv, OP *o, MAGIC *mg);
+        MAGIC *(*post_newcv)(pTHX_ SV *cv, SV *compcv, MAGIC *compmg);
+
         MAGIC *(*clone_cv)(pTHX_ SV *ncv, SV *protocv,
                            MAGIC *protomg);
     };
@@ -348,6 +351,36 @@ to subroutines - i.e. those whose type is C<SVt_PVCV>.
 For this structure, the C<shape> field takes the value C<MGv2s_CODE>.
 
 =over 4
+
+=item C<pre_newcv> trigger function
+
+An optional pointer to a function to be invoked as part of the L</newATTRSUB>
+or L</newMYSUB> API functions, when finishing the steps of compiling a new
+subroutine. To take effect, this magic has to be applied to C<PL_compcv>.
+
+This trigger function is passed a pointer to the optree representing the body
+of the function, and may inspect or alter it. The return value from the
+trigger function is then captured by the newly-created CV.
+
+In the case that C<PL_compcv> has multiple magic attachments that provide this
+trigger function, they are invoked in I<reverse> order - that is, the most
+recently applied magic is the first to get an opportunity to inspect the
+optree. Its result is then passed to the previous one, and so on, with the
+newly-created CV capturing the result of the final trigger function to be
+invoked, which is the one from the oldest-applied magic.
+
+=item C<post_newcv> trigger function
+
+An optional pointer to a function to be invoked as part of the L</newATTRSUB>
+or L</newMYSUB> API functions, when finishing the steps of compiling a new
+subroutine. To take effect, this magic has to be applied to C<PL_compcv>.
+
+This trigger function is invoked after the new CV has been created, and is
+passed a pointer to it, as well as the C<PL_compcv>. It can adjust or make
+use of the new CV; perhaps by copying its own magic there. As this trigger
+function has the same argument shape and return type as the C<localize_mg>
+trigger, it has the same ability to use L</magicv2_copy> or variants; or
+wrapping those in your own trigger function to perform additional steps.
 
 =item C<clone_cv> trigger function
 
