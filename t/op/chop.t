@@ -7,7 +7,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-my $tests_count = 148;
+my $tests_count = 150;
 plan tests => $tests_count;
 
 $_ = 'abc';
@@ -301,5 +301,21 @@ $/ = "\n";
         $b = chomp @a;
         is $b, 1,
           'lexical $b = chomp @a when $b eq $/ eq 0 and \$a[0] == \$b';
+    }
+}
+
+TODO: {
+    local $::TODO = 'GH 25035';
+    for ("\x{100}", "\x{ff}") {
+        my $s = $_;
+        my $orig = $s;
+        my $c = chop $s;
+        my $testname =  "chop() sets UTF-8 flag appropriately";
+        if (utf8::valid($c)) {
+            is($c, $orig, $testname);
+        }
+        else {
+            fail($testname);
+        }
     }
 }
