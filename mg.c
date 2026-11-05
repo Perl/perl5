@@ -3284,6 +3284,9 @@ Perl_magic_setvec(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+/* A deferred element is an lvalue alias for an array or hash element
+   that may not exist yet. It holds the container and an index or key
+   until it can resolve to the element itself. */
 SV *
 Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -3321,13 +3324,17 @@ Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
             }
         }
         if (targ && (targ != &PL_sv_undef)) {
-            /* somebody else defined it for us */
-            SvREFCNT_dec(LvTARG(sv));
+            /* The container may own the only reference to targ. Retain
+               targ and resolve the alias before releasing the container,
+               since that release can run destructors. */
+            SV * const old_target = LvTARG(sv);
+            SV * const old_key = mg->mg_obj;
             LvTARG(sv) = SvREFCNT_inc_simple_NN(targ);
             LvTARGLEN(sv) = 0;
-            SvREFCNT_dec(mg->mg_obj);
             mg->mg_obj = NULL;
             mg->mg_flags &= ~MGf_REFCOUNTED;
+            SvREFCNT_dec(old_target);
+            SvREFCNT_dec(old_key);
         }
         return targ;
     }
@@ -3380,21 +3387,27 @@ Perl_vivify_defelem(pTHX_ SV *sv)
         croak(PL_no_aelem, LvSTARGOFF(sv));
     else {
         AV *const av = MUTABLE_AV(LvTARG(sv));
+        /* A nonextendible miss has no value. LvTARG must keep the array
+           until the common release or its reference is leaked. */
         if ((I32)LvTARGLEN(sv) < 0 && LvSTARGOFF(sv) > AvFILL(av))
-            LvTARG(sv) = NULL;	/* array can't be extended */
+            value = NULL;
         else {
             SV* const * const svp = av_fetch(av, LvSTARGOFF(sv), TRUE);
             if (!svp || !(value = *svp))
                 croak(PL_no_aelem, LvSTARGOFF(sv));
         }
     }
+    /* Retain value and resolve the alias before releasing its old
+       references, since those releases can run destructors. */
+    SV * const old_target = LvTARG(sv);
+    SV * const old_key = mg->mg_obj;
     SvREFCNT_inc_simple_void(value);
-    SvREFCNT_dec(LvTARG(sv));
     LvTARG(sv) = value;
     LvTARGLEN(sv) = 0;
-    SvREFCNT_dec(mg->mg_obj);
     mg->mg_obj = NULL;
     mg->mg_flags &= ~MGf_REFCOUNTED;
+    SvREFCNT_dec(old_target);
+    SvREFCNT_dec(old_key);
 }
 
 int

@@ -443,6 +443,13 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Resolving a deferred array or hash element no longer frees the element when
+the deferred alias holds the container's last reference. Assigning through a
+deferred array element that can no longer extend its array no longer leaks the
+array. [GH #25038]
+
+=item *
+
 A case-insensitive regex trie no longer accepts a word ending partway through
 an input character's fold. For example, C</s|zoo/iu> no longer matches a
 sharp-s, whose full fold is C<ss>. Later alternatives are tried in order.
