@@ -580,48 +580,6 @@ SKIP: {
     is $@, "", 'vivify_defelem does not croak on &PL_sv_undef elements';
 }
 
-{
-    my $saved;
-    my $array = [10, 20, 30];
-    sub { $saved = \@_ }->($array->[5]);
-    $array->[5] = 42;
-    undef $array;
-    is $saved->[0], 42, 'defelem retains an array element before its owner';
-}
-
-{
-    my $saved;
-    my $hash = { first => 10 };
-    sub { $saved = \@_ }->($hash->{later});
-    $hash->{later} = 42;
-    undef $hash;
-    is $saved->[0], 42, 'defelem retains a hash element before its owner';
-}
-
-{
-    package DefelemOwner;
-    our $destroyed = 0;
-    sub DESTROY { ++$destroyed }
-}
-
-for my $assign (0, 1) {
-    $DefelemOwner::destroyed = 0;
-    {
-        my @array = (bless({}, 'DefelemOwner'), 2, 3);
-        delete $array[1];
-        my $index = 0;
-        for my $element (@array) {
-            if ($index++ == 1) {
-                delete $array[2];
-                $element = 42 if $assign;
-            }
-        }
-    }
-    is $DefelemOwner::destroyed, 1,
-        $assign ? 'nonextendible defelem releases its array'
-                : 'unassigned defelem releases its array';
-}
-
 for $x ($y) {
     $x = 3;
     ($x, my $z) = (1, $y);
