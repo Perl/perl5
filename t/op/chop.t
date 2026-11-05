@@ -304,8 +304,9 @@ $/ = "\n";
     }
 }
 
-TODO: {
-    local $::TODO = 'GH 25035';
+{   # GH 25035
+
+    # First iteration sets UTF-8 flag in TARG; 2nd needs to clear it.
     for ("\x{100}", "\x{ff}") {
         my $s = $_;
         my $orig = $s;
