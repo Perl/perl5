@@ -10,6 +10,7 @@
  *
  */
 
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -40,8 +41,13 @@
 
 # define POLL_EVENTS_MASK (POLL_CAN_READ | POLL_CAN_WRITE | POLL_HAS_EXCP)
 
+#if defined(PERL_IMPLICIT_SYS)
 int
-poll(struct pollfd *fds, unsigned long nfds, int timeout)
+Perl_my_poll_cxt(pTHX_ struct pollfd *fds, unsigned long nfds, int timeout)
+#else
+int
+Perl_my_poll(struct pollfd *fds, unsigned long nfds, int timeout)
+#endif
 {
     int i,err;
     fd_set rfd,wfd,efd,ifd;
