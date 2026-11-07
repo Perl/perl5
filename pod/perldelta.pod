@@ -512,6 +512,21 @@ refaliasing and the C<builtin::indexed> function. [GH #24999]
         say "Array number [$idx] contains <@arr>";
     }
 
+=item *
+
+C<PL_sv_zero>, introduced in 5.28, has a zero numeric value and a "0"
+string value. Its flags did not indicate which value should be treated
+as authoritative when serializing or encoding to an external format.
+This could lead to what was originally a numerical return value being
+output as the string representation instead, which might not have the
+same meaning (e.g. in JSON).
+
+The flags on C<PL_sv_zero> have been modified so that it appears to have
+been created as a number and then later gained a string representation.
+This change is intended to make it easier for serialization modules to
+output C<0> rather than C<"0">, provided that such modules actually do
+differentiate between "created as number" and "created as string".
+
 =back
 
 =head1 Known Problems
