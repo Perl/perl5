@@ -3467,6 +3467,7 @@ PROG
     }
 
     {   # GH 24339
+        local $::TODO = "GH #24339";
         fresh_perl_is(<<~'PROG', "", {}, "intuit_more bug compiles");
         use strict;
         my ($prevDecade, $decade, $year) = (0, 1, 2);
@@ -3484,7 +3485,6 @@ PROG
     }
 
     {   # GH 24789
-        local $::TODO = "GH #24789";
         fresh_perl_is(<<~'PROG', "", {}, "use strict doesnt affect behavior");
         my @e = 0;
         my $f = \@e;
