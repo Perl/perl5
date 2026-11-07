@@ -144,6 +144,9 @@ typedef struct regexp_internal {
                                    is true, 0 means "no value" like any other
                                    index into the data array.*/
         U32 depth;              /* 1 = executing; 2+ = recursing */
+        U8 regstclass_len;      /* How many chars regstclass matches.
+                                 *     variable for an EXACTish start class,
+                                 *     otherwise set to 1. */
         U8 slc_whilem_seen;     /* Num of WHILEMs using super-linear cache.
                                    Same type as FLAGS() */
         struct slc_cache_item *slc; /* permanent array of super-linear cache
