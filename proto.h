@@ -13080,13 +13080,6 @@ S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size)
        STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
-static void
-S_set_save_buffer_min_size(pTHX_ const Size_t min_len, char **buf, Size_t *buf_size)
-        Perl_attribute_nonnull_aTHX;
-#   define PERL_ARGS_ASSERT_SET_SAVE_BUFFER_MIN_SIZE \
-       STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
 PERL_STATIC_NO_RET void
 S_setlocale_failure_panic_via_i(pTHX_ const locale_category_index cat_index, const char *current, const char *failed, const line_t proxy_caller_line, const line_t immediate_caller_line, const char *higher_caller_file, const line_t higher_caller_line)
         Perl_attribute_nonnull_aTHX
@@ -13304,13 +13297,27 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char *locale)
              !defined(USE_POSIX_2008_LOCALE) &&
              !defined(USE_THREAD_SAFE_LOCALE) */
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
-static wchar_t *
-S_Win_byte_string_to_wstring(const UINT code_page, const char *byte_string);
-#     define PERL_ARGS_ASSERT_WIN_BYTE_STRING_TO_WSTRING
+static bool
+S_Win_byte_string_to_wstring(pTHX_ const UINT code_page, const char *byte_string, wchar_t **dest_ptr, Size_t *dest_size_ptr)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_3)
+        Perl_attribute_nonnull(pTHX_4);
+#     define PERL_ARGS_ASSERT_WIN_BYTE_STRING_TO_WSTRING \
+         STMT_START { Perl_assert_aTHX; assert(dest_ptr);   \
+                      assert(dest_size_ptr);                \
+                      PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
 
-static char *
-S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t *wstring);
-#     define PERL_ARGS_ASSERT_WIN_WSTRING_TO_BYTE_STRING
+static bool
+S_Win_wstring_to_byte_string(pTHX_ const UINT code_page, const wchar_t *wstring, char **dest_ptr, Size_t *dest_size_ptr)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_3)
+        Perl_attribute_nonnull(pTHX_4);
+#     define PERL_ARGS_ASSERT_WIN_WSTRING_TO_BYTE_STRING \
+         STMT_START { Perl_assert_aTHX; assert(dest_ptr);   \
+                      assert(dest_size_ptr);                \
+                      PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
 
 static const char *
 S_win32_setlocale(pTHX_ int category, const char *locale)
@@ -19776,11 +19783,8 @@ Perl_thread_locale_init(pTHX)
     } STMT_END
 
 PERL_CALLCONV void
-Perl_thread_locale_term(pTHX)
-        Perl_attribute_nonnull_aTHX;
-# define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM    \
-     STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
+Perl_thread_locale_term(pTHX);
+# define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM
 
 #endif /* defined(USE_THREADS) */
 #if defined(VMS) || defined(WIN32)
@@ -19819,14 +19823,6 @@ Perl_get_context(void)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_GET_CONTEXT
 
-PERL_CALLCONV bool
-Perl_get_win32_message_utf8ness(pTHX_ const char *string)
-        Perl_attribute_nonnull_aTHX
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_GET_WIN32_MESSAGE_UTF8NESS \
-     STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
-    } STMT_END
-
 PERL_CALLCONV_NO_RET void
 win32_croak_not_implemented(const char *fname)
         Perl_attribute_nonnull(1)
@@ -19846,6 +19842,16 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     } STMT_END
 
 #endif /* !defined(WIN32) */
+#if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
+PERL_CALLCONV bool
+Perl_get_win32_message_utf8ness(pTHX_ const char *string)
+        Perl_attribute_nonnull_aTHX
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_GET_WIN32_MESSAGE_UTF8NESS \
+     STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+#endif
 
 #ifdef PERL_CORE
 #  include "pp_proto.h"

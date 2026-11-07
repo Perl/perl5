@@ -1228,6 +1228,22 @@ perl_destruct(pTHXx)
         PL_setlocale_buf = NULL;
     }
 
+#if defined(USE_LOCALE) && (   defined(WIN32)                               \
+                            || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES))
+    if (PL_win_bscratch) {
+        //Safefree(PL_win_bscratch);
+        //PL_win_bscratch = NULL;
+    }
+    if (PL_wrap_wsetlocale_wlocale) {
+        //Safefree(PL_wrap_wsetlocale_wlocale);
+        //PL_wrap_wsetlocale_wlocale = NULL;
+    }
+    if (PL_wrap_wsetlocale_result) {
+        //Safefree(PL_wrap_wsetlocale_result);
+        //PL_wrap_wsetlocale_result = NULL;
+    }
+#endif
+
     SvREFCNT_dec(PL_langinfo_sv);
     PL_langinfo_sv = NULL;
     SvREFCNT_dec(PL_scratch_langinfo);
