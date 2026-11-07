@@ -296,6 +296,8 @@ EXTCONST struct body_details PL_bodies_by_type[] = {
       0,
       SVt_PVOBJ, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
+
+    { 0, 0, 0, SVt_INTERNAL, TRUE, NONV, NOARENA, 0 },
 };
 #else
 EXTCONST struct body_details PL_bodies_by_type[];
