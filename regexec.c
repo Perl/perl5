@@ -5718,6 +5718,134 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
     return true;
 }
 
+/* The exactish_cache for this regex either hasn't been set up yet,
+ * or it currently lacks an eligible S_setup_EXACTISH_ST() result. */
+static bool
+S_setup_EXACTISH_ST_cache_miss(pTHX_ regexp_internal *rexi,
+                                     const regnode * const text_node,
+                                     struct next_matchable_info * m,
+                                     regmatch_info *reginfo)
+{
+    assert(OP(text_node) != EXACTFL); /* Unsuitable for caching */
+    assert(text_node > rexi->program  /* program[0] not  a live regnode. */
+        && text_node < rexi->program + rexi->proglen);
+
+    bool ok = S_setup_EXACTISH_ST(aTHX_ text_node, m, reginfo);
+    assert(m->count >= 0 && ok == (m->count > 0));
+
+    struct exactish_cache *cache = rexi->exactish_cache;
+    if (UNLIKELY(!cache)) {
+        /* Create a new cache sized for 4 entries. */
+        Newxc(cache,
+              sizeof(struct exactish_cache) +
+                      3 * sizeof(struct exactish_cache_item),
+              char, struct exactish_cache);
+        rexi->exactish_cache = cache;
+        cache->size = 4;
+        cache->used = 0;
+        Zero(cache->items, 4, struct exactish_cache_item);
+    }
+
+    const U32 offset = (U32) (text_node - rexi->program);
+    U32 mask = cache->size - 1;
+    U32 i;
+
+    /* Either find the correct item, which might be present but only
+     * caching the other (UTF-8/non-UTF-8 encoding result), or exhaust
+     * the search. */
+    for (i = offset & mask; cache->items[i].offset != offset; i = (i+1) & mask) {
+        if (cache->items[i].offset == 0) {
+            /* A complete cache miss. The regnode has no entry. */
+            cache->used++;
+            cache->items[i].offset = offset;
+            cache->items[i].info[0].count = -1;
+            cache->items[i].info[1].count = -1;
+            break;
+        }
+    }
+
+    struct exactish_cache_item *wotsit = &cache->items[i];
+
+    struct next_matchable_info *cached = &wotsit->info[reginfo->is_utf8_target];
+    assert(cached->count < 0);
+    StructCopy(m, cached, struct next_matchable_info);
+
+    /* Ensure there's always an empty slot to find/fill */
+    if (UNLIKELY(cache->used * 2 > cache->size )) {
+        /* Gotta add more slots to the cache - and rehash */
+        const U32 new_size = cache->size * 2;
+        mask = new_size - 1;
+
+        struct exactish_cache *new_cache;
+        Newxc(new_cache,
+              sizeof(struct exactish_cache) +
+                  mask * sizeof(struct exactish_cache_item),
+                  char, struct exactish_cache);
+        rexi->exactish_cache = new_cache;
+        new_cache->size = new_size;
+        new_cache->used = cache->used;
+        Zero(new_cache->items, new_size, struct exactish_cache_item);
+
+        U32 j;
+        for (j = 0; j < cache->size; j++) {
+            if (cache->items[j].offset) {
+                U32 k = cache->items[j].offset & mask;
+                /* Linear probing for unused slots */
+                while (new_cache->items[k].offset)
+                    k = (k + 1) & mask;
+                StructCopy(&cache->items[j],
+                           &new_cache->items[k],
+                           struct exactish_cache_item);
+            }
+        }
+        Safefree(cache);
+    }
+    return ok;
+}
+
+/* Lookup the results of a S_setup_EXACTISH_ST() call in a lazily-
+ * allocated and populated per-regex cache, rather than repeatedly
+ * re-derive them. Note that folding EXACTish nodes whose results
+ * are dependent upon the runtime locale are not eligible for caching
+ * and are still passed through to S_setup_EXACTISH_ST() every time. */
+PERL_STATIC_FORCE_INLINE bool
+S_setup_EXACTISH_ST_cached(pTHX_ regexp_internal *rexi,
+                                 const regnode * const text_node,
+                                 struct next_matchable_info * m,
+                                 regmatch_info *reginfo)
+{
+    const struct exactish_cache * const cache = rexi->exactish_cache;
+
+    if (LIKELY(cache)) {
+        const U32 offset = (U32) (text_node - rexi->program);
+        const U32 cache_size = cache->size;
+
+        const struct exactish_cache_item * item =
+                                &cache->items[offset & (cache_size - 1)];
+
+        while (UNLIKELY(item->offset != offset)) {
+            if (item->offset == 0)
+                goto miss;
+
+            if (++item == cache->items + cache_size)
+                item = cache->items;
+        }
+
+        const struct next_matchable_info * const cached =
+                                &item->info[reginfo->is_utf8_target];
+
+        if (LIKELY(cached->count >= 0)) {
+            StructCopy(cached, m, struct next_matchable_info);
+            return m->count > 0;
+        }
+    }
+  miss:
+    if (OP(text_node) == EXACTFL) {
+        return S_setup_EXACTISH_ST(aTHX_ text_node, m, reginfo);
+    }
+    return S_setup_EXACTISH_ST_cache_miss(aTHX_ rexi, text_node, m, reginfo);
+}
+
 PERL_STATIC_FORCE_INLINE    /* We want speed at the expense of size */
 bool
 S_test_EXACTISH_ST(const char * loc,
@@ -10106,7 +10234,7 @@ NULL
                     if (! HAS_TEXT(text_node))
                         FIND_NEXT_IMPT(text_node);
                     if (REGNODE_TYPE(OP(text_node)) == EXACT) {
-                        if (! S_setup_EXACTISH_ST(aTHX_ text_node,
+                        if (! S_setup_EXACTISH_ST_cached(aTHX_ rexi, text_node,
                                                         &ST.Binfo, reginfo))
                         {
                             sayNO;
@@ -10269,7 +10397,7 @@ NULL
                         ST.Binfo.count = 0;
                     }
                     else {
-                        if (! S_setup_EXACTISH_ST(aTHX_ text_node,
+                        if (! S_setup_EXACTISH_ST_cached(aTHX_ rexi, text_node,
                                                         &ST.Binfo, reginfo))
                         {
                             minmod = 0;
@@ -11221,7 +11349,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
         /* Set up termination info, and quit if we can rule out that we've
          * gotten a match of the termination criteria */
-        if (   ! S_setup_EXACTISH_ST(aTHX_ p, &Binfo, reginfo)
+        if (   ! S_setup_EXACTISH_ST_cached(aTHX_ RXi_GET(prog), p, &Binfo,
+                                                reginfo)
             ||   scan + Binfo.min_length > this_eol
             || ! S_test_EXACTISH_ST(scan, Binfo))
         {
