@@ -135,4 +135,30 @@ is $@, "", 'PERL_MAGIC_ext is permitted on read-only things';
         "AV set magic that dies via av_store should not warn about double free");
 }
 
+{
+    # The intent here is to test that utf8_magic() returns the values
+    # stored in magic, if you make some change that needs the values
+    # stored to change, then feel free to change these tests.
+    #
+    # But be careful that you haven't prevented caching something
+    # we do want cached.
+    #
+    # Inspired by GH 24891
+    my $x = "\N{GREEK SMALL LETTER PI}";
+    utf8::encode(my $pi_bytes = $x);
+    my $pi_blen = length $pi_bytes;
+    ok(!XS::APItest::Magic::utf8_magic($x),
+       "fresh utf8 SV not magical");
+    ok(length $x, "just invoke length on utf8");
+    is_deeply([ XS::APItest::Magic::utf8_magic($x) ], [ 1 ],
+              "length()ed utf8 SV magical");
+    $x = ($x x 1000) . "a" . ($x x 1000);
+    ok(!XS::APItest::Magic::utf8_magic($x),
+       "modified utf8 SV not magical");
+    is(substr($x, 1000, 1), "a", "fetch");
+    is_deeply([ XS::APItest::Magic::utf8_magic($x) ],
+              [ 2001, 1001, $pi_blen * 1000 + 1, 1000, $pi_blen * 1000 ],
+       "substred utf8 SV magical");
+}
+
 done_testing;
