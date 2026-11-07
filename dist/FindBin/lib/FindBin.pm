@@ -127,9 +127,9 @@ sub init
  *Dir = \$Bin;
  *RealDir = \$RealBin;
 
- if($0 eq '-e' || $0 eq '-')
+ if($0 eq '-e' || $0 eq '-' || -p $0)
   {
-   # perl invoked with -e or script is on C<STDIN>
+   # perl invoked with -e or script is on C<STDIN> or a fifo (named pipe)
    $Script = $RealScript = $0;
    $Bin    = $RealBin    = cwd2();
    $Bin = VMS::Filespec::unixify($Bin) if $^O eq 'VMS';
