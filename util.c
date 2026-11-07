@@ -6871,6 +6871,22 @@ int perl_tsa_mutex_destroy(perl_mutex* mutex)
 
 #ifdef USE_DTRACE
 
+volatile STRLEN force_page_in_temp;
+
+PERL_STATIC_INLINE void
+force_page_in(const char *s) {
+  /* touch every element of the string so dtrace copyinstr() can
+     see it, from the dtrace manual:
+
+     The copyin() and copyinstr() subroutines cannot read from user
+     addresses which have not yet been touched. A valid address might
+     cause an error if the page that contains that address has not
+     been faulted in by an access attempt.
+  */
+  if (s)
+    force_page_in_temp = strlen(s);
+}
+
 /* log a sub call or return */
 
 void
@@ -6897,6 +6913,11 @@ Perl_dtrace_probe_call(pTHX_ CV *cv, bool is_call)
     line  = CopLINE(start);
     stash = CopSTASHPV(start);
 
+    /* ensure they are paged in */
+    force_page_in(func);
+    force_page_in(file);
+    force_page_in(stash);
+
     if (is_call) {
         PERL_SUB_ENTRY(func, file, line, stash);
     }
@@ -6913,6 +6934,7 @@ Perl_dtrace_probe_load(pTHX_ const char *name, bool is_loading)
 {
     PERL_ARGS_ASSERT_DTRACE_PROBE_LOAD;
 
+    force_page_in(name);
     if (is_loading) {
         PERL_LOADING_FILE(name);
     }
@@ -6928,8 +6950,9 @@ void
 Perl_dtrace_probe_op(pTHX_ const OP *op)
 {
     PERL_ARGS_ASSERT_DTRACE_PROBE_OP;
-
-    PERL_OP_ENTRY(OP_NAME(op));
+    const char *op_name = OP_NAME(op);
+    force_page_in(op_name);
+    PERL_OP_ENTRY(op_name);
 }
 
 
@@ -6942,6 +6965,8 @@ Perl_dtrace_probe_phase(pTHX_ enum perl_phase phase)
 
     const char *ph_old = PL_phase_names[PL_phase];
     const char *ph_new = PL_phase_names[phase];
+    force_page_in(ph_old);
+    force_page_in(ph_new);
 
     PERL_PHASE_CHANGE(ph_new, ph_old);
 }
