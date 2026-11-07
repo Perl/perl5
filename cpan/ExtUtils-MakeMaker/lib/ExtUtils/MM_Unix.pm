@@ -2781,7 +2781,10 @@ sub _find_static_libs {
     );
     my %staticlib21;
     require File::Find;
-    File::Find::find(sub {
+    no warnings;
+    File::Find::find({
+        no_chdir => 1,
+        wanted => sub {
 	if ($File::Find::name =~ m{/auto/share\z}) {
 	    # in a subdir of auto/share, prune because e.g.
 	    # Alien::pkgconfig uses File::ShareDir to put .a files
@@ -2792,20 +2795,22 @@ sub _find_static_libs {
 
 	return unless m/\Q$self->{LIB_EXT}\E$/;
 
-	return unless -f 'extralibs.ld'; # this checks is a "proper" XS installation
+	return unless -f "$File::Find::dir/extralibs.ld"; # this checks is a "proper" XS installation
+
+        my ($base) = $File::Find::name =~ m{([^/\\]+)\z};
 
         # Skip perl's libraries.
-        return if m/^libperl/ or m/^perl\Q$self->{LIB_EXT}\E$/;
+        return if $base =~ /^libperl/ or $base =~ /^perl\Q$self->{LIB_EXT}\E$/;
 
 	# Skip purified versions of libraries
         # (e.g., DynaLoader_pure_p1_c0_032.a)
-	return if m/_pure_\w+_\w+_\w+\.\w+$/ and -f "$File::Find::dir/.pure";
+	return if $base =~ /_pure_\w+_\w+_\w+\.\w+$/ and -f "$File::Find::dir/.pure";
 
 	if( exists $self->{INCLUDE_EXT} ){
 		my $found = 0;
 
 		(my $xx = $File::Find::name) =~ s,.*?/auto/,,s;
-		$xx =~ s,/?$_,,;
+		$xx =~ s,/?\Q$base\E\z,,;
 		$xx =~ s,/,::,g;
 
 		# Throw away anything not explicitly marked for inclusion.
@@ -2820,7 +2825,7 @@ sub _find_static_libs {
 	}
 	elsif( exists $self->{EXCLUDE_EXT} ){
 		(my $xx = $File::Find::name) =~ s,.*?/auto/,,s;
-		$xx =~ s,/?$_,,;
+		$xx =~ s,/?\Q$base\E\z,,;
 		$xx =~ s,/,::,g;
 
 		# Throw away anything explicitly marked for exclusion
@@ -2837,10 +2842,11 @@ sub _find_static_libs {
 	# Once the patch to minimod.PL is in the distribution, I can
 	# drop it
 	return if $File::Find::name =~ m:\Q$installed_version\E\z:;
-	return if !$self->xs_static_lib_is_xs($_);
-	use Cwd 'cwd';
-	$staticlib21{cwd() . "/" . $_}++;
-    }, grep( -d $_, map { $self->catdir($_, 'auto') } @{$searchdirs || []}) );
+	return if !$self->xs_static_lib_is_xs($File::Find::name);
+	use Cwd 'abs_path';
+	my $abs = eval { abs_path($File::Find::name) } || File::Spec->rel2abs($File::Find::name);
+	$staticlib21{$abs}++;
+    }}, grep( -d $_, map { $self->catdir($_, 'auto') } @{$searchdirs || []}) );
     return \%staticlib21;
 }
 
