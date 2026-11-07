@@ -45,6 +45,58 @@ magicfunc_inc_on_clone_clone(pTHX_ SV *nsv, MAGIC *nmg, SV *osv, MAGIC *omg, CLO
         sv_inc(auxsv);
 }
 
+static OP *
+magicfunc_log_pre_newcv(pTHX_ SV *cv, OP *o, MAGIC *mg)
+{
+    SV *var = get_sv("main::MG_LOG", GV_ADD);
+
+    if (!SvOK(var))
+        sv_setpvs(var, "");
+    else
+        sv_catpvs(var, ",");
+    sv_catpvf(var, "pre_newcv(<%" SVf ">:cv=%s)",
+            SVfARG(MgAUXSV(mg)), cv == (SV *)PL_compcv ? "PL_compcv" : "?");
+
+    return o;
+}
+
+static MAGIC *
+magicfunc_log_post_newcv(pTHX_ SV *cv, SV *compcv, MAGIC *compmg)
+{
+    PERL_UNUSED_ARG(cv);
+
+    SV *var = get_sv("main::MG_LOG", GV_ADD);
+
+    if (!SvOK(var))
+        sv_setpvs(var, "");
+    else
+        sv_catpvs(var, ",");
+    sv_catpvf(var, "post_newcv(<%" SVf ">:compcv=%s)",
+            SVfARG(MgAUXSV(compmg)), compcv == (SV *)PL_compcv ? "PL_compcv" : "?");
+
+    return NULL;
+}
+
+static OP *
+magicfunc_add_one_to_expr(pTHX_ SV *cv, OP *o, MAGIC *mg)
+{
+    PERL_UNUSED_ARG(cv);
+    PERL_UNUSED_ARG(mg);
+
+    return newBINOP(OP_ADD, 0, o,
+            newSVOP(OP_CONST, 0, newSViv(1)));
+}
+
+static MAGIC *
+magicfunc_copy_clone(pTHX_ SV *nsv, SV *sv, MAGIC *mg)
+{
+    MAGIC *nmg = magicv2_copy(nsv, sv, mg);
+
+    MgAUXSV_set(nmg, newSVpvs("this-is-clone"));
+
+    return nmg;
+}
+
 static const struct MagicFunctions magicfuncs_empty = {
     .ver   = 2,
     .shape = MGv2s_BASE,
@@ -147,6 +199,31 @@ static const struct ArrayVarMagicFunctions magicfuncs_inc_after_clear_hash = {
     .clear = &magicfunc_inc,
 };
 
+static const struct CodeMagicFunctions magicfuncs_log_on_newcv = {
+    .ver = 2,
+    .shape = MGv2s_CODE,
+    .debug_name = "XS::APItest/log_on_newcv",
+
+    .pre_newcv  = &magicfunc_log_pre_newcv,
+    .post_newcv = &magicfunc_log_post_newcv,
+};
+
+static const struct CodeMagicFunctions magicfuncs_add_one_to_expr = {
+    .ver = 2,
+    .shape = MGv2s_CODE,
+    .debug_name = "XS::APItest/add_one_to_expr",
+
+    .pre_newcv = &magicfunc_add_one_to_expr,
+};
+
+static const struct CodeMagicFunctions magicfuncs_copy_clonecv = {
+    .ver = 2,
+    .shape = MGv2s_CODE,
+    .debug_name = "XS::APItest/copy_clonecv",
+
+    .clone_cv = &magicfunc_copy_clone,
+};
+
 /* we can't make this one `static` because -Wc++-compat gets upset if we do */
 extern const struct ScalarValueMagicFunctions magicfuncs_value;
 
@@ -176,22 +253,37 @@ const struct ScalarValueMagicFunctions magicfuncs_value = {
     .propagate = magicfunc_propagate,
 };
 
+static const struct {
+  const char *name;
+  const struct MagicFunctions *funcs;
+} magicfuncs[] = {
+  {"empty",                                         &magicfuncs_empty},
+  {"weak",                                          &magicfuncs_weak},
+  {"container_empty",      (struct MagicFunctions *)&magicfuncs_container_empty},
+  {"with_keyiv",           (struct MagicFunctions *)&magicfuncs_with_keyiv},
+  {"with_keysv",           (struct MagicFunctions *)&magicfuncs_with_keysv},
+  {"inc_on_free",                                   &magicfuncs_inc_on_free},
+  {"inc_on_clone",                                  &magicfuncs_inc_on_clone},
+  {"userstruct",           (struct MagicFunctions *)&magicfuncs_userstruct},
+  {"grab_before_get",      (struct MagicFunctions *)&magicfuncs_grab_before_get},
+  {"inc_after_set",        (struct MagicFunctions *)&magicfuncs_inc_after_set},
+  {"inc_after_clear_arr",  (struct MagicFunctions *)&magicfuncs_inc_after_clear_arr},
+  {"inc_after_clear_hash", (struct MagicFunctions *)&magicfuncs_inc_after_clear_hash},
+  {"log_on_newcv",         (struct MagicFunctions *)&magicfuncs_log_on_newcv},
+  {"add_one_to_expr",      (struct MagicFunctions *)&magicfuncs_add_one_to_expr},
+  {"copy_clonecv",         (struct MagicFunctions *)&magicfuncs_copy_clonecv},
+  {"value",                (struct MagicFunctions *)&magicfuncs_value},
+  {NULL, NULL},
+};
+
 static const struct MagicFunctions *S_magicfuncs_by_name(pTHX_ SV *name)
 {
     char *namepv = SvPV_nolen(name);
-    if(strEQ(namepv, "empty"))           return &magicfuncs_empty;
-    if(strEQ(namepv, "weak"))            return &magicfuncs_weak;
-    if(strEQ(namepv, "container_empty")) return (struct MagicFunctions *)&magicfuncs_container_empty;
-    if(strEQ(namepv, "with_keyiv"))      return (struct MagicFunctions *)&magicfuncs_with_keyiv;
-    if(strEQ(namepv, "with_keysv"))      return (struct MagicFunctions *)&magicfuncs_with_keysv;
-    if(strEQ(namepv, "inc_on_free"))     return &magicfuncs_inc_on_free;
-    if(strEQ(namepv, "inc_on_clone"))    return &magicfuncs_inc_on_clone;
-    if(strEQ(namepv, "userstruct"))      return (struct MagicFunctions *)&magicfuncs_userstruct;
-    if(strEQ(namepv, "grab_before_get")) return (struct MagicFunctions *)&magicfuncs_grab_before_get;
-    if(strEQ(namepv, "inc_after_set"))   return (struct MagicFunctions *)&magicfuncs_inc_after_set;
-    if(strEQ(namepv, "inc_after_clear_arr"))  return (struct MagicFunctions *)&magicfuncs_inc_after_clear_arr;
-    if(strEQ(namepv, "inc_after_clear_hash")) return (struct MagicFunctions *)&magicfuncs_inc_after_clear_hash;
-    if(strEQ(namepv, "value"))           return (struct MagicFunctions *)&magicfuncs_value;
+
+    for (int i = 0; magicfuncs[i].name; i++)
+        if (strEQ(namepv, magicfuncs[i].name))
+            return magicfuncs[i].funcs;
+
     croak("Unrecognised magicfuncs name %" SVf, SVfARG(name));
 }
 

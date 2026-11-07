@@ -6729,6 +6729,11 @@ Perl_sv_magicv2_add(pTHX_ SV *sv, const struct MagicFunctions *funcs, U32 flags,
                 goto bad_shape;
             break;
 
+        case MGv2s_CODE:
+            if (svt != SVt_PVCV)
+                goto bad_shape;
+            break;
+
         case MGv2s_SCALARVALUE:
             if (svt > SVt_PVMG && svt != SVt_PVLV && svt != SVt_REGEXP)
                 goto bad_shape;
