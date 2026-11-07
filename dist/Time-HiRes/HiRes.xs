@@ -1409,6 +1409,42 @@ clock_gettime(clock_id = 0)
 
 #endif /*  #if defined(TIME_HIRES_CLOCK_GETTIME) */
 
+#if defined(TIME_HIRES_CLOCK_GETTIME)
+
+void
+hrtime(as_array = 0)
+    bool as_array
+    PREINIT:
+        struct timespec ts;
+        int status;
+    PPCODE:
+#  ifdef TIME_HIRES_CLOCK_GETTIME_SYSCALL
+        status = syscall(SYS_clock_gettime, CLOCK_MONOTONIC, &ts);
+#  else
+        status = clock_gettime(CLOCK_MONOTONIC, &ts);
+#  endif
+        if (status != 0)
+            XSRETURN_EMPTY;
+        if (as_array) {
+            EXTEND(sp, 2);
+            PUSHs(sv_2mortal(newSViv(ts.tv_sec)));
+            PUSHs(sv_2mortal(newSViv(ts.tv_nsec)));
+        } else {
+            EXTEND(sp, 1);
+            PUSHs(sv_2mortal(newSVuv((UV)ts.tv_sec * (UV)IV_1E9 + (UV)ts.tv_nsec)));
+        }
+
+#else  /* if defined(TIME_HIRES_CLOCK_GETTIME) */
+
+void
+hrtime(as_array = 0)
+    bool as_array
+    PPCODE:
+        PERL_UNUSED_ARG(as_array);
+        croak("Time::HiRes::hrtime(): unimplemented in this platform");
+
+#endif  /* #if defined(TIME_HIRES_CLOCK_GETTIME) */
+
 #if defined(TIME_HIRES_CLOCK_GETRES)
 
 NV
