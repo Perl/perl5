@@ -699,7 +699,9 @@ perl_destruct(pTHXx)
         JMPENV_PUSH(x);
         PERL_UNUSED_VAR(x);
         if (PL_endav && !PL_minus_c) {
+            PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY(PL_phase_names[PL_phase]);
             PERL_SET_PHASE(PERL_PHASE_END);
+            PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN(PL_phase_names[PERL_PHASE_END]);
             call_list(PL_scopestack_ix, PL_endav);
         }
         JMPENV_POP;
@@ -951,7 +953,9 @@ perl_destruct(pTHXx)
      * destruct_level > 0 */
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = NULL;
+    PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY("END");
     PERL_SET_PHASE(PERL_PHASE_DESTRUCT);
+    PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN("DESTRUCT");
 
     /* Tell PerlIO we are about to tear things apart in case
        we have layers which are using resources that should
@@ -1974,7 +1978,9 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
             call_list(oldscope, PL_unitcheckav);
         }
         if (PL_checkav) {
+            PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY(PL_phase_names[PL_phase]);
             PERL_SET_PHASE(PERL_PHASE_CHECK);
+            PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN(PL_phase_names[PERL_PHASE_CHECK]);
             call_list(oldscope, PL_checkav);
         }
         ret = 0;
@@ -1992,7 +1998,9 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
             call_list(oldscope, PL_unitcheckav);
         }
         if (PL_checkav) {
+            PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY(PL_phase_names[PL_phase]);
             PERL_SET_PHASE(PERL_PHASE_CHECK);
+            PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN(PL_phase_names[PERL_PHASE_CHECK]);
             call_list(oldscope, PL_checkav);
         }
         ret = STATUS_EXIT;
@@ -2265,7 +2273,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     bool add_read_e_script = FALSE;
     U32 lex_start_flags = 0;
 
+    PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY("CONSTRUCT");
     PERL_SET_PHASE(PERL_PHASE_START);
+    PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN("START");
 
     init_main_stash();
 
@@ -2864,7 +2874,9 @@ perl_run(pTHXx)
         SET_CURSTASH(PL_defstash);
         if (!(PL_exit_flags & PERL_EXIT_DESTRUCT_END) &&
             PL_endav && !PL_minus_c) {
+            PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY(PL_phase_names[PL_phase]);
             PERL_SET_PHASE(PERL_PHASE_END);
+            PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN(PL_phase_names[PERL_PHASE_END]);
             call_list(oldscope, PL_endav);
         }
 #ifdef MYMALLOC
@@ -2912,7 +2924,9 @@ S_run_body(pTHX_ I32 oldscope)
         if (PERLDB_SINGLE && PL_DBsingle)
             PL_DBsingle_iv = 1;
         if (PL_initav) {
+            PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY(PL_phase_names[PL_phase]);
             PERL_SET_PHASE(PERL_PHASE_INIT);
+            PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN(PL_phase_names[PERL_PHASE_INIT]);
             call_list(oldscope, PL_initav);
         }
 #ifdef PERL_DEBUG_READONLY_OPS
@@ -2923,7 +2937,9 @@ S_run_body(pTHX_ I32 oldscope)
 
     /* do it */
 
+    PERL_DTRACE_PROBE_PHASE_CHANGE_ENTRY("INIT");
     PERL_SET_PHASE(PERL_PHASE_RUN);
+    PERL_DTRACE_PROBE_PHASE_CHANGE_RETURN("RUN");
 
     if (PL_restartop) {
 #ifdef DEBUGGING
