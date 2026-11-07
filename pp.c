@@ -971,6 +971,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
         else if (s && len) {
             s += --len;
             sv_setpvn(retval, s, 1);
+            SvUTF8_off(retval);
             *s = '\0';
             SvCUR_set(sv, len);
             SvUTF8_off(sv);
