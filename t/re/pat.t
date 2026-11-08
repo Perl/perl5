@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 6823 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 6824 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -3467,7 +3467,6 @@ PROG
     }
 
     {   # GH 24339
-        local $::TODO = "GH #24339";
         fresh_perl_is(<<~'PROG', "", {}, "intuit_more bug compiles");
         use strict;
         my ($prevDecade, $decade, $year) = (0, 1, 2);
@@ -3489,6 +3488,7 @@ PROG
         my $b = "b" x 150000;
         my $c = "c" x 150000;
         print "ok" if "1a" =~ /^(?:(?:\da|$b)|$c)/;
+        PROG
     }
 
     {   # GH 24789
