@@ -4572,7 +4572,7 @@ S_is_existing_identifier(pTHX_ char *s, Size_t len, char sigil, bool is_utf8)
 
 /* This is the one truly awful dwimmer necessary to conflate C and sed. */
 
-static int
+static bool
 S_intuit_more(pTHX_ char *s, char *e,
               U8 caller_context,    /* Who's calling us? basically an enum */
               char * caller_s,      /* If non-NULL, the name of the identifier
