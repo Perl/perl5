@@ -17011,7 +17011,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
-static int
+static bool
 S_intuit_more(pTHX_ char *s, char *e, U8 caller_context, char *caller_s, Size_t caller_length)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
