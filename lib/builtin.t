@@ -752,6 +752,18 @@ EOS
     is($h{123}, 456, "Numerical OP_CONST SVs in hash init are created_as_number() when hekified");
 }
 
+# array element counts are numbers, even if that number is zero
+{
+    use builtin qw( created_as_number created_as_string);
+    my @arr;
+    my $sc = scalar @arr;
+    ok(created_as_number($sc), 'scalar @arr on empty array created_as_number');
+    ok(!created_as_string($sc), 'scalar @arr on empty array not created_as_string');
+    push @arr, "abcde";
+    ok(created_as_number($sc), 'scalar @arr on single element array created_as_number');
+    ok(!created_as_string($sc), 'scalar @arr on single element array not created_as_string');
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();

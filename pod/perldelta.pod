@@ -519,6 +519,25 @@ refaliasing and the C<builtin::indexed> function. [GH #24999]
         say "Array number [$idx] contains <@arr>";
     }
 
+=item *
+
+Previously, as an optimization, C<scalar @array> on an empty array would
+result in C<PL_sv_zero> being returned in order to avoid having to create
+a temporary SV to carry the element count.
+
+That special SV has a zero numeric value and a C<"0"> string value.
+However, it does not pretend that one value came first or should be
+preferred when serializing or encoding to an external format.
+
+In addition, serializers (I<JSON::XS> being one such case) may use
+a string value in preference of a numerical value, even in cases where
+I<created_as_number> is true. C<"0"> might then be treated differently
+from C<0> in downstream processing.
+
+To minimize the chances of that happening, C<scalar @array> will once
+again return a temporary SV containing only the numerical count of array
+elements.
+
 =back
 
 =head1 Known Problems

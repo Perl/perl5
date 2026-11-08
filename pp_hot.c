@@ -2375,15 +2375,12 @@ PP(pp_padav)
     {
         const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
         rpp_extend(1);
-        if (!maxarg)
-            targ = &PL_sv_zero;
-        else if (PL_op->op_private & OPpTRUEBOOL)
-            targ = &PL_sv_yes;
-        else {
+        if (PL_op->op_private & OPpTRUEBOOL) {
+            targ = (maxarg) ? &PL_sv_yes : &PL_sv_zero;
+            rpp_push_IMM(targ);
+        } else {
             rpp_push_1_norc(newSViv(maxarg));
-            return NORMAL;
         }
-        rpp_push_IMM(targ);
         return NORMAL;
     }
 
