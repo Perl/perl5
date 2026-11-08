@@ -4666,6 +4666,17 @@ S_intuit_more(pTHX_ char *s, char *e,
     s++;
     start = s;
 
+    /* If called from the same position as before, return what was computed
+     * before.  This finesses the issue where we get called from
+     * LEX_INTERPENDMAYBE without the parse having advanced from when we were
+     * called from somewhere else, but without the context that was used in
+     * that previous call.  Lacking that context can cause this to come to a
+     * different (and worse) conclusion than we already made.  So simply
+     * return that previous conclusion */
+    if (start == PL_intuit_more_prev_lbracket_pos) {
+        return PL_intuit_more_prev_return;
+    }
+
     /* '^' implies a character class; An empty '[]' isn't legal, and it means
      * there isn't more to come */
     if (s[0] == ']' || s[0] == '^') {
