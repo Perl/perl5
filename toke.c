@@ -87,6 +87,9 @@ Individual members of C<PL_parser> have their own documentation.
 #  define PL_nexttoke		(PL_parser->nexttoke)
 #  define PL_nexttype		(PL_parser->nexttype)
 #  define PL_nextval		(PL_parser->nextval)
+#  define PL_intuit_more_prev_lbracket_pos                                  \
+                                (PL_parser->intuit_more_prev_lbracket_pos)
+#  define PL_intuit_more_prev_return (PL_parser->intuit_more_prev_return)
 
 #define SvEVALED(sv) \
     (SvTYPE(sv) >= SVt_PVNV \
@@ -993,6 +996,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
                                                         |LEX_DONT_CLOSE_RSFP));
 
     parser->in_pod = parser->filtered = 0;
+    parser->intuit_more_prev_lbracket_pos = NULL;
 }
 
 
@@ -5273,9 +5277,13 @@ S_intuit_more(pTHX_ char *s, char *e,
     /* FALLTHROUGH */
 
   do_save_and_return:
+    PL_intuit_more_prev_lbracket_pos = start;
+    PL_intuit_more_prev_return = retval;
     return retval;
 
-  do_clear_and_return:
+  do_clear_and_return:  /* We didn't get far enough to see a '[' */
+    PL_intuit_more_prev_lbracket_pos = NULL;
+    PL_intuit_more_prev_return = retval;
     return retval;
 }
 
