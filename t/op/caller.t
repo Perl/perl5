@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
     set_up_inc('../lib');
-    plan( tests => 127 ); # some tests are run in a BEGIN block
+    plan( tests => 128 ); # some tests are run in a BEGIN block
 }
 
 my @c;
@@ -326,6 +326,31 @@ fresh_perl_is(<<'EOP', "6\n9\n", {}, 'RT #7165: line number should be consistent
       
       tagCall
       sub {};
+EOP
+
+# The require state consumes the saved parser line. The following import
+# state uses the current line at the end of the use statement.
+# Before we sequenced the newSTATEOP() calls, some builds reported these
+# lines in reverse order because the import state consumed the saved line.
+fresh_perl_is(<<'EOP', "17\n18\n", {}, 'in multiline use with anon subs check line no');
+BEGIN {
+    unshift @INC, sub {
+        return unless $_[1] eq 'LineProbe.pm';
+        my $src = <<'MODULE';
+package LineProbe;
+print +(caller)[2], "\n";
+sub import {
+    print +(caller)[2], "\n";
+}
+1;
+MODULE
+        open my $fh, '<', \$src or die;
+        return $fh;
+    };
+}
+use LineProbe
+   one => sub { 1 },
+   two => sub { 2 };
 EOP
 
 $::testing_caller = 1;
