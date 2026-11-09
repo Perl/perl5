@@ -459,6 +459,14 @@ array. [GH #25038]
 
 =item *
 
+Various operations in the parser have now been made deterministic where
+they used to be at the mercy of the C compiler. Parser errors and warnings
+should now be emitted in consistent order in all build contexts. Line
+attribution for the implicit statements in a C<use> no longer depends on
+C compiler argument evaluation order.
+
+=item *
+
 A case-insensitive regex trie no longer accepts a word ending partway through
 an input character's fold. For example, C</s|zoo/iu> no longer matches a
 sharp-s, whose full fold is C<ss>. Later alternatives are tried in order.
