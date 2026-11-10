@@ -40,6 +40,7 @@
 #   undef F_sin_amg
 #   undef F_sqrt_amg
 #   undef GET_aTHX_if_NULL
+#   undef HAS_WARNING_ON_DEPRECATED_USE
 #   undef HASATTRIBUTE_UNINITIALIZED
 #   undef isFOO_or_UNDERSCORE_
 #   undef isIDCONT_lazy_if_safe

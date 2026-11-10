@@ -1104,7 +1104,7 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
 
 /* This release of perl has instances of warning when a deprecated API element
  * is used */
-//#define HAS_WARNING_ON_DEPRECATED_USE
+#define HAS_WARNING_ON_DEPRECATED_USE
 
 #ifdef HAS_WARNING_ON_DEPRECATED_USE
 #define Perl_warn_on_first_deprecated_use(category, name, alternative, when)\
