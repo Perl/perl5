@@ -5567,8 +5567,6 @@ PP(pp_subst)
 
         if (once) {
             char *d, *m;
-            if (RXp_MATCH_TAINTED(prog)) /* run time pattern taint, eg locale */
-                rxtainted |= SUBST_TAINT_PAT;
             m = orig + RXp_OFFS_START(prog,0);
             d = orig + RXp_OFFS_END(prog,0);
             s = orig;
@@ -5605,9 +5603,6 @@ PP(pp_subst)
                 SSize_t i;
                 if (UNLIKELY(iters++ > maxiters))
                     DIE(aTHX_ "Substitution loop");
-                /* run time pattern taint, eg locale */
-                if (UNLIKELY(RXp_MATCH_TAINTED(prog)))
-                    rxtainted |= SUBST_TAINT_PAT;
                 m = RXp_OFFS_START(prog,0) + orig;
                 if ((i = m - s)) {
                     if (s != d)
@@ -5657,8 +5652,6 @@ PP(pp_subst)
 #ifdef PERL_ANY_COW
       have_a_cow:
 #endif
-        if (RXp_MATCH_TAINTED(prog)) /* run time pattern taint, eg locale */
-            rxtainted |= SUBST_TAINT_PAT;
         repl = dstr;
         s = RXp_OFFS_START(prog,0) + orig;
 
@@ -5754,8 +5747,6 @@ PP(pp_subst)
             {
                 if (UNLIKELY(iters++ > maxiters))
                     DIE(aTHX_ "Substitution loop");
-                if (UNLIKELY(RXp_MATCH_TAINTED(prog)))
-                    rxtainted |= SUBST_TAINT_PAT;
                 if (RXp_MATCH_COPIED(prog) && RXp_SUBBEG(prog) != orig) {
                     char *old_s    = s;
                     char *old_orig = orig;
@@ -5801,8 +5792,6 @@ PP(pp_subst)
             {
                 if (UNLIKELY(iters++ > maxiters))
                     DIE(aTHX_ "Substitution loop");
-                if (UNLIKELY(RXp_MATCH_TAINTED(prog)))
-                    rxtainted |= SUBST_TAINT_PAT;
                 if (RXp_MATCH_COPIED(prog) && RXp_SUBBEG(prog) != orig) {
                     char *old_s    = s;
                     char *old_orig = orig;
