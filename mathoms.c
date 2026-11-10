@@ -66,6 +66,53 @@
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
 
+#if 0	/* Not currently used, but may be needed in the future */
+PERLVAR(I, seen_deprecated_macro, HV *)
+
+static void
+S_warn_on_first_deprecated_use(pTHX_ U32 category,
+                                     const char * const name,
+                                     const char * const alternative,
+                                     const bool use_locale,
+                                     const char * const file,
+                                     const unsigned line)
+{
+    PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE;
+
+    const char * key;
+
+    if (ckWARN_d(category)) {
+
+        key = form("%s;%d;%s;%d", name, use_locale, file, line);
+        if (! hv_fetch(PL_seen_deprecated_macro, key, strlen(key), 0)) {
+            if (! PL_seen_deprecated_macro) {
+                PL_seen_deprecated_macro = newHV();
+            }
+            if (! hv_store(PL_seen_deprecated_macro, key,
+                           strlen(key), &PL_sv_undef, 0))
+            {
+                croak("panic: hv_store() unexpectedly failed");
+            }
+
+            if (instr(file, "mathoms.c")) {
+                warner(category,
+                       "In %s, line %d, starting in Perl v5.32, %s()"
+                       " will be removed.  Avoid this message by"
+                       " converting to use %s().\n",
+                       file, line, name, alternative);
+            }
+            else {
+                warner(category,
+                       "In %s, line %d, starting in Perl v5.32, %s() will"
+                       " require an additional parameter.  Avoid this"
+                       " message by converting to use %s().\n",
+                       file, line, name, alternative);
+            }
+        }
+    }
+}
+#endif
+
 #ifdef NO_MATHOMS
 /* ..." warning: ISO C forbids an empty source file"
    So make sure we have something in here by processing the headers anyway.

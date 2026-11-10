@@ -1243,6 +1243,9 @@
 #   define opslab_free_nopad(a)                 Perl_opslab_free_nopad(aTHX_ a)
 #   define parser_free_nexttoke_ops(a,b)        Perl_parser_free_nexttoke_ops(aTHX_ a,b)
 #   define should_warn_nl                       S_should_warn_nl
+#   if 0
+#     define warn_on_first_deprecated_use(a,b,c,d,e,f) S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e,f)
+#   endif
 #   if defined(DEBUGGING)
 #     define get_debug_opts(a,b)                Perl_get_debug_opts(aTHX_ a,b)
 #     define set_padlist                        Perl_set_padlist
@@ -1842,9 +1845,6 @@
 #     define turkic_lc(a,b,c,d)                 S_turkic_lc(aTHX_ a,b,c,d)
 #     define turkic_uc(a,b,c,d)                 S_turkic_uc(aTHX_ a,b,c,d)
 #     define unexpected_non_continuation_text(a,b,c,d) S_unexpected_non_continuation_text(aTHX_ a,b,c,d)
-#     if 0
-#       define warn_on_first_deprecated_use(a,b,c,d,e,f) S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e,f)
-#     endif
 #   endif /* defined(PERL_IN_UTF8_C) */
 #   if defined(PERL_IN_UTIL_C)
 #     define ckwarn_common(a)                   S_ckwarn_common(aTHX_ a)

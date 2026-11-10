@@ -10615,6 +10615,19 @@ Perl_yyunlex(pTHX)
     STMT_START { Perl_assert_aTHX; PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
 
+#if 0
+static void
+S_warn_on_first_deprecated_use(pTHX_ U32 category, const char * const name, const char * const alternative, const bool use_locale, const char * const file, const unsigned line)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_2)
+        Perl_attribute_nonnull(pTHX_3)
+        Perl_attribute_nonnull(pTHX_5);
+# define PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE \
+     STMT_START { Perl_assert_aTHX; assert(name); assert(alternative);  \
+                  assert(file); PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;    \
+    } STMT_END
+
+#endif /* 0 */
 #if defined(DEBUGGING)
 PERL_CALLCONV int
 Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
@@ -17360,19 +17373,6 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s, STRLEN print_len, c
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;      \
     } STMT_END
 
-# if 0
-static void
-S_warn_on_first_deprecated_use(pTHX_ U32 category, const char * const name, const char * const alternative, const bool use_locale, const char * const file, const unsigned line)
-        Perl_attribute_nonnull_aTHX
-        Perl_attribute_nonnull(pTHX_2)
-        Perl_attribute_nonnull(pTHX_3)
-        Perl_attribute_nonnull(pTHX_5);
-#   define PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE \
-       STMT_START { Perl_assert_aTHX; assert(name); assert(alternative);  \
-                    assert(file); PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;    \
-    } STMT_END
-
-# endif /* 0 */
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
 PERL_STATIC_INLINE int
 S_does_utf8_overflow(const U8 * const s, const U8 *e)

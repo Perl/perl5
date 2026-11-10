@@ -4367,6 +4367,15 @@ EXp	|int	|yylex
 p	|int	|yyparse	|int gramtype
 p	|void	|yyquit
 p	|void	|yyunlex
+#if 0
+S	|void	|warn_on_first_deprecated_use				\
+				|U32 category				\
+				|NN const char * const name		\
+				|NN const char * const alternative	\
+				|const bool use_locale			\
+				|NN const char * const file		\
+				|const unsigned line
+#endif
 #if defined(DEBUGGING)
 : Used in mg.c
 Rp	|int	|get_debug_opts |NN const char **s			\
@@ -6638,15 +6647,6 @@ RS	|char * |unexpected_non_continuation_text			\
 				|STRLEN print_len			\
 				|const STRLEN non_cont_byte_pos 	\
 				|const STRLEN expect_len
-# if 0
-S	|void	|warn_on_first_deprecated_use				\
-				|U32 category				\
-				|NN const char * const name		\
-				|NN const char * const alternative	\
-				|const bool use_locale			\
-				|NN const char * const file		\
-				|const unsigned line
-# endif
 #endif /* defined(PERL_IN_UTF8_C) */
 #if defined(PERL_IN_UTIL_C)
 S	|bool	|ckwarn_common	|U32 w
