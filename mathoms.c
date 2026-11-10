@@ -145,7 +145,19 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 {
     PERL_ARGS_ASSERT_UTF8_TO_UVUNI;
 
-    return NATIVE_TO_UNI(valid_utf8_to_uv(s, retlen));
+    STRLEN char_len = UTF8_SKIP(s);
+
+    /* Don't read beyond an unexpected NUL */
+    if (char_len > UTF8_CHK_SKIP(s)) {
+        return UNICODE_REPLACEMENT;
+    }
+
+    UV cp;
+    if (! utf8_to_uv(s, s + char_len, &cp, retlen)) {
+        return UNICODE_REPLACEMENT;
+    }
+
+    return NATIVE_TO_UNI(cp);
 }
 
 U8 *
