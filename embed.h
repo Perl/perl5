@@ -1243,9 +1243,6 @@
 #   define opslab_free_nopad(a)                 Perl_opslab_free_nopad(aTHX_ a)
 #   define parser_free_nexttoke_ops(a,b)        Perl_parser_free_nexttoke_ops(aTHX_ a,b)
 #   define should_warn_nl                       S_should_warn_nl
-#   if 0
-#     define warn_on_first_deprecated_use(a,b,c,d,e,f) S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e,f)
-#   endif
 #   if defined(DEBUGGING)
 #     define get_debug_opts(a,b)                Perl_get_debug_opts(aTHX_ a,b)
 #     define set_padlist                        Perl_set_padlist
@@ -1278,6 +1275,9 @@
        ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
          defined(SOCK_DGRAM) )
 #     define PerlSock_socketpair_cloexec(a,b,c,d) Perl_PerlSock_socketpair_cloexec(aTHX_ a,b,c,d)
+#   endif
+#   if defined(HAS_WARNING_ON_DEPRECATED_USE)
+#     define warn_on_first_deprecated_use(a,b,c,d,e,f) S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e,f)
 #   endif
 #   if defined(PERL_DEBUG_READONLY_COW)
 #     define sv_buf_to_ro(a)                    Perl_sv_buf_to_ro(aTHX_ a)

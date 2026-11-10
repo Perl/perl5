@@ -4367,15 +4367,6 @@ EXp	|int	|yylex
 p	|int	|yyparse	|int gramtype
 p	|void	|yyquit
 p	|void	|yyunlex
-#if 0
-S	|void	|warn_on_first_deprecated_use				\
-				|U32 category				\
-				|NN const char * const name		\
-				|NN const char * const alternative	\
-				|const bool use_locale			\
-				|NN const char * const file		\
-				|const unsigned line
-#endif
 #if defined(DEBUGGING)
 : Used in mg.c
 Rp	|int	|get_debug_opts |NN const char **s			\
@@ -4484,6 +4475,15 @@ ATds	|Size_t |my_strlcpy	|NULLOK char *dst			\
 #if !defined(HAS_STRNLEN)
 ATdip	|Size_t |my_strnlen	|NN const char *str			\
 				|Size_t maxlen
+#endif
+#if defined(HAS_WARNING_ON_DEPRECATED_USE)
+S	|void	|warn_on_first_deprecated_use				\
+				|U32 category				\
+				|NN const char * const name		\
+				|NN const char * const alternative	\
+				|const bool use_locale			\
+				|NN const char * const file		\
+				|const unsigned line
 #endif
 #if defined(HAVE_INTERP_INTERN)
 Cp	|void	|sys_intern_clear

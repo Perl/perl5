@@ -17888,7 +17888,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_CCC_non0_non230        = sv_dup_inc(proto_perl->ICCC_non0_non230, param);
     PL_Private_Use            = sv_dup_inc(proto_perl->IPrivate_Use, param);
 
-#if 0
+#ifdef HAS_WARNING_ON_DEPRECATED_USE
     PL_seen_deprecated = hv_dup_inc(proto_perl->Iseen_deprecated, param);
 #endif
 

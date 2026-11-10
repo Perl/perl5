@@ -277,6 +277,7 @@
 # define PL_scratch_locale_obj                  (vTHX->Iscratch_locale_obj)
 # define PL_SCX_invlist                         (vTHX->ISCX_invlist)
 # define PL_secondgv                            (vTHX->Isecondgv)
+# define PL_seen_deprecated                     (vTHX->Iseen_deprecated)
 # define PL_setlocale_buf                       (vTHX->Isetlocale_buf)
 # define PL_setlocale_bufsize                   (vTHX->Isetlocale_bufsize)
 # define PL_sharehook                           (vTHX->Isharehook)

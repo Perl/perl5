@@ -66,9 +66,7 @@
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
 
-#if 0	/* Not currently used, but may be needed in the future */
-PERLVAR(I, seen_deprecated, HV *)
-
+#ifdef HAS_WARNING_ON_DEPRECATED_USE
 static void
 S_warn_on_first_deprecated_use(pTHX_ U32 category,
                                      const char * const name,
