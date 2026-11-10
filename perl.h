@@ -1106,6 +1106,12 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
  * is used */
 //#define HAS_WARNING_ON_DEPRECATED_USE
 
+#ifdef HAS_WARNING_ON_DEPRECATED_USE
+#define Perl_warn_on_first_deprecated_use(category, name, alternative, when)\
+    Perl_warn_on_first_deprecated_use_inlined(aTHX_                         \
+            category, name, alternative, when, __FILE__, (line_t) __LINE__)
+#endif
+
 /* These exist only for back-compat with XS modules.
 =for apidoc_section $compiler
 =for apidoc ABmn||VOL

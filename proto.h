@@ -10901,17 +10901,37 @@ Perl_my_strnlen(const char *str, Size_t maxlen)
 # endif
 #endif
 #if defined(HAS_WARNING_ON_DEPRECATED_USE)
-static void
-S_warn_on_first_deprecated_use(pTHX_ U32 category, const char * const name, const char * const alternative, const bool use_locale, const char * const file, const unsigned line)
+PERL_CALLCONV void
+Perl_warn_on_first_deprecated_use_helper(pTHX_ U32 category, const char * const key, const char * const name, const char * const alternative, const char * const when, const char * const file, line_t line)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_2)
         Perl_attribute_nonnull(pTHX_3)
-        Perl_attribute_nonnull(pTHX_5);
-# define PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE \
-     STMT_START { Perl_assert_aTHX; assert(name); assert(alternative);  \
-                  assert(file); PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;    \
+        Perl_attribute_nonnull(pTHX_4)
+        Perl_attribute_nonnull(pTHX_5)
+        Perl_attribute_nonnull(pTHX_6)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE_HELPER \
+     STMT_START { Perl_assert_aTHX; assert(key); assert(name);      \
+                  assert(alternative); assert(when); assert(file);  \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;              \
     } STMT_END
 
+# if !defined(PERL_NO_INLINE_FUNCTIONS)
+PERL_STATIC_FORCE_INLINE void
+Perl_warn_on_first_deprecated_use_inlined(pTHX_ U32 category, const char * const name, const char * const alternative, const char * const when, const char * const file, line_t line)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_2)
+        Perl_attribute_nonnull(pTHX_3)
+        Perl_attribute_nonnull(pTHX_4)
+        Perl_attribute_nonnull(pTHX_5)
+        __attribute__always_inline__;
+#   define PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE_INLINED \
+     STMT_START { Perl_assert_aTHX; assert(name); assert(alternative);  \
+                  assert(when); assert(file);                           \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                  \
+    } STMT_END
+
+# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(HAS_WARNING_ON_DEPRECATED_USE) */
 #if defined(HAVE_INTERP_INTERN)
 PERL_CALLCONV void

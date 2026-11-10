@@ -3560,6 +3560,26 @@ Perl_uv_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 
 /* ------------------------------- perl.h ----------------------------- */
 
+#ifdef HAS_WARNING_ON_DEPRECATED_USE
+
+PERL_STATIC_INLINE void
+Perl_warn_on_first_deprecated_use_inlined(pTHX_
+        U32 category, const char * const name, const char * const alternative,
+        const char * const when, const char * const file, line_t line)
+{
+    PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE_INLINED;
+
+    if (ckWARN_d(category)) {
+        const char * key = form("%s;%s;%" LINE_Tf, name, file, line);
+        if (! LIKELY(hv_fetch(PL_seen_deprecated, key, strlen(key), 0))) {
+            Perl_warn_on_first_deprecated_use_helper(aTHX_
+                          category, key, name, alternative, when, file, line);
+        }
+    }
+}
+
+#endif
+
 /*
 =for apidoc_section $utility
 

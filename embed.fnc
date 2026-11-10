@@ -4477,13 +4477,21 @@ ATdip	|Size_t |my_strnlen	|NN const char *str			\
 				|Size_t maxlen
 #endif
 #if defined(HAS_WARNING_ON_DEPRECATED_USE)
-S	|void	|warn_on_first_deprecated_use				\
+p	|void	|warn_on_first_deprecated_use_helper			\
+				|U32 category				\
+				|NN const char * const key		\
+				|NN const char * const name		\
+				|NN const char * const alternative	\
+				|NN const char * const when		\
+				|NN const char * const file		\
+				|line_t line
+CIp	|void	|warn_on_first_deprecated_use_inlined			\
 				|U32 category				\
 				|NN const char * const name		\
 				|NN const char * const alternative	\
-				|const bool use_locale			\
+				|NN const char * const when		\
 				|NN const char * const file		\
-				|const unsigned line
+				|line_t line
 #endif
 #if defined(HAVE_INTERP_INTERN)
 Cp	|void	|sys_intern_clear

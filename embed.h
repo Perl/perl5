@@ -913,6 +913,12 @@
 # if !defined(HAS_STRNLEN)
 #   define my_strnlen                           Perl_my_strnlen
 # endif
+# if defined(HAS_WARNING_ON_DEPRECATED_USE)
+#   define warn_on_first_deprecated_use_inlined(a,b,c,d,e,f) Perl_warn_on_first_deprecated_use_inlined(aTHX_ a,b,c,d,e,f)
+#   if defined(PERL_CORE)
+#     define warn_on_first_deprecated_use_helper(a,b,c,d,e,f,g) Perl_warn_on_first_deprecated_use_helper(aTHX_ a,b,c,d,e,f,g)
+#   endif
+# endif
 # if defined(HAVE_INTERP_INTERN)
 #   define sys_intern_clear()                   Perl_sys_intern_clear(aTHX)
 #   define sys_intern_init()                    Perl_sys_intern_init(aTHX)
@@ -1275,9 +1281,6 @@
        ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
          defined(SOCK_DGRAM) )
 #     define PerlSock_socketpair_cloexec(a,b,c,d) Perl_PerlSock_socketpair_cloexec(aTHX_ a,b,c,d)
-#   endif
-#   if defined(HAS_WARNING_ON_DEPRECATED_USE)
-#     define warn_on_first_deprecated_use(a,b,c,d,e,f) S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e,f)
 #   endif
 #   if defined(PERL_DEBUG_READONLY_COW)
 #     define sv_buf_to_ro(a)                    Perl_sv_buf_to_ro(aTHX_ a)

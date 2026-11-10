@@ -67,46 +67,31 @@
 #include "perl.h"
 
 #ifdef HAS_WARNING_ON_DEPRECATED_USE
-static void
-S_warn_on_first_deprecated_use(pTHX_ U32 category,
-                                     const char * const name,
-                                     const char * const alternative,
-                                     const bool use_locale,
-                                     const char * const file,
-                                     const unsigned line)
+void
+Perl_warn_on_first_deprecated_use_helper(pTHX_ U32 category,
+                                         const char * key,
+                                         const char * const name,
+                                         const char * const alternative,
+                                         const char * const when,
+                                         const char * const file,
+                                               line_t line)
 {
-    PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE;
+    PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE_HELPER;
 
-    const char * key;
+    if (! PL_seen_deprecated) {
+        PL_seen_deprecated = newHV();
+    }
 
-    if (ckWARN_d(category)) {
+    if (! hv_store(PL_seen_deprecated, key, strlen(key), &PL_sv_undef, 0)) {
+        croak("panic: hv_store() unexpectedly failed");
+    }
 
-        key = form("%s;%d;%s;%d", name, use_locale, file, line);
-        if (! hv_fetch(PL_seen_deprecated, key, strlen(key), 0)) {
-            if (! PL_seen_deprecated) {
-                PL_seen_deprecated = newHV();
-            }
-            if (! hv_store(PL_seen_deprecated, key,
-                           strlen(key), &PL_sv_undef, 0))
-            {
-                croak("panic: hv_store() unexpectedly failed");
-            }
-
-            if (instr(file, "mathoms.c")) {
-                warner(category,
-                       "In %s, line %d, starting in Perl v5.32, %s()"
-                       " will be removed.  Avoid this message by"
-                       " converting to use %s().\n",
-                       file, line, name, alternative);
-            }
-            else {
-                warner(category,
-                       "In %s, line %d, starting in Perl v5.32, %s() will"
-                       " require an additional parameter.  Avoid this"
-                       " message by converting to use %s().\n",
-                       file, line, name, alternative);
-            }
-        }
+    if (! instr(file, "mathoms.c")) {
+        warner(category,
+               "In %s, line %" LINE_Tf
+               ", starting in Perl v%s, '%s' will be removed."
+               "  Avoid this message by converting to use '%s'.\n",
+               file, line, when, name, alternative);
     }
 }
 #endif
