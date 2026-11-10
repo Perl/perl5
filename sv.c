@@ -17889,7 +17889,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_Private_Use            = sv_dup_inc(proto_perl->IPrivate_Use, param);
 
 #if 0
-    PL_seen_deprecated_macro = hv_dup_inc(proto_perl->Iseen_deprecated_macro, param);
+    PL_seen_deprecated = hv_dup_inc(proto_perl->Iseen_deprecated, param);
 #endif
 
     if (proto_perl->Ipsig_pend) {

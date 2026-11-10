@@ -67,7 +67,7 @@
 #include "perl.h"
 
 #if 0	/* Not currently used, but may be needed in the future */
-PERLVAR(I, seen_deprecated_macro, HV *)
+PERLVAR(I, seen_deprecated, HV *)
 
 static void
 S_warn_on_first_deprecated_use(pTHX_ U32 category,
@@ -84,11 +84,11 @@ S_warn_on_first_deprecated_use(pTHX_ U32 category,
     if (ckWARN_d(category)) {
 
         key = form("%s;%d;%s;%d", name, use_locale, file, line);
-        if (! hv_fetch(PL_seen_deprecated_macro, key, strlen(key), 0)) {
-            if (! PL_seen_deprecated_macro) {
-                PL_seen_deprecated_macro = newHV();
+        if (! hv_fetch(PL_seen_deprecated, key, strlen(key), 0)) {
+            if (! PL_seen_deprecated) {
+                PL_seen_deprecated = newHV();
             }
-            if (! hv_store(PL_seen_deprecated_macro, key,
+            if (! hv_store(PL_seen_deprecated, key,
                            strlen(key), &PL_sv_undef, 0))
             {
                 croak("panic: hv_store() unexpectedly failed");
