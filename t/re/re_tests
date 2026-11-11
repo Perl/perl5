@@ -2213,6 +2213,11 @@ ABCF|BCD[Ee]|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 (?:zz|(?:a(*THEN)b|c)|d)	a	n	$&	a	-	(*THEN) stays nested (no match)
 (?:zz|(?:a(*THEN)b|c)|d)	d	y	$&	d	-	(*THEN) stays nested (match)
 
+# Nested branch flattening and NOTHING nodes are studied correctly
+^(?:|(?:)a+)$	aa	y	$&	aa	-	NOTHING branch followed by valid nodes
+^(?:|(?:(?:a+|b)|))$	aa	y	$&	aa	-	NOTHING branch followed by valid nodes
+^(?:|(?:(?:(a)|b)|))$	a	y	$1	a	-	NOTHING branch followed by valid nodes
+
 # Prefixes extracted from jump tries must remain attached to those tries.
 # Otherwise an enclosing trie pass can discard the branch structure needed
 # by backtracking control verbs.  Keep both failing and successful paths here
