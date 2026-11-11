@@ -2026,7 +2026,7 @@ if ($expected_file_found && $expected_file eq 't/perl') {
         undef $expected_file_found;
         my $link = readlink $expected_file;
         warn "'t/perl' => '$link', not 'perl'";
-        die_255("Could not realink t/perl: $!") unless defined $link;
+        die_255("Could not readlink t/perl: $!") unless defined $link;
     }
 }
 
