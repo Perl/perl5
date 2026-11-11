@@ -10,7 +10,7 @@ BEGIN {
 # Tests the new documented mechanism for determining the original type
 # of an SV.
 
-plan tests => 24;
+plan tests => 27;
 use strict;
 use B qw(svref_2object SVf_IOK SVf_NOK SVf_POK);
 
@@ -123,8 +123,34 @@ CODE
 unlike($got, qr/Conditional jump or move depends on uninitialised value/,
         'All fields initialized in SVt_PV[IV|NV|MG] copies');
 
-my @arr;
-# pp_padav pushes $PL_sv_zero to the stack here
-my $sc = scalar @arr;
-$xobj = svref_2object(\$sc);
-is($xobj->FLAGS & (SVf_IOK | SVf_POK), SVf_IOK, "PL_sv_zero behaves as number (not string) first");
+# pp_padav returns PL_sv_zero if count=0
+{
+    my @arr;
+    my $sc = scalar @arr;
+    $xobj = svref_2object(\$sc);
+    is($xobj->FLAGS & (SVf_IOK | SVf_POK), SVf_IOK, "PL_sv_zero from pp_padav behaves as number (not string) first");
+}
+
+# pp_padhv returns PL_sv_zero if count=0
+{
+    my %hash;
+    my $sc = scalar %hash;
+    $xobj = svref_2object(\$sc);
+    is($xobj->FLAGS & (SVf_IOK | SVf_POK), SVf_IOK, "PL_sv_zero from pp_padhv behaves as number (not string) first");
+}
+
+# pp_rv2av returns PL_sv_zero if count=0
+{
+    our @pkgarr;
+    my $sc = scalar @pkgarr;
+    $xobj = svref_2object(\$sc);
+    is($xobj->FLAGS & (SVf_IOK | SVf_POK), SVf_IOK, "PL_sv_zero from pp_rv2av behaves as number (not string) first");
+}
+
+# pp_rv2hv returns PL_sv_zero if count=0
+{
+    our %pkghash;
+    my $sc = scalar %pkghash;
+    $xobj = svref_2object(\$sc);
+    is($xobj->FLAGS & (SVf_IOK | SVf_POK), SVf_IOK, "PL_sv_zero from pp_rv2hv behaves as number (not string) first");
+}

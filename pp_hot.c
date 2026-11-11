@@ -2312,13 +2312,14 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
         }
         else {
           push_i:
-            if (has_targ) {
+            if (!i)
+                rpp_push_IMM(&PL_sv_zero);
+            else if (has_targ) {
                 dTARGET;
                 TARGi(i,1);
                 rpp_push_1(targ);
             }
-            else
-            if (is_keys) {
+            else if (is_keys) {
                 /* parent op should be an unused OP_KEYS whose targ we can
                  * use */
                 dTARG;
@@ -2509,8 +2510,10 @@ PP(pp_rv2av)
 
         if (gimme == G_SCALAR) {
             const SSize_t maxarg = AvFILL(av) + 1;
-            if (PL_op->op_private & OPpTRUEBOOL)
-                rpp_replace_1_IMM_NN(maxarg ? &PL_sv_yes : &PL_sv_zero);
+            if (!maxarg)
+                rpp_replace_1_IMM_NN(&PL_sv_zero);
+            else if (PL_op->op_private & OPpTRUEBOOL)
+                rpp_replace_1_IMM_NN(&PL_sv_yes);
             else {
                 dTARGET;
                 TARGi(maxarg, 1);
