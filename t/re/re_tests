@@ -2217,6 +2217,8 @@ ABCF|BCD[Ee]|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 ^(?:|(?:)a+)$	aa	y	$&	aa	-	NOTHING branch followed by valid nodes
 ^(?:|(?:(?:a+|b)|))$	aa	y	$&	aa	-	NOTHING branch followed by valid nodes
 ^(?:|(?:(?:(a)|b)|))$	a	y	$1	a	-	NOTHING branch followed by valid nodes
+^(?:(?:a|)|b)c$	c	y	$&	c	-	flattening handles a trailing NOTHING branch
+^(?:(?:|a+)|b)c$	aac	y	$&	aac	-	flattening handes a leading NOTHING branch
 
 # Prefixes extracted from jump tries must remain attached to those tries.
 # Otherwise an enclosing trie pass can discard the branch structure needed

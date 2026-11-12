@@ -3108,29 +3108,19 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
 
         /* Proceed if there is a nested branch with in-range offsets */
         if (OP(first_inner_br) == BRANCH && ender - outer_br <= U16_MAX) {
-            /* There is a set of inner BRANCH regnodes. Walk them to find the
-             * final one in the chain, checking for conditions (such as empty
-             * branch contents) that could corrupt the regex if flattened. */
+            /* A set of inner BRANCH regnodes exists. We need the end BRANCH. */
             last_inner_br = first_inner_br;
              /* Note: This loop could check if flattening has a good chance of
               * building bigger tries, but with the anticipated move to 32 bit
               * offsets, it shouldn't matter. */
-            while (1) {
-                regnode *inner_content = S_content_head(aTHX_ last_inner_br);
-                if (REGNODE_TYPE(OP(inner_content)) == NOTHING) {
-                    last_inner_br = NULL;
-                    break;
-                }
-                if (OP(regnext(last_inner_br)) != BRANCH)
-                    break;
+            while (OP(regnext(last_inner_br)) == BRANCH)
                 last_inner_br = regnext(last_inner_br);
-            }
 
             /* It may not be safe to flatten if the regnode following the final
              * inner BRANCH isn't a TAIL. Flattening is definitely not safe if
              * the tail doesn't point to the expected outer TAIL. */
-            if(last_inner_br && ( UNLIKELY(OP(regnext(last_inner_br)) != TAIL)
-                                || regnext(regnext(last_inner_br)) != ender))
+            if(UNLIKELY(OP(regnext(last_inner_br)) != TAIL)
+                                || regnext(regnext(last_inner_br)) != ender)
                 last_inner_br = NULL;
         }
         if (!last_inner_br) {
@@ -3158,7 +3148,9 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
 #endif
         /* Walk the inner BRANCH regnodes in turn. */
         for (regnode *inner_br = first_inner_br; OP(inner_br) == BRANCH; inner_br = regnext(inner_br)) {
-            regnode *content_tail = S_content_head(aTHX_ inner_br);
+            /* In the unlikely event of a branch being completely empty,
+             * we can't skip over NOTHING/OPTMIZED regnodes. */
+            regnode *content_tail = REGNODE_AFTER(inner_br);
 #ifdef DEBUGGING
             regnode *content_head = content_tail;
 #endif
