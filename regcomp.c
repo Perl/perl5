@@ -3087,6 +3087,18 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
     regnode *prev_outer_br = NULL;
     regnode *outer_br  = first_outer_br;
 
+    /* Don't flatten if the outer branch contains capture group(s), as these
+     * may not be correctly reset if the match backtracks.
+     * Note: This is a conservative approach, it may be possible to fix up
+     *       the capture groups with more work. */
+    regnode *last_br = first_outer_br;
+    regnode *next;
+    while ( (next = regnext(last_br)) && OP(next) == BRANCH) {
+        last_br = next;
+    }
+    if (BRANCH_LAST_CAPTURE(last_br) != BRANCH_CAPTURE_FLOOR(first_outer_br))
+        return;
+
     while (outer_br && OP(outer_br) == BRANCH) {
         /* Get next outer BRANCH node - or the tail */
         regnode *outer_successor = regnext(outer_br);
