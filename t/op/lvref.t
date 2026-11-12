@@ -5,7 +5,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 203;
+plan 205;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental aliasing via reference not enabled/,
@@ -767,4 +767,33 @@ pass("RT #123821");
     is("@a", "102 200 301", "rt #133538 \@a still aliased");
     is("$h{one} $h{two} $h{three}", "102 200 301", "rt #133538 %h still aliased");
 
+}
+
+# GH#25056 refalias checks GETMAGIC
+{
+    package ElemsAreArrayrefs {
+        # Implements a tied array whose elements are all 1-element ARRAYrefs,
+        # containing their own index
+        sub TIEARRAY { bless [] }
+        sub FETCHSIZE { 5 }
+        sub FETCH { my ($self, $idx) = @_; return [$idx]; }
+    }
+
+    tie my @outer_a, "ElemsAreArrayrefs";
+
+    my $output;
+    foreach \my @inner_a (@outer_a) {
+        $output .= "|" if length $output;
+        $output .= "<@inner_a>";
+    }
+    is($output, "<0>|<1>|<2>|<3>|<4>",
+        'foreach(ARRAY) on refalias invokes GETMAGIC on each element');
+
+    undef $output;
+    foreach \my @inner_a ($outer_a[0], $outer_a[1], $outer_a[2]) {
+        $output .= "|" if length $output;
+        $output .= "<@inner_a>";
+    }
+    is($output, "<0>|<1>|<2>",
+        'foreach(LIST) on refalias invokes GETMAGIC on each element');
 }
