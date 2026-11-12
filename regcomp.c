@@ -3102,10 +3102,8 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
          * branch contents) that could corrupt the regex if flattened. */
         regnode *last_inner_br = first_inner_br;
          /* Note: This loop could check if flattening has a good chance of
-         * building bigger tries, or would result in offsets > U16_MAX, but
-         * with the anticipated move to 32 bit offsets, it shouldn't matter.
-         * If this code does create oversized offsets in the meantime, the
-         * surrounding code will reparse using BRANCHJ. */
+         * building bigger tries, but with the anticipated move to 32 bit
+         * offsets, it shouldn't matter. */
         bool unsafe = false;
         while (1) {
             regnode *inner_content = S_content_head(aTHX_ last_inner_br);
@@ -3127,6 +3125,12 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
          * the tail doesn't point to the expected outer TAIL. */
         regnode *inner_ender = regnext(last_inner_br);
         if (UNLIKELY(OP(inner_ender) != TAIL) || regnext(inner_ender) != ender) {
+            prev_outer_br = outer_br; outer_br = outer_successor; continue;
+        }
+
+        /* Flattening links regnodes in the inner branch directly to *ender.
+         * Skip this outer branch if the offsets would overflow. */
+        if (ender - outer_br > U16_MAX) {
             prev_outer_br = outer_br; outer_br = outer_successor; continue;
         }
 
