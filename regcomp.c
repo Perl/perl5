@@ -3104,54 +3104,42 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
         regnode *outer_successor = regnext(outer_br);
         /* Follow REGNODE_AFTER(outer_br) to see what's inside this BRANCH */
         regnode *first_inner_br = S_content_head(aTHX_ outer_br);
+        regnode *last_inner_br = NULL;
 
-        if (OP(first_inner_br) != BRANCH) { /* Not a nested BRANCH */
-            prev_outer_br = outer_br; outer_br = outer_successor; continue;
-        }
-
-        /* There is a set of inner BRANCH regnodes. Walk them to find the
-         * final one in the chain, checking for conditions (such as empty
-         * branch contents) that could corrupt the regex if flattened. */
-        regnode *last_inner_br = first_inner_br;
-         /* Note: This loop could check if flattening has a good chance of
-         * building bigger tries, but with the anticipated move to 32 bit
-         * offsets, it shouldn't matter. */
-        bool unsafe = false;
-        while (1) {
-            regnode *inner_content = S_content_head(aTHX_ last_inner_br);
-            const U8 type = REGNODE_TYPE(OP(inner_content));
-            if (type == NOTHING) { /* Note: OPTIMIZED also has type == NOTHING */
-                unsafe = true; break;
+        /* Proceed if there is a nested branch with in-range offsets */
+        if (OP(first_inner_br) == BRANCH && ender - outer_br <= U16_MAX) {
+            /* There is a set of inner BRANCH regnodes. Walk them to find the
+             * final one in the chain, checking for conditions (such as empty
+             * branch contents) that could corrupt the regex if flattened. */
+            last_inner_br = first_inner_br;
+             /* Note: This loop could check if flattening has a good chance of
+              * building bigger tries, but with the anticipated move to 32 bit
+              * offsets, it shouldn't matter. */
+            while (1) {
+                regnode *inner_content = S_content_head(aTHX_ last_inner_br);
+                if (REGNODE_TYPE(OP(inner_content)) == NOTHING) {
+                    last_inner_br = NULL;
+                    break;
+                }
+                if (OP(regnext(last_inner_br)) != BRANCH)
+                    break;
+                last_inner_br = regnext(last_inner_br);
             }
 
-            if (OP(regnext(last_inner_br)) != BRANCH)
-                break;
-            last_inner_br = regnext(last_inner_br);
+            /* It may not be safe to flatten if the regnode following the final
+             * inner BRANCH isn't a TAIL. Flattening is definitely not safe if
+             * the tail doesn't point to the expected outer TAIL. */
+            if(last_inner_br && ( UNLIKELY(OP(regnext(last_inner_br)) != TAIL)
+                                || regnext(regnext(last_inner_br)) != ender))
+                last_inner_br = NULL;
         }
-        if (unsafe) {
-            prev_outer_br = outer_br; outer_br = outer_successor; continue;
-        }
-
-        /* It may not be safe to flatten if the regnode following the final
-         * inner BRANCH isn't a TAIL. Flattening is definitely not safe if
-         * the tail doesn't point to the expected outer TAIL. */
-        regnode *inner_ender = regnext(last_inner_br);
-        if (UNLIKELY(OP(inner_ender) != TAIL) || regnext(inner_ender) != ender) {
-            prev_outer_br = outer_br; outer_br = outer_successor; continue;
-        }
-
-        /* Flattening links regnodes in the inner branch directly to *ender.
-         * Skip this outer branch if the offsets would overflow. */
-        if (ender - outer_br > U16_MAX) {
+        if (!last_inner_br) {
             prev_outer_br = outer_br; outer_br = outer_successor; continue;
         }
 
         /* By this point, there is an inner BRANCH and it seems safe to
          * flatten it. This is done by manipulating regnode offsets. */
-        const regnode_offset last_inner_off      = REGNODE_OFFSET(last_inner_br);
-        const regnode_offset outer_successor_off = REGNODE_OFFSET(outer_successor);
-        const regnode_offset first_inner_br_off  = REGNODE_OFFSET(first_inner_br);
-        const regnode_offset prev_outer_br_off = (prev_outer_br) ? REGNODE_OFFSET(prev_outer_br) : 0;
+        regnode *inner_ender = regnext(last_inner_br);
 
         /* However, we cannot reliably tell if there is an outer *THEN yet to
          * be parsed, in which case flattening could mess up the matching logic.
@@ -3171,26 +3159,18 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
         /* Walk the inner BRANCH regnodes in turn. */
         for (regnode *inner_br = first_inner_br; OP(inner_br) == BRANCH; inner_br = regnext(inner_br)) {
             regnode *content_tail = S_content_head(aTHX_ inner_br);
-            assert(content_tail);
 #ifdef DEBUGGING
             regnode *content_head = content_tail;
 #endif
             /* Walk the regnodes within a single inner BRANCH to
              * find the local tail (content_tail). */
-            regnode *nx = regnext(content_tail);
-            while (nx && nx != inner_ender && content_tail != ender) {
+            regnode *nx;
+            while ((nx = regnext(content_tail)) && nx != inner_ender)
                 content_tail = nx;
-                nx = regnext(content_tail);
-            }
-            /* The inner tail shouldn't be an outer regnode. */
-            assert(content_tail != ender);
 
             /* Flatten this inner BRANCH by effectively hoisting the
              * contents to the level of the outer BRANCH. */
-            if (nx == inner_ender) {
-                const regnode_offset tail_off  = REGNODE_OFFSET(content_tail);
-                const regnode_offset ender_off = REGNODE_OFFSET(ender);
-
+            if (LIKELY(nx == inner_ender)) {
                 DEBUG_PARSE_r({
                     if (my_nalt == 1) sv_catpvs(debug_string, "|");
                     /* Not trying exhaustively to find an EXACT to report */
@@ -3202,7 +3182,8 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
                         re_printf("~ EXACT <%.*s> (brnc %" UVuf ") "
                             "attach to TAIL (%" UVuf ")\n",
                             (int) STR_LEN(lbl), STRING(lbl),
-                            (UV) REGNODE_OFFSET(lbl), (UV) ender_off);
+                            (UV) REGNODE_OFFSET(lbl),
+                            (UV) REGNODE_OFFSET(ender));
                         if (my_nalt < 2) {
                             sv_catpvn(debug_string, STRING(lbl), STR_LEN(lbl));
                         }
@@ -3211,7 +3192,8 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
                         re_printf(" ~ route %s tail (%" UVuf
                             ") to ender (%" UVuf ")\n",
                             SvPV_nolen_const(RExC_mysv1),
-                            (UV) tail_off, (UV) ender_off);
+                            (UV) REGNODE_OFFSET(content_tail),
+                            (UV) REGNODE_OFFSET(ender));
                         if (my_nalt < 2) {
                             sv_catsv(debug_string, RExC_mysv1);
                         }
@@ -3222,7 +3204,7 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
                 });
                 /* Point the final regnode within the inner BRANCH to the
                  * common outer TAIL regnode. */
-                NEXT_OFF_set(content_tail, ender_off - tail_off);
+                NEXT_OFF_set(content_tail, ender - content_tail);
             }
         }
 
@@ -3242,15 +3224,12 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
 
         /* Fix up the relevant outer BRANCH regnode */
         if (prev_outer_br) {
-            NEXT_OFF_set(prev_outer_br, first_inner_br_off - prev_outer_br_off);
+            NEXT_OFF_set(prev_outer_br, first_inner_br - prev_outer_br);
             OP(outer_br) = OPTIMIZED;
             NEXT_OFF_set(outer_br, 0);
         } else {
             OP(outer_br) = NOTHING;
-
-            const regnode_offset outer_br_off = REGNODE_OFFSET(outer_br);
-            assert(first_inner_br_off >= outer_br_off);
-            NEXT_OFF_set(outer_br, first_inner_br_off - outer_br_off);
+            NEXT_OFF_set(outer_br, first_inner_br - outer_br);
         }
 
         regnode *detritus = outer_br + NODE_STEP_REGNODE;
@@ -3258,7 +3237,7 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
         NEXT_OFF_set(detritus, 0);
 
         /* Fix up the inner branch. */
-        NEXT_OFF_set(last_inner_br, outer_successor_off - last_inner_off);
+        NEXT_OFF_set(last_inner_br, outer_successor - last_inner_br);
 
         /* .. and the inner content tail. */
         OP(inner_ender) = OPTIMIZED; /* inner_ender was likely a TAIL node */
