@@ -412,6 +412,14 @@ package FetchStoreCounter {
 
     ok(eq_array(\@output, [qw( [0]=six [1]=seven [2]=eight [3]=nine )] ),
         'foreach + builtin::indexed LIST' );
+
+    my $ten = 10;
+    foreach my ( $idx, $val ) ( builtin::indexed $ten ) {
+        $val++;
+    }
+
+    is($ten, 10,
+        'foreach + builtin::indexed creates copies, not aliases' );
 }
 
 # indexed + foreach + refalias (GH#24999)
