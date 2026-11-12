@@ -3227,14 +3227,63 @@ S_flatten_inner_branches(pTHX_ RExC_state_t *pRExC_state, regnode *first_outer_b
             NEXT_OFF_set(prev_outer_br, first_inner_br - prev_outer_br);
             OP(outer_br) = OPTIMIZED;
             NEXT_OFF_set(outer_br, 0);
-        } else {
-            OP(outer_br) = NOTHING;
-            NEXT_OFF_set(outer_br, first_inner_br - outer_br);
-        }
 
-        regnode *detritus = outer_br + NODE_STEP_REGNODE;
-        OP(detritus) = OPTIMIZED;
-        NEXT_OFF_set(detritus, 0);
+            regnode *detritus = outer_br + NODE_STEP_REGNODE;
+            OP(detritus) = OPTIMIZED;
+            NEXT_OFF_set(detritus, 0);
+        } else {
+             /* Note: the following code depends upon there being no
+              * capture groups in the outer branch. If this function is
+              * revised to enable flattening when they are present, some
+              * revision here may be necessary. */
+            assert(BRANCH_CAPTURE_FLOOR(outer_br)
+                == BRANCH_CAPTURE_FLOOR(first_inner_br));
+            assert(BRANCH_LAST_CAPTURE(outer_br)
+                == BRANCH_LAST_CAPTURE(first_inner_br));
+
+            /* If the size of a BRANCH regnode ever changes, the 1s and 2s
+               below will need updating. */
+            assert(sizeof(tregnode_BRANCH) == 2 * sizeof(regnode));
+
+            /* If we flatten by doing:
+             *     OP(outer_br) = NOTHING;
+             * or
+             *     OP(first_inner_branch) = NOTHING;
+             * that would cause code elsewhere to stop at that regnode
+             * rather than walking the whole flattened branch chain.
+             * That could prevent a valid stclass being identified.
+             *
+             * Instead, the outer_br is repurposed and the inner
+             * branches are moved to overwrite the first_inner_branch. */
+            regnode * const src = REGNODE_AFTER(first_inner_br);
+            regnode * const src_end = regnext(first_inner_br);
+            regnode * const unused = src_end - 2;
+
+            /* Update inner branch regnode offsets so they can be moved */
+            assert(src == first_inner_br + 2);
+            for (regnode *n = src; n < src_end; n = REGNODE_AFTER(n)) {
+                if (NEXT_OFF(n) && n + NEXT_OFF(n) >= src_end) {
+                    NEXT_OFF_set(n, NEXT_OFF(n) + 2);
+                }
+            }
+
+            /* Now move them to overwrite the first inner branch regnore */
+            Move(src, first_inner_br, src_end - src, regnode);
+
+            /* Deal with the now-trailing slack */
+            OP(unused) = OPTIMIZED;
+            NEXT_OFF_set(unused, 0);
+            OP(unused + 1) = OPTIMIZED;
+            NEXT_OFF_set(unused + 1, 0);
+
+            /* Fixup the remaining offsets */
+            if (first_inner_br == last_inner_br) {
+                last_inner_br = outer_br;
+            } else {
+                NEXT_OFF_set(outer_br, src_end - outer_br);
+            }
+            first_inner_br = outer_br;
+        }
 
         /* Fix up the inner branch. */
         NEXT_OFF_set(last_inner_br, outer_successor - last_inner_br);
