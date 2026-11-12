@@ -4892,6 +4892,68 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     return retval;
 }
 
+/* The build_* helpers below need explicit ordering of parser operations.
+ * Functions such as scalar(), list(), and ref() can emit diagnostics or
+ * change parser state. C does not specify argument evaluation order, so
+ * nesting such calls in separate arguments can change diagnostic order
+ * or line attribution between builds.
+ *
+ * Keep the ordering explicit inside each helper as well as at its call
+ * sites. For example:
+ *
+ *     lhs = scalar(lhs);
+ *     rhs = scalar(rhs);
+ *     return newBINOP(operation, 0, lhs, rhs);
+ *
+ * Do not fold those scalar() calls into newBINOP()'s arguments.
+ * t/porting/parser_order.t checks known helpers for this pattern.
+ */
+
+/*
+=for apidoc build_array_element
+
+    build_array_element($target, $selector);
+
+Builds an array element op for C<$array[$index]> or C<$term-E<gt>[$index]>.
+The target is prepared by the caller before the selector receives scalar
+context.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_array_element(pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_ARRAY_ELEMENT;
+
+    return newBINOP(OP_AELEM, 0, target, scalar(selector));
+}
+
+/*
+=for apidoc build_binary_expression
+
+Builds a binary expression, applying scalar context to the operands from
+left to right. For C<OP_REPEAT>, only the right operand receives scalar
+context here.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_binary_expression(pTHX_ I32 operation, OP *lhs, OP *rhs)
+{
+    PERL_ARGS_ASSERT_BUILD_BINARY_EXPRESSION;
+
+    if (operation != OP_REPEAT)
+        lhs = scalar(lhs);
+    rhs = scalar(rhs);
+    return newBINOP(operation, 0, lhs, rhs);
+}
+
 /*
 =for apidoc build_function_invocation
 
@@ -4913,6 +4975,151 @@ Perl_build_function_invocation (pTHX_ I32 flags, OP *code, OP *arguments)
         flags,
         op_append_elem (OP_LIST, arguments, code)
     );
+}
+
+/*
+=for apidoc build_hash_element
+
+    build_hash_element($target, $selector);
+
+Builds a hash element op for C<$hash{$key}> or C<$term-E<gt>{$key}>.
+The caller prepares the target before this function handles a possible
+multidimensional selector.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_hash_element(pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_HASH_ELEMENT;
+
+    return newBINOP(OP_HELEM, 0, target, jmaybe(selector));
+}
+
+/*
+=for apidoc build_list_slice
+
+    build_list_slice(operation, $target, $selector);
+
+Builds an array or hash slice. The selector receives list context before
+the target is converted to the type required by C<operation> and marked
+as a reference.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice(pTHX_ I32 operation, OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE;
+
+    selector = list(selector);
+    OP *container = target;
+    if (operation == OP_HSLICE)
+        container = oopsHV(container);
+    else if (operation == OP_KVASLICE)
+        container = oopsAV(container);
+    container = ref(container, operation);
+
+    OP *op = op_prepend_elem(
+        operation,
+        newOP(OP_PUSHMARK, 0),
+        newLISTOP(operation, 0, selector, container)
+    );
+
+    if (op && target)
+        op->op_private |= target->op_private & OPpSLICEWARNING;
+
+    return op;
+}
+
+/*
+=for apidoc build_list_slice_array
+
+    build_list_slice_array($target, $selector);
+
+Builds a value slice of an array, such as C<@array[@indexes]> or
+C<$term-E<gt>@[@indexes]>.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_array(pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_ARRAY;
+
+    return build_list_slice(OP_ASLICE, target, selector);
+}
+
+/*
+=for apidoc build_list_slice_hash
+
+    build_list_slice_hash($target, $selector);
+
+Builds a value slice of a hash, such as C<@hash{@keys}> or
+C<$term-E<gt>@{@keys}>.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_hash(pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_HASH;
+
+    return build_list_slice(OP_HSLICE, target, selector);
+}
+
+/*
+=for apidoc build_list_slice_kv_array
+
+    build_list_slice_kv_array($target, $selector);
+
+Builds a key/value slice of an array, such as C<%array[@indexes]> or
+C<$term-E<gt>%[@indexes]>.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_kv_array(pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_KV_ARRAY;
+
+    return build_list_slice(OP_KVASLICE, target, selector);
+}
+
+/*
+=for apidoc build_list_slice_kv_hash
+
+    build_list_slice_kv_hash($target, $selector);
+
+Builds a key/value slice of a hash, such as C<%hash{@keys}> or
+C<$term-E<gt>%{@keys}>.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_list_slice_kv_hash(pTHX_ OP *target, OP *selector)
+{
+    PERL_ARGS_ASSERT_BUILD_LIST_SLICE_KV_HASH;
+
+    return build_list_slice(OP_KVHSLICE, target, selector);
 }
 
 /*
@@ -4998,6 +5205,27 @@ Perl_build_method_invocation_arguments (pTHX_ OP *target, OP *arguments)
         ? op_prepend_elem (OP_LIST, target, arguments)
         : target
         ;
+}
+
+/*
+=for apidoc build_range
+
+Builds a range expression, applying scalar context to its operands from
+left to right before constructing the range op.
+
+Available since: v5.46
+
+=cut
+*/
+
+OP*
+Perl_build_range(pTHX_ I32 flags, OP *lhs, OP *rhs)
+{
+    PERL_ARGS_ASSERT_BUILD_RANGE;
+
+    lhs = scalar(lhs);
+    rhs = scalar(rhs);
+    return newRANGE(flags, lhs, rhs);
 }
 
 /*
