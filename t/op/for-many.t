@@ -558,4 +558,20 @@ is($continue, 'xx', 'continue reached twice');
     refcount_is \@arry, 1+1, 'arry refcount 1 after loop';
 }
 
+# GH#25055
+{
+    use feature qw( refaliasing declared_refs );
+    no warnings qw( experimental::refaliasing experimental::declared_refs );
+
+    my $output;
+    for my ( \@arr, $v1, $v2, $v3, $v4, $v5, $v6, $v7, $v8,
+        $v9, $v10, $v11, $v12, $v13, $v14, $v15, $v16,
+        $v17, $v18, $v19, $v20, $v21, $v22, $v23, $v24,
+        $v25, $v26, $v27, $v28, $v29, $v30, $v31, $v32 ) ( [0], 1 .. 32 ) {
+        $output = "arr=<@arr> v32=$v32";
+    }
+    is($output, "arr=<0> v32=32",
+        'foreach refalias is not confused by U32 bitshift wraparound');
+}
+
 done_testing();
