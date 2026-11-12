@@ -412,6 +412,15 @@ package FetchStoreCounter {
 
     ok(eq_array(\@output, [qw( [0]=six [1]=seven [2]=eight [3]=nine )] ),
         'foreach + builtin::indexed LIST' );
+
+    undef @output;
+
+    foreach my ( $idx, $val ) ( builtin::indexed reverse qw( zero one two ) ) {
+        push @output, "[$idx]=$val";
+    }
+
+    ok(eq_array(\@output, [qw( [0]=two [1]=one [2]=zero )]),
+        'foreach + builtin::indexed reverse LIST' );
 }
 
 # indexed + foreach + refalias (GH#24999)

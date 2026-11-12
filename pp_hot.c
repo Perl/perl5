@@ -5152,8 +5152,11 @@ PP(pp_iter)
             if (UNLIKELY(pflags & OPpITER_INDEXED) && (i == 0)) {
                 SvREFCNT_dec(*itersvp);
                 /* here ix is really a stack pointer offset; we have to
-                 * calculate the real index */
-                *itersvp = newSViv(ix - cx->blk_loop.state_u.stack.basesp - 1);
+                 * calculate the real index. What value that is depends on
+                 * the OPpITER_REVERSED flag */
+                *itersvp = (pflags & OPpITER_REVERSED)
+                    ? newSViv(cx->blk_oldsp - ix)
+                    : newSViv(ix - cx->blk_loop.state_u.stack.basesp - 1);
 
                 ++i;
                 ++itersvp;
