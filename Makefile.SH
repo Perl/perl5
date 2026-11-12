@@ -536,16 +536,16 @@ unidatadirs = lib/unicore/To lib/unicore/lib
 
 h = \
     EXTERN.h INTERN.h XSUB.h \
-    av.h cop.h cv.h dosish.h embed.h form.h gv.h handy.h hv.h hv_func.h \
-    iperlsys.h keywords.h l1_char_class_tab.h mg.h mydtrace.h op.h \
+    attributes.h av.h cop.h cv.h dosish.h embed.h form.h gv.h handy.h hv.h \
+    hv_func.h iperlsys.h keywords.h l1_char_class_tab.h mg.h mydtrace.h op.h \
     op_reg_common.h opcode.h pad.h patchlevel.h perl.h perlapi.h perly.h pp.h \
     proto.h regcomp.h regcomp_internal.h regexp.h regexp_constants.h scope.h \
     sv.h thread.h unixish.h utf8.h util.h warnings.h \
     $(CONFIGH)
 
 c_base = \
-    av.c builtin.c caretx.c class.c deb.c doio.c doop.c dquote.c dump.c \
-    globals.c gv.c hv.c keywords.c locale.c long_names.c mathoms.c mg.c \
+    attributes.c av.c builtin.c caretx.c class.c deb.c doio.c doop.c dquote.c \
+    dump.c globals.c gv.c hv.c keywords.c locale.c long_names.c mathoms.c mg.c \
     mro_core.c numeric.c op.c pad.c peep.c perl.c perlio.c perly.c \
     pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c \
     reentr.c regcomp.c regcomp_debug.c regcomp_invlist.c regcomp_study.c \
@@ -570,7 +570,8 @@ c = $(c_base) miniperlmain.c $(mini_only_src)
 # actual perl(mini)main.o, nor any dtrace objects.
 
 common_objs = \
-    av$(OBJ_EXT) builtin$(OBJ_EXT) caretx$(OBJ_EXT) class$(OBJ_EXT) \
+    attributes$(OBJ_EXT) av$(OBJ_EXT) builtin$(OBJ_EXT) caretx$(OBJ_EXT) \
+    class$(OBJ_EXT) \
     deb$(OBJ_EXT) doio$(OBJ_EXT) doop$(OBJ_EXT) dquote$(OBJ_EXT) \
     dump$(OBJ_EXT) globals$(OBJ_EXT) gv$(OBJ_EXT) hv$(OBJ_EXT) \
     keywords$(OBJ_EXT) locale$(OBJ_EXT) long_names$(OBJ_EXT) \
