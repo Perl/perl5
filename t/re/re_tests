@@ -2408,6 +2408,8 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 (?{})\A(?:(a)?b)+(?(1)a|c)\z	abbc	y	$&	abbc	-	conditional sees the skipped capture as unset
 (?{})\A(?:(\x{100})?b)+\z	\x{100}bb	y	${\(defined($1) ? $1 : q(undef))}	undef	-	Unicode optional capture
 (?{})\A(?:(a)?b)+\z	abab	y	$1	a	-	final participating capture is preserved
+(?:(?:y(b)|a)|x)+	ybx	y	${\(defined($1) ? $1 : q(undef))}	undef	-	branch flattening preserves capture reset
+(?:x(b)|(?:(?:y|z)|w))+	xby	y	${\(defined($1) ? $1 : q(undef))}	undef	-	branch flattening preserves capture reset
 
 # GH #24944
 /\A\ba*\z/m	a	y	$&	a	-	SBOL and BOUND start class should match
