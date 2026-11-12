@@ -31,6 +31,8 @@ my $sensitive = qr/\b(?:Perl_|S_)?(?:
     scalar | list | scalarvoid | voidnonfinal | op_contextualize
     | op_lvalue(?:_flags)? | ref | doref | jmaybe | oopsAV | oopsHV
     | newAVREF | newHVREF | newSTATEOP
+    | build_array_element | build_binary_expression | build_hash_element
+    | build_list_slice(?:_array|_hash|_kv_array|_kv_hash)? | build_range
 )\s*\(/x;
 
 my $parens = qr/(?<parens> \( (?: [^()]++ | (?&parens) )* \) )/x;
@@ -80,6 +82,15 @@ my @bad = (
         newSTATEOP(0, NULL, require_op), newSTATEOP(0, NULL, version_op)),
         newSTATEOP(0, NULL, import_op));',
     'newBINOP(op, 0, Perl_scalar(aTHX_ left), scalar(right));',
+    'f(build_array_element(target, selector), scalar(other));',
+    'f(build_hash_element(target, selector), scalar(other));',
+    'f(build_binary_expression(op, left, right), scalar(other));',
+    'f(build_range(flags, left, right), scalar(other));',
+    'f(build_list_slice(OP_ASLICE, target, selector), scalar(other));',
+    'f(build_list_slice_array(target, selector), scalar(other));',
+    'f(build_list_slice_hash(target, selector), scalar(other));',
+    'f(build_list_slice_kv_array(target, selector), scalar(other));',
+    'f(build_list_slice_kv_hash(target, selector), scalar(other));',
     'newBINOP(OP_AELEM, 0, oopsAV(array), scalar(selector));',
     'newBINOP(OP_HELEM, 0, oopsHV(hash), jmaybe(selector));',
     'newBINOP(OP_HELEM, 0,
@@ -104,6 +115,8 @@ my @bad = (
 my @good = (
     'left = scalar(left); right = scalar(right); newBINOP(op, 0, left, right);',
     'newBINOP(op, 0, op_lvalue(scalar(left), op), right);',
+    'build_array_element(ref(newAVREF(target), OP_RV2AV), selector);',
+    'build_hash_element(ref(newHVREF(target), OP_RV2HV), selector);',
     'f((scalar(left), scalar(right)), other);',
     'return (scalar(left), scalar(right));',
     'f("scalar(left)", scalar(right));',

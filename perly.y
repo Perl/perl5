@@ -1457,24 +1457,15 @@ subscripted:    gelem subscript_keys[selector]        /* *main::{something} */
                          * provided by the tokeniser */
 			{ $$ = newBINOP(OP_GELEM, 0, $gelem, scalar($selector)); }
 	|	scalar[array] subscript_index[selector]          /* $array[$element] */
-			{ OP * const arrayop = oopsAV($array);
-			  OP * const index = scalar($selector);
-			  $$ = newBINOP(OP_AELEM, 0, arrayop, index);
-			}
+			{ $$ = build_array_element(oopsAV($array), $selector); }
 	|	subscriptable_reference[array_reference] subscript_index[selector]    /* $ref->[..]; $foo{$bar}[..] */
-			{ OP * const arrayop = ref(newAVREF($array_reference), OP_RV2AV);
-			  OP * const index = scalar($selector);
-			  $$ = newBINOP(OP_AELEM, 0, arrayop, index);
-			}
+			{ $$ = build_array_element(
+			      ref(newAVREF($array_reference), OP_RV2AV), $selector); }
 	|	scalar[hash] subscript_keys[selector]    /* $foo{bar();} */
-			{ OP * const hashop = oopsHV($hash);
-			  OP * const key = jmaybe($selector);
-			  $$ = newBINOP(OP_HELEM, 0, hashop, key);
-			}
+			{ $$ = build_hash_element(oopsHV($hash), $selector); }
 	|	subscriptable_reference[hash_reference] subscript_keys[selector] /* $foo->[bar]->{baz;} */
-			{ OP * const hashop = ref(newHVREF($hash_reference), OP_RV2HV);
-			  OP * const key = jmaybe($selector);
-			  $$ = newBINOP(OP_HELEM, 0, hashop, key); }
+			{ $$ = build_hash_element(
+			      ref(newHVREF($hash_reference), OP_RV2HV), $selector); }
 	|	/* $subref->(@args); $foo->{bar}(@args) */
 		subscriptable_reference [code_reference]
 		PERLY_PAREN_OPEN
@@ -1520,44 +1511,29 @@ termbinop:	term[lhs] PLUGIN_HIGH_OP[op] term[rhs]
 	|	term[lhs] PLUGIN_ASSIGN_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] POWOP term[rhs]                        /* $x ** $y */
-			{ OP * const left = scalar($lhs);
-			  OP * const right = scalar($rhs);
-			  $$ = newBINOP($POWOP, 0, left, right); }
+			{ $$ = build_binary_expression($POWOP, $lhs, $rhs); }
 	|	term[lhs] PLUGIN_POW_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] MULOP term[rhs]                        /* $x * $y, $x x $y */
-			{   if ($MULOP != OP_REPEAT)
-				scalar($lhs);
-			    $$ = newBINOP($MULOP, 0, $lhs, scalar($rhs));
-			}
+			{ $$ = build_binary_expression($MULOP, $lhs, $rhs); }
 	|	term[lhs] PLUGIN_MUL_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] ADDOP term[rhs]                        /* $x + $y */
-			{ OP * const left = scalar($lhs);
-			  OP * const right = scalar($rhs);
-			  $$ = newBINOP($ADDOP, 0, left, right); }
+			{ $$ = build_binary_expression($ADDOP, $lhs, $rhs); }
 	|	term[lhs] PLUGIN_ADD_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] SHIFTOP term[rhs]                      /* $x >> $y, $x << $y */
-			{ OP * const left = scalar($lhs);
-			  OP * const right = scalar($rhs);
-			  $$ = newBINOP($SHIFTOP, 0, left, right); }
+			{ $$ = build_binary_expression($SHIFTOP, $lhs, $rhs); }
 	|	termrelop %prec PREC_LOW               /* $x > $y, etc. */
 			{ $$ = $termrelop; }
 	|	termeqop %prec PREC_LOW                /* $x == $y, $x cmp $y */
 			{ $$ = $termeqop; }
 	|	term[lhs] BITANDOP term[rhs]                     /* $x & $y */
-			{ OP * const left = scalar($lhs);
-			  OP * const right = scalar($rhs);
-			  $$ = newBINOP($BITANDOP, 0, left, right); }
+			{ $$ = build_binary_expression($BITANDOP, $lhs, $rhs); }
 	|	term[lhs] BITOROP term[rhs]                      /* $x | $y */
-			{ OP * const left = scalar($lhs);
-			  OP * const right = scalar($rhs);
-			  $$ = newBINOP($BITOROP, 0, left, right); }
+			{ $$ = build_binary_expression($BITOROP, $lhs, $rhs); }
 	|	term[lhs] DOTDOT term[rhs]                       /* $x..$y, $x...$y */
-			{ OP * const left = scalar($lhs);
-			  OP * const right = scalar($rhs);
-			  $$ = newRANGE($DOTDOT, left, right); }
+			{ $$ = build_range($DOTDOT, $lhs, $rhs); }
 	|	term[lhs] ANDAND term[rhs]                       /* $x && $y */
 			{ $$ = newLOGOP(OP_AND, 0, $lhs, $rhs); }
 	|	term[lhs] PLUGIN_LOGICAL_AND_OP[op] term[rhs]
@@ -1577,9 +1553,7 @@ termbinop:	term[lhs] PLUGIN_HIGH_OP[op] term[rhs]
 termrelop:	relopchain %prec PREC_LOW
 			{ $$ = cmpchain_finish($relopchain); }
 	|	term[lhs] NCRELOP term[rhs]
-			{ OP * const left = scalar($lhs);
-			  OP * const right = scalar($rhs);
-			  $$ = newBINOP($NCRELOP, 0, left, right); }
+			{ $$ = build_binary_expression($NCRELOP, $lhs, $rhs); }
 	|	termrelop NCRELOP
 			{ yyerror("syntax error"); YYERROR; }
 	|	termrelop CHRELOP
@@ -1597,9 +1571,7 @@ relopchain:	term[lhs] CHRELOP term[rhs]
 termeqop:	eqopchain %prec PREC_LOW
 			{ $$ = cmpchain_finish($eqopchain); }
 	|	term[lhs] NCEQOP term[rhs]
-			{ OP * const left = scalar($lhs);
-			  OP * const right = scalar($rhs);
-			  $$ = newBINOP($NCEQOP, 0, left, right); }
+			{ $$ = build_binary_expression($NCEQOP, $lhs, $rhs); }
 	|	termeqop NCEQOP
 			{ yyerror("syntax error"); YYERROR; }
 	|	termeqop CHEQOP
@@ -1711,45 +1683,13 @@ term[product]	:	termbinop
 	|       subscripted
 			{ $$ = $subscripted; }
 	|	sliceme subscript_index[selector]                     /* array slice */
-			{ OP * const selector = list($selector);
-			  OP * const arrayop = ref($sliceme, OP_ASLICE);
-			  $$ = op_prepend_elem(OP_ASLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_ASLICE, 0, selector, arrayop));
-			  if ($$ && $sliceme)
-			      $$->op_private |=
-				  $sliceme->op_private & OPpSLICEWARNING;
-			}
+			{ $$ = build_list_slice_array($sliceme, $selector); }
 	|	kvslice subscript_index[selector]                 /* array key/value slice */
-			{ OP * const selector = list($selector);
-			  OP * const arrayop = ref(oopsAV($kvslice), OP_KVASLICE);
-			  $$ = op_prepend_elem(OP_KVASLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_KVASLICE, 0, selector, arrayop));
-			  if ($$ && $kvslice)
-			      $$->op_private |=
-				  $kvslice->op_private & OPpSLICEWARNING;
-			}
+			{ $$ = build_list_slice_kv_array($kvslice, $selector); }
 	|	sliceme subscript_keys[selector]                 /* @hash{@keys} */
-			{ OP * const selector = list($selector);
-			  OP * const hashop = ref(oopsHV($sliceme), OP_HSLICE);
-			  $$ = op_prepend_elem(OP_HSLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_HSLICE, 0, selector, hashop));
-			  if ($$ && $sliceme)
-			      $$->op_private |=
-				  $sliceme->op_private & OPpSLICEWARNING;
-			}
+			{ $$ = build_list_slice_hash($sliceme, $selector); }
 	|	kvslice subscript_keys[selector]                 /* %hash{@keys} */
-			{ OP * const selector = list($selector);
-			  OP * const hashop = ref($kvslice, OP_KVHSLICE);
-			  $$ = op_prepend_elem(OP_KVHSLICE,
-				newOP(OP_PUSHMARK, 0),
-				    newLISTOP(OP_KVHSLICE, 0, selector, hashop));
-			  if ($$ && $kvslice)
-			      $$->op_private |=
-				  $kvslice->op_private & OPpSLICEWARNING;
-			}
+			{ $$ = build_list_slice_kv_hash($kvslice, $selector); }
 	|	THING	%prec PERLY_PAREN_OPEN
 			{ $$ = $THING; }
 	|	/* &foo; */
