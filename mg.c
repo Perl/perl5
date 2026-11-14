@@ -3412,17 +3412,14 @@ Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
             }
         }
         if (targ && (targ != &PL_sv_undef)) {
-            /* The container may own the only reference to targ. Retain
-               targ and resolve the alias before releasing the container,
-               since that release can run destructors. */
+            /* somebody else defined it for us */
             SV * const old_target = LvTARG(sv);
-            SV * const old_key = mg->mg_obj;
             LvTARG(sv) = SvREFCNT_inc_simple_NN(targ);
+            SvREFCNT_dec(old_target);
             LvTARGLEN(sv) = 0;
+            SvREFCNT_dec(mg->mg_obj);
             mg->mg_obj = NULL;
             mg->mg_flags &= ~MGf_REFCOUNTED;
-            SvREFCNT_dec(old_target);
-            SvREFCNT_dec(old_key);
         }
         return targ;
     }
@@ -3475,27 +3472,19 @@ Perl_vivify_defelem(pTHX_ SV *sv)
         croak(PL_no_aelem, LvSTARGOFF(sv));
     else {
         AV *const av = MUTABLE_AV(LvTARG(sv));
-        /* A nonextendible miss has no value. LvTARG must keep the array
-           until the common release or its reference is leaked. */
-        if ((I32)LvTARGLEN(sv) < 0 && LvSTARGOFF(sv) > AvFILL(av))
-            value = NULL;
-        else {
+        if ((I32)LvTARGLEN(sv) >= 0 || LvSTARGOFF(sv) <= AvFILL(av)) {
             SV* const * const svp = av_fetch(av, LvSTARGOFF(sv), TRUE);
             if (!svp || !(value = *svp))
                 croak(PL_no_aelem, LvSTARGOFF(sv));
         }
     }
-    /* Retain value and resolve the alias before releasing its old
-       references, since those releases can run destructors. */
-    SV * const old_target = LvTARG(sv);
-    SV * const old_key = mg->mg_obj;
     SvREFCNT_inc_simple_void(value);
+    SvREFCNT_dec(LvTARG(sv));
     LvTARG(sv) = value;
     LvTARGLEN(sv) = 0;
+    SvREFCNT_dec(mg->mg_obj);
     mg->mg_obj = NULL;
     mg->mg_flags &= ~MGf_REFCOUNTED;
-    SvREFCNT_dec(old_target);
-    SvREFCNT_dec(old_key);
 }
 
 int
