@@ -5005,7 +5005,7 @@ PP(pp_iter)
         IV ix;
         IV inc;
 
-        bool refalias_this = refalias_mask & (1<<i);
+        bool refalias_this = (i < 24) && (refalias_mask & (1<<i));
 
         switch (type) {
 
