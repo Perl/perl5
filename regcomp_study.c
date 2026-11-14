@@ -2162,7 +2162,19 @@ Perl_study_chunk(pTHX_
                                  * is 'first' then we can turn the whole thing
                                  * into a NOTHING
                                  */
-                                if ( startbranch == first ) {
+                                bool empty = startbranch == first;
+                                regnode *br = startbranch;
+
+                                /* A branch starting with a NOTHING isn't guaranteed
+                                 * to be empty. Flattening of nested branches could
+                                 * cause this to occur. */
+                                for (; empty && br != scan; br = regnext(br)) {
+                                    regnode * const noper = REGNODE_AFTER(br);
+                                    if (OP(noper) != NOTHING || regnext(noper) < tail)
+                                        empty = false;
+                                }
+
+                                if (empty) {
                                     regnode *opt;
                                     /* the entire thing is a NOTHING sequence,
                                      * something like this: (?:|) So we can
