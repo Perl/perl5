@@ -12,7 +12,9 @@ if ($Config{sig_name} =~ /\bRTMIN\b/ && $Config{sig_name} =~ /\bRTMAX\b/) {
 
 my @libs;
 if ($^O ne 'MSWin32' && $^O ne 'freemint') {
-    push @libs, qw(m posix cposix);
+    push @libs, 'm';
+    push @libs, grep { $Config{libs} =~ /(?:^|\s)-l\Q$_\E(?:\s|$)/ }
+                     qw(posix cposix);
 }
 if ($^O eq 'solaris') {
     push @libs, qw(sunmath);
