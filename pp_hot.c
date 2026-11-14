@@ -5238,7 +5238,7 @@ PP(pp_iter)
                     *itersvp = NULL;
                     croak("Use of freed value in iteration");
                 }
-                if (SvPADTMP(sv)) {
+                if (SvPADTMP(sv) || (pflags & OPpITER_INDEXED)) {
                     sv = newSVsv(sv);
                 }
                 else {
