@@ -203,12 +203,29 @@ Intel*) ;; # # Is that you, Intel C++?
    *" -std="*) ;; # Already have -std=...
    *) warns="-std=c99 $warns" ;;
    esac
+   # Filter out -Werror from probes so unused declarations do not reject valid
+   # flags, leaving ccflags unchanged for the actual build.  We tried disabling
+   # the offending warnings instead, but that raises different portability
+   # concerns.  Filtering it out is the least troublesome option.
+   probe_ccflags=''
+   for flag in $ccflags
+   do
+       case "$flag" in
+       -Werror|-Werror=*) ;;
+       *) probe_ccflags="$probe_ccflags $flag" ;;
+       esac
+   done
    for opt in $warns
     do
        case " $ccflags " in
        *" $opt "*) ;; # Skip if already there.
        *) rm -f _cflags$_exe
-	  flags="-DPERL_NO_INLINE_FUNCTIONS $ccflags $warn $stdflags $opt"
+          # TODO: Currently (5.45.5), we need -DPERL_NO_INLINE_FUNCTIONS here
+          # even with C99.  Without it, GCC at -O0 emits the unused static
+          # Perl_croak_memory_wrap function.  The probe then fails to link
+          # because PL_memory_wrap and Perl_croak are unresolved.  At some
+          # point we should fix this.  -- Yves
+	  flags="-DPERL_NO_INLINE_FUNCTIONS $probe_ccflags $warn $stdflags $opt"
 	  case "$opt" in
 	  *-pedantic*) flags="$flags -DPERL_GCC_PEDANTIC" ;;
 	  esac
