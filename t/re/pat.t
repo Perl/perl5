@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 6822 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 6823 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -3480,6 +3480,16 @@ PROG
         print $1 // "undef", ":", $2 // "undef", "\n";
         "abcde5678" =~ / b .* (*plb:(*plb:(.{4}))? (.{5}) ) .$ /x;
         print $1 // "undef", ":", $2 // "undef", "\n";
+        PROG
+    }
+
+    {   # GH 24789
+        fresh_perl_is(<<~'PROG', "", {}, "use strict doesnt affect behavior");
+        my @e = 0;
+        my $f = \@e;
+        qr/$$f[0]/;
+        use strict;
+        qr/$$f[0]/;
         PROG
     }
 
