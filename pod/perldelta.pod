@@ -287,6 +287,11 @@ L</Platform Support> section, instead.
 
 =item *
 
+GCC configuration probes now work with C<-Werror> when detecting library
+functions, the size of C<long double>, and supported compiler options.
+
+=item *
+
 Fix some build noise and technical undefined behaviour with
 C<-Duselongdouble> builds on ARM64:
 
