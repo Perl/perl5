@@ -115,7 +115,9 @@
          "https://dev.perl.org/licenses/"
       ],
       "repository" : {
-         "url" : "https://github.com/Perl/perl5"
+         "type" : "git",
+         "url" : "https://github.com/Perl/perl5.git",
+         "web" : "https://github.com/Perl/perl5"
       }
    },
    "version" : "5.045005",
