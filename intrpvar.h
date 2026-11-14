@@ -772,6 +772,17 @@ PERLVARI(I, NUMERIC_toggle_depth, int, 0)
 #if defined(USE_LOCALE) && (defined(WIN32) || ! defined(USE_THREAD_SAFE_LOCALE))
 PERLVARI(I, perl_controls_locale, bool, true)
 #endif
+
+#if defined(USE_LOCALE) && (   defined(WIN32)                               \
+                            || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES))
+PERLVARI(I, win_bscratch, char *, NULL)
+PERLVARI(I, win_bscratch_size, Size_t, 0)
+PERLVARI(I, wrap_wsetlocale_wlocale, wchar_t *, NULL)
+PERLVARI(I, wrap_wsetlocale_wlocale_size, Size_t, 0)
+PERLVARI(I, wrap_wsetlocale_result, char *, NULL)
+PERLVARI(I, wrap_wsetlocale_result_size, Size_t, 0)
+#endif
+
 #ifdef USE_PL_CUR_LC_ALL
 PERLVARI(I, cur_LC_ALL, const char *, NULL)
 #endif
