@@ -6806,7 +6806,13 @@ set d_cplusplus
 eval $setvar
 
 : is a C symbol defined?
+# The generic declaration tests linkage, not the builtin function signature.
 csym='tlook=$1;
+csymflags=;
+case "$gccversion" in
+"") ;;
+*) csymflags="-fno-builtin";;
+esac;
 case "$3" in
 -v) tf=libc.tmp; tdc="";;
 -a) tf=libc.tmp; tdc="[]";;
@@ -6829,13 +6835,13 @@ yes)
 			tval=true;
 		elif $test "$mistrustnm" = compile -o "$mistrustnm" = run; then
 			echo "$extern_C void *$1$tdc; void *(*(p()))$tdc { return &$1; } int main(int argc, char **argv) { if(p() && p() != (void *)argv[0]) return(0); else return(1); }"> try.c;
-			$cc -o try $optimize $ccflags $ldflags try.c >/dev/null 2>&1 $libs && tval=true;
+			$cc -o try $optimize $ccflags $csymflags $ldflags try.c >/dev/null 2>&1 $libs && tval=true;
 			$test "$mistrustnm" = run -a -x try && { $run ./try$_exe >/dev/null 2>&1 || tval=false; };
 			$rm_try;
 		fi;
 	else
 		echo "$extern_C void *$1$tdc; void *(*(p()))$tdc { return &$1; } int main(int argc, char **argv) { if(p() && p() != (void *)argv[0]) return(0); else return(1); }"> try.c;
-		$cc -o try $optimize $ccflags $ldflags try.c $libs >/dev/null 2>&1 && tval=true;
+		$cc -o try $optimize $ccflags $csymflags $ldflags try.c $libs >/dev/null 2>&1 && tval=true;
 		$rm_try;
 	fi;
 	;;
