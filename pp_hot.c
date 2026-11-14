@@ -5199,6 +5199,8 @@ PP(pp_iter)
             if (refalias_this) {
                 /* TODO(leonerd): pull out this behaviour into a shared place.
                  * This is mostly copypaste from mg.c's Perl_magic_setlvref */
+                if(sv)
+                    SvGETMAGIC(sv);
                 if (!sv || !SvROK(sv)) croak("Assigned value is not a reference");
                 SV *rv = SvRV(sv);
 
