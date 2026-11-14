@@ -179,7 +179,9 @@ Deprecated.  Use C<GIMME_V> instead.
 
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
 #  define GIMME \
-          (PL_op->op_flags & OPf_WANT					\
+          (Perl_warn_on_first_deprecated_use(                           \
+                WARN_DEPRECATED, "GIMME", "GIMME_V", "5.50"),           \
+           PL_op->op_flags & OPf_WANT					\
            ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
               ? G_LIST							\
               : G_SCALAR)						\

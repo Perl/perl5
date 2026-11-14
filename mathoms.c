@@ -66,6 +66,36 @@
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
 
+#ifdef HAS_WARNING_ON_DEPRECATED_USE
+void
+Perl_warn_on_first_deprecated_use_helper(pTHX_ U32 category,
+                                         const char * key,
+                                         const char * const name,
+                                         const char * const alternative,
+                                         const char * const when,
+                                         const char * const file,
+                                               line_t line)
+{
+    PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE_HELPER;
+
+    if (! PL_seen_deprecated) {
+        PL_seen_deprecated = newHV();
+    }
+
+    if (! hv_store(PL_seen_deprecated, key, strlen(key), &PL_sv_undef, 0)) {
+        croak("panic: hv_store() unexpectedly failed");
+    }
+
+    if (! instr(file, "mathoms.c")) {
+        warner(category,
+               "In %s, line %" LINE_Tf
+               ", starting in Perl v%s, '%s' will be removed."
+               "  Avoid this message by converting to use '%s'.\n",
+               file, line, when, name, alternative);
+    }
+}
+#endif
+
 #ifdef NO_MATHOMS
 /* ..." warning: ISO C forbids an empty source file"
    So make sure we have something in here by processing the headers anyway.

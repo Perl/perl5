@@ -40,6 +40,7 @@
 #   undef F_sin_amg
 #   undef F_sqrt_amg
 #   undef GET_aTHX_if_NULL
+#   undef HAS_WARNING_ON_DEPRECATED_USE
 #   undef HASATTRIBUTE_UNINITIALIZED
 #   undef isFOO_or_UNDERSCORE_
 #   undef isIDCONT_lazy_if_safe
@@ -912,6 +913,12 @@
 # endif
 # if !defined(HAS_STRNLEN)
 #   define my_strnlen                           Perl_my_strnlen
+# endif
+# if defined(HAS_WARNING_ON_DEPRECATED_USE)
+#   define warn_on_first_deprecated_use_inlined(a,b,c,d,e,f) Perl_warn_on_first_deprecated_use_inlined(aTHX_ a,b,c,d,e,f)
+#   if defined(PERL_CORE)
+#     define warn_on_first_deprecated_use_helper(a,b,c,d,e,f,g) Perl_warn_on_first_deprecated_use_helper(aTHX_ a,b,c,d,e,f,g)
+#   endif
 # endif
 # if defined(HAVE_INTERP_INTERN)
 #   define sys_intern_clear()                   Perl_sys_intern_clear(aTHX)
@@ -1851,9 +1858,6 @@
 #     define turkic_lc(a,b,c,d)                 S_turkic_lc(aTHX_ a,b,c,d)
 #     define turkic_uc(a,b,c,d)                 S_turkic_uc(aTHX_ a,b,c,d)
 #     define unexpected_non_continuation_text(a,b,c,d) S_unexpected_non_continuation_text(aTHX_ a,b,c,d)
-#     if 0
-#       define warn_on_first_deprecated_use(a,b,c,d,e,f) S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e,f)
-#     endif
 #   endif /* defined(PERL_IN_UTF8_C) */
 #   if defined(PERL_IN_UTIL_C)
 #     define ckwarn_common(a)                   S_ckwarn_common(aTHX_ a)
