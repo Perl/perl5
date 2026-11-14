@@ -90,7 +90,7 @@ SKIP: { # GH #23307
             setlocale(LC_CTYPE(), "C");
             print strftime("$test_case %T\n", localtime);
 EOF
-        qr/^$bytes /, {},
+        qr/^$bytes /, { wide_chars => 1 },
         "strftime in single-byte locale with non-ASCII chars works");
 }
 
