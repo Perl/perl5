@@ -1560,31 +1560,6 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
     return NULL;
 }
 
-#ifdef ARGV_USE_ATFUNCTIONS
-#  if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-
-/* FreeBSD 11 renameat() mis-behaves strangely with absolute paths in cases where the
- * equivalent rename() succeeds
- */
-static int
-S_my_renameat(int olddfd, const char *oldpath, int newdfd, const char *newpath)
-{
-    /* this is intended only for use in Perl_do_close() */
-    assert(olddfd == newdfd);
-    assert(PERL_FILE_IS_ABSOLUTE(oldpath) == PERL_FILE_IS_ABSOLUTE(newpath));
-    if (PERL_FILE_IS_ABSOLUTE(oldpath)) {
-        return PerlLIO_rename(oldpath, newpath);
-    }
-    else {
-        return renameat(olddfd, oldpath, newdfd, newpath);
-    }
-}
-
-#  else
-#    define S_my_renameat(dh1, pv1, dh2, pv2) renameat((dh1), (pv1), (dh2), (pv2))
-#  endif /* if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) */
-#endif
-
 static bool
 S_dir_unchanged(pTHX_ const char *orig_pv, MAGIC *mg)
 {
@@ -1715,7 +1690,7 @@ S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict)
 #ifdef HAS_RENAME
                     if (
 #  ifdef ARGV_USE_ATFUNCTIONS
-                        S_my_renameat(dfd, orig_pv, dfd, SvPVX(*back_psv)) < 0 &&
+                        renameat(dfd, orig_pv, dfd, SvPVX(*back_psv)) < 0 &&
                         !(UNLIKELY(NotSupported(errno)) &&
                           dir_unchanged(orig_pv, mg) &&
                           PerlLIO_rename(orig_pv, SvPVX(*back_psv)) == 0)
@@ -1762,7 +1737,7 @@ S_argvout_final(pTHX_ MAGIC *mg, IO *io, bool is_explict)
 #if !defined(HAS_RENAME)
                 link(SvPVX(*temp_psv), orig_pv) < 0
 #elif defined(ARGV_USE_ATFUNCTIONS)
-                S_my_renameat(dfd, SvPVX(*temp_psv), dfd, orig_pv) < 0 &&
+                renameat(dfd, SvPVX(*temp_psv), dfd, orig_pv) < 0 &&
                 !(UNLIKELY(NotSupported(errno)) &&
                   dir_unchanged(orig_pv, mg) &&
                   PerlLIO_rename(SvPVX(*temp_psv), orig_pv) == 0)
