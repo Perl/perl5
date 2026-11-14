@@ -1436,8 +1436,10 @@ Perl_boot_core_UNIVERSAL(pTHX)
 
     /* Providing a Regexp::DESTROY fixes #21347. See test in t/op/ref.t  */
     {
-        CV * const cv =
-            newCONSTSUB(get_hv("Regexp::", GV_ADD), "DESTROY", NULL);
+        GV* const gv = gv_fetchpvs("Regexp::", GV_ADD, SVt_PVHV);
+        HV* const stash = GvHV(gv);
+        CV* const cv =
+            newCONSTSUB_flags(stash, "DESTROY", STRLENs("DESTROY"), 0, NULL);
         char ** cvfile = &CvFILE(cv);
         char * oldfile = *cvfile;
         CvDYNFILE_off(cv);
