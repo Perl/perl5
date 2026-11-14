@@ -19,7 +19,7 @@ use warnings;
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 510 + 6 * 2;
+plan tests => 512 + 6 * 2;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -724,4 +724,55 @@ formline X000n^\\0,\\0^\\0for\0,0..10
 EOS
                   '',
                   {}, "[perl #17844] access beyond end of block");
+}
+
+{
+    # GH #9972 (previously [perl #70652])
+
+    my $warn = 0;
+    use strict;
+    use warnings;
+    local $SIG{__WARN__} = sub { $warn++ };
+
+    my $unicodestring = "\x{5454}\x{6655}";
+    my $normalstring = "0\36\4\13\200\0\31V\3\0\320\225\342\26\365\4\0\240\r\2\3\0\242_\2\1\0\2\1\0000\0\b\b\b\b\b\b\b\b";
+    my $iv = "\246\205\236\367]\257\304\276";
+
+    # First we need $1 to be unicode, otherwise the bug won't occur
+    $unicodestring =~ m/(.)/;
+
+    my @t;
+
+    # $1 is assigned but not yet unicode: UTF8-Flag ($1)
+    push @t, utf8::is_utf8 ($1);
+
+    # After we copy $1 the Flag is on: UTF8-Flag ($1)
+    my $copy = $1;
+    push @t, utf8::is_utf8 ($1);
+
+    # Now we take 8 Bytes of a normal string with m/(.{8})/
+    push @t, utf8::is_utf8 ($normalstring);
+
+    $normalstring =~ m/(.{8})/;
+
+    # The UTF-8 Flag of $1 is still on: UTF8-Flag ($1)
+    push @t, utf8::is_utf8 ($1);
+    # We have a second value called ($iv) without an UTF-8 Flag : UTF8-Flag ($iv)
+    push @t, utf8::is_utf8 ($iv);
+
+    # Now the UTF-8 Flag of $1 is off: UTF8-Flag ($1)
+    push @t, utf8::is_utf8 ($1);
+
+    my $x = $1 ^ $iv;
+    # $1 is now not UTF-8 anymore UTF8-Flag ($1)
+    push @t, utf8::is_utf8 ($1);
+    # $x is now UTF-8: UTF8-Flag ($x)
+    push @t, utf8::is_utf8 ($x);
+    # $iv suddenly is also UTF-8: UTF8-Flag ($iv)
+    push @t, utf8::is_utf8 ($iv);
+
+    ok(! $warn, "No warnings in this block");
+    my $got = [@t];
+    my $exp = [1, 1, "", "", "", "", "", "", ""];
+    ok( eq_array($got, $exp), "GH 9972: no malformed UTF-8 character in bitwise xor");
 }
