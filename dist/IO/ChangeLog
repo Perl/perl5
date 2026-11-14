@@ -1,3 +1,7 @@
+IO 1.56
+    * A very minor optimization was done in perl's emulated poll() on the OSes
+      that use need that use Perl's implementation.
+
 IO 1.55
     * XS changes for getline/getlines to support reference counted stacks
     * moved the binmode method from IO::File to IO::Handle, since all types
