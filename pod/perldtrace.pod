@@ -89,18 +89,6 @@ from a DTrace action.
            copyinstr(arg3), copyinstr(arg0), copyinstr(arg1), arg2);
  }
 
-=item phase-change(NEWPHASE, OLDPHASE)
-
-Traces changes to Perl's interpreter state. You can internalize this
-as tracing changes to Perl's C<${^GLOBAL_PHASE}> variable, especially
-since the values for C<NEWPHASE> and C<OLDPHASE> are the strings that
-C<${^GLOBAL_PHASE}> reports.
-
- perl*:::phase-change {
-     printf("Phase changed from %s to %s\n",
-         copyinstr(arg1), copyinstr(arg0));
- }
-
 =item op-entry(OPNAME)
 
 Traces the execution of each opcode in the Perl runloop. This probe
