@@ -82,7 +82,7 @@ my @header_files = qw(EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h
 		      pad.h parser.h patchlevel.h perl.h perlio.h perlsdio.h
 		      perlvars.h perly.h pp.h pp_proto.h proto.h
 		      regcomp.h regexp.h regnodes.h scope.h sv.h thread.h utf8.h
-		      util.h);
+		      perl_util.h);
 
 push @header_files,
     $^O eq 'VMS' ? 'vmsish.h' : qw(dosish.h perliol.h time64.h unixish.h);
