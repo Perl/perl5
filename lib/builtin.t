@@ -442,7 +442,16 @@ package FetchStoreCounter {
     }
 
     ok(eq_array(\@output, ['[0]=<a b c>', '[1]=<d e f>']),
-        'foreach + builtin::indexed + refalias');
+        'foreach + builtin::indexed LIST + refalias');
+
+    my @input = ( [qw( g h i )], [qw( j k l )] );
+    undef @output;
+    foreach my ( $idx, \@arr ) ( builtin::indexed( @input ) ) {
+        push @output, "[$idx]=<@arr>";
+    }
+
+    ok(eq_array(\@output, ['[0]=<g h i>', '[1]=<j k l>']),
+        'foreach + builtin::indexed ARRAY + refalias');
 }
 
 # Vanilla trim tests
