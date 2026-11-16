@@ -13375,7 +13375,7 @@ $cat >try.c <<EOCP
 #include <stdlib.h>
 #endif
 int main() {
-	if(O_RDONLY);
+	(void)O_RDONLY;
 #ifdef O_TRUNC
 	exit(0);
 #else
