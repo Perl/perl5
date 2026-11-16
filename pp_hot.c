@@ -4983,6 +4983,7 @@ PP(pp_iter)
        behaviour */
     PADOFFSET how_many = PL_op->op_targ;
     U32 refalias_mask = 0;
+    PADNAME **itervar_pnp = NULL;
     if (pflag_refalias) {
         refalias_mask = how_many >> 8;
         how_many &= 0xFF;
@@ -4992,6 +4993,18 @@ PP(pp_iter)
              * refaliased
              */
             refalias_mask = 1;
+
+        /* TODO(leonerd): This code structure isn't very fast or efficient
+         *   at runtime, but it's the best we can do without altering the
+         *   data structure of any of the ops involved.
+         *   For perl 5.46 we can try to do better and store the refalias
+         *   expected types directly in this op so we don't have to look up
+         *   sigils out of the pad.
+         */
+        PADOFFSET itervar_idx = itersvp - PL_curpad;
+        PADNAMELIST *pnl = PadlistNAMES(CvPADLIST(find_runcv(0)));
+        assert(itervar_idx > 0 && itervar_idx <= PadnamelistMAX(pnl));
+        itervar_pnp = PadnamelistARRAY(pnl) + itervar_idx;
     }
 
     PADOFFSET i = 0;
@@ -5160,6 +5173,8 @@ PP(pp_iter)
 
                 ++i;
                 ++itersvp;
+                if(itervar_pnp)
+                    ++itervar_pnp;
 
                 refalias_this = refalias_mask & (1<<i);
             }
@@ -5195,6 +5210,8 @@ PP(pp_iter)
 
                 ++i;
                 ++itersvp;
+                if(itervar_pnp)
+                    ++itervar_pnp;
 
                 refalias_this = refalias_mask & (1<<i);
             }
@@ -5210,15 +5227,14 @@ PP(pp_iter)
                 SV *rv = SvRV(sv);
 
                 const char *bad = NULL;
-                /* TODO(leonerd): is it sufficient to use the existing var type? */
-                switch (SvTYPE(*itersvp)) {
-                    case SVt_PVAV:
+                switch (PadnamePV(*itervar_pnp)[0]) {
+                    case '@':
                         if(SvTYPE(rv) != SVt_PVAV) bad = "an ARRAY";
                         break;
-                    case SVt_PVHV:
+                    case '%':
                         if(SvTYPE(rv) != SVt_PVHV) bad = "a HASH";
                         break;
-                    case SVt_PVCV:
+                    case '&':
                         if(SvTYPE(rv) != SVt_PVCV) bad = "a CODE";
                         break;
                     default:
@@ -5270,6 +5286,8 @@ PP(pp_iter)
 
         /* Only relevant for a many-at-a-time loop: */
         ++itersvp;
+        if(UNLIKELY(itervar_pnp))
+            ++itervar_pnp;
     }
 
     /* Try to bypass pushing &PL_sv_yes and calling pp_and(); instead

@@ -493,6 +493,14 @@ is($continue, 'xx', 'continue reached twice');
         push @ret, "$k=" . join("|", %hash );
     }
     is(join(",", @ret), "one=1|1,two=2|2,three=3|3", 'iterator vars can refalias arrays');
+
+    # GH25051 - refalias iterator variables can be reüsed
+    foreach my $pass ( 1, 2 ) {
+        foreach my ( $idx, \@array ) ( 0 => [], 1 => [], 2 => [] ) {
+            # empty
+        }
+        pass("Reused refalias iterator variable pass $pass");
+    }
 }
 
 # Spaces shouldn't trigger parsing errors:
