@@ -173,12 +173,20 @@ if (   $define{HAS_POSIX_2008_LOCALE}
 
 if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE}) {
     if (    $define{USE_POSIX_2008_LOCALE}
-        || ($define{WIN32} && (   $cctype !~ /\D/
-                               && $cctype >= 80)))
+        || ($define{WIN32} && (   $cctype !~ /\D/ && $cctype >= 80
+                               || $Config{libc} =~ /ucrt/i)))
     {
         $define{USE_THREAD_SAFE_LOCALE} = 1;
     }
+
+    # Temporary during 5.45 development to find any bugs
+    if (   ! $define{USE_THREAD_SAFE_LOCALE}
+        && ! $define{NO_EMULATE_THREAD_SAFE_LOCALES})
+    {
+        $define{EMULATE_THREAD_SAFE_LOCALES} = 1;
+    }
 }
+
 
 if (    $define{USE_POSIX_2008_LOCALE}
     && (   $define{HAS_QUERYLOCALE}
