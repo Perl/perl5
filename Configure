@@ -10869,13 +10869,11 @@ int main()
 #ifdef S_TIMEZONE
 	struct timezone tzp;
 #endif
-	if (foo.tm_sec == foo.tm_sec)
-		exit(0);
+	(void)sizeof(foo.tm_sec);
 #ifdef S_TIMEVAL
-	if (bar.tv_sec == bar.tv_sec)
-		exit(0);
+	(void)sizeof(bar.tv_sec);
 #endif
-	exit(1);
+	exit(0);
 }
 EOCP
 	flags=''
