@@ -287,8 +287,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-GCC configuration probes now work with C<-Werror> when detecting library
-functions, the size of C<long double>, and supported compiler options.
+GCC and Clang configuration probes now work with C<-Werror> when detecting
+library functions, the size of C<long double>, supported compiler options,
+time headers, memory-mapping and shared-memory return types, and the
+in-memory representation of floating-point zero.
 
 =item *
 
