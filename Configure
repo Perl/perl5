@@ -16653,7 +16653,15 @@ case "$i_sysmman$d_mmap" in
 #include <sys/mman.h>
 void *mmap();
 END
-	if $cc $ccflags -c mmap.c >/dev/null 2>&1; then
+	# Filter out -Werror so deprecation warnings do not break this probe.
+	probe_ccflags=''
+	for flag in $ccflags; do
+		case "$flag" in
+		-Werror|-Werror=*) ;;
+		*) probe_ccflags="$probe_ccflags $flag" ;;
+		esac
+	done
+	if $cc $probe_ccflags -c mmap.c >/dev/null 2>&1; then
 		mmaptype='void *'
 	else
 		mmaptype='caddr_t'
@@ -19128,7 +19136,15 @@ case "$d_shmat" in
 #include <sys/shm.h>
 void *shmat();
 END
-	if $cc $ccflags -c shmat.c >/dev/null 2>&1; then
+	# Filter out -Werror so deprecation warnings do not break this probe.
+	probe_ccflags=''
+	for flag in $ccflags; do
+		case "$flag" in
+		-Werror|-Werror=*) ;;
+		*) probe_ccflags="$probe_ccflags $flag" ;;
+		esac
+	done
+	if $cc $probe_ccflags -c shmat.c >/dev/null 2>&1; then
 		shmattype='void *'
 	else
 		shmattype='char *'
