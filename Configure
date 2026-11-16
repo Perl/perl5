@@ -17304,7 +17304,7 @@ int main(int argc, char **argv) {
 
     fail += checkit(d, "ternary");
 
-    memset(&d, sizeof(d), argv[argc] ? 1 : 0);
+    memset(&d, argv[argc] ? 1 : 0, sizeof(d));
 
     if (d != 0.0) {
 	printf("No - memset doesn't give 0.0\n");
