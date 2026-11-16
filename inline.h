@@ -4682,7 +4682,7 @@ Perl_newPADxVOP(pTHX_ I32 type, I32 flags, PADOFFSET padix)
     return o;
 }
 
-/* ------------------ util.h ------------------------------------------- */
+/* ------------------ perl_util.h -------------------------------------- */
 
 /*
 =for apidoc_section $string

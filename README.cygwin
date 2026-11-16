@@ -593,7 +593,7 @@ be kept as clean as possible.
  pp_sys.c              - do not define h_errno, init
                          _pwent_struct.pw_comment
  util.c                - use setenv
- util.h                - PERL_FILE_IS_ABSOLUTE macro
+ perl_util.h           - PERL_FILE_IS_ABSOLUTE macro
  pp.c                  - Comment about Posix vs IEEE math under
                          Cygwin
  perlio.c              - CR/LF mode
