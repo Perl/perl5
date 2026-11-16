@@ -5032,7 +5032,7 @@ Perl_build_list_slice(pTHX_ I32 operation, OP *target, OP *selector)
         newLISTOP(operation, 0, selector, container)
     );
 
-    if (op && target)
+    if (op)
         op->op_private |= target->op_private & OPpSLICEWARNING;
 
     return op;
