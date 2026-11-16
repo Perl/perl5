@@ -538,9 +538,10 @@ h = \
     EXTERN.h INTERN.h XSUB.h \
     av.h cop.h cv.h dosish.h embed.h form.h gv.h handy.h hv.h hv_func.h \
     iperlsys.h keywords.h l1_char_class_tab.h mg.h mydtrace.h op.h \
-    op_reg_common.h opcode.h pad.h patchlevel.h perl.h perlapi.h perly.h pp.h \
+    op_reg_common.h opcode.h pad.h patchlevel.h perl.h perlapi.h perl_util.h \
+    perly.h pp.h \
     proto.h regcomp.h regcomp_internal.h regexp.h regexp_constants.h scope.h \
-    sv.h thread.h unixish.h utf8.h util.h warnings.h \
+    sv.h thread.h unixish.h utf8.h warnings.h \
     $(CONFIGH)
 
 c_base = \

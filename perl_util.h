@@ -1,4 +1,4 @@
-/*    util.h
+/*    perl_util.h
  *
  *    Copyright (C) 1991, 1992, 1993, 1999, 2001, 2002, 2003, 2004, 2005,
  *    2007, by Larry Wall and others
@@ -222,7 +222,7 @@ means arg not present, 1 is empty string/null byte */
 #define HS_GETXSVERLEN(key) ((U8) ((key) >> 8))
 #define HS_GETAPIVERLEN(key) ((key) & HSm_APIVERLEN)
 
-/* internal to util.h macro to create a packed handshake key, all args must be constants */
+/* internal to perl_util.h macro to create a packed handshake key, all args must be constants */
 /* U32 return = (U16 interpsize, bool cxt, bool setxsubfn, bool popmark,
    U5 (FIVE!) apiverlen, U8 xsverlen) */
 #define HS_KEYp(interpsize, cxt, setxsubfn, popmark, apiverlen, xsverlen) \

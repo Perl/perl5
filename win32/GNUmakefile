@@ -1025,7 +1025,7 @@ CORE_NOCFG_H	=		\
 		..\thread.h	\
 		..\unixish.h	\
 		..\utf8.h	\
-		..\util.h	\
+		..\perl_util.h	\
 		..\warnings.h	\
 		..\XSUB.h	\
 		..\EXTERN.h	\
