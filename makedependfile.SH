@@ -124,7 +124,34 @@ $echo "Finding dependencies for $filebase$_o"
         -e "/^${filebase}_init(/q"                                          \
                                                                             \
         -e ': tstcont'                                                      \
-        -e '/^[ 	]*#/s|[ 	]*/\*..*\*/[ 	]*| |'              \
+                                                                            \
+        -e '# Replace non-empty /*...*/ comments (and surrounding white'    \
+        -e '# space) by a single blank.  Note that this doesnt work'        \
+        -e '# properly if the comment introducer is inside a literal'       \
+        -e '# "string", but this is quite unlikely in a preprocessor'       \
+        -e '# statement'                                                    \
+        -e '\:/\*:{'                                                        \
+                                                                            \
+            -e '# Ready to handle the comment(s).  We have to cope with'    \
+            -e '# the fact that "*" is always greedy in sed.  First,'       \
+            -e '# loop to change all interior asterisks like'               \
+            -e '#   /* ... *** */                                        '  \
+            -e '#                   somewhat arbitrarily to'                \
+            -e '#   /* ... @@@ */'                                          \
+            -e '\:/\*..*\*[^/]:{'                                           \
+                -e '# Make sure t flag is cleared'                          \
+                -e 't stars'                                                \
+                                                                            \
+                -e ': stars'                                                \
+                -e 's:\(/\*[^*]*\)\*\([^/]\):\1@\2:'                        \
+                -e 't stars'                                                \
+            -e '}'                                                          \
+                                                                            \
+            -e '# Now that there are no interior asterisks, we can use a'   \
+            -e '# pattern that avoids the greediness issues'                \
+            -e 's:[ 	]*/\*[^*]\{1,\}\*/[ 	]*: :g'                     \
+        -e '}'                                                              \
+                                                                            \
                                                                             \
         -e '# If this line is continued, join the next one to it, and'      \
         -e '# loop.  The loop removes comments on this next joined segment' \
