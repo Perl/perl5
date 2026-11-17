@@ -236,7 +236,6 @@ $echo "Finding dependencies for $filebase$_o"
             -e g                                                            \
             -e 'b longs'                                                    \
         -e '}'                                                              \
-        | $grep -v ":"                                                      \
 ) >UU/$file.c
 
 # Some files include this header, which may not be present on this system.
