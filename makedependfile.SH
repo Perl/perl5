@@ -242,7 +242,7 @@ $echo "Finding dependencies for $filebase$_o"
 touch UU/git_version.h
 
 # Run the preprocess, and remove all the following irrelevant lines
-$cppstdin -DPERL_CORE $finc -I. -IUU $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
+$cppstdin -DPERL_CORE $finc -I. -IUU $cppflags $cppminus <UU/$file.c >$$.cout
 $sed -e '1d'                                                                \
      -e '/^#.*<stdin>/d'                                                    \
      -e '/^#.*<builtin>/d'                                                  \
@@ -264,10 +264,9 @@ $sed -e '1d'                                                                \
      -e 's/^.*"\(.*\)".*$/'$filebase'\$(OBJ_EXT): \1/'                      \
      -e 's/^# *[0-9][0-9]* \(.*\)$/'$filebase'\$(OBJ_EXT): \1/'             \
      -e 's|: \./|: |'                                                       \
-     -e 's|\.c\.c|.c|' $uwinfix $$.cout $$.cerr                             \
+     -e 's|\.c\.c|.c|' $uwinfix $$.cout                                     \
 | $uniq | $sort | $uniq >> $outfile
 rm $$.cout
-rm $$.cerr
 $echo "$filebase\$(OBJ_EXT): $@" >>$outfile
 
 !NO!SUBS!
