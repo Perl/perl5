@@ -94,7 +94,7 @@ $echo "Finding dependencies for $filebase$_o"
 #
 # sed labels here use 7 characters max due to a solaris restriction
 (     $echo "#line 2 \"$file\"";                                            \
-      $sed -n <$file                                                        \
+      $sed  <$file                                                          \
         -e "/^${filebase}_init(/q"                                          \
                                                                             \
         -e ': tstcont'                                                      \
@@ -189,14 +189,16 @@ $echo "Finding dependencies for $filebase$_o"
         -e '# of the lines joined with their continuations'                 \
         -e 's/\\\n//g'                                                      \
                                                                             \
+        -e '# We only output preprocessor control lines; now that the'      \
+        -e '# current line has no continuations or multi-line comments,'    \
+        -e '# we know enough to skip non-preprocessor lines'                \
+        -e '/^[ 	]*#/!d'                                             \
+                                                                            \
         -e '# Delete two styles of lines that specify the line number'      \
         -e '/^#line/d'                                                      \
         -e '/^#[    ]+[0-9][0-9]* /d'                                       \
                                                                             \
-        -e '/^[ 	]*#/{'                                              \
-            -e 's/.\{255\}/&\\\n/g'                                         \
-            -e p                                                            \
-        -e '}'                                                              \
+        -e 's/.\{255\}/&\\\n/g'                                             \
         | $grep -v ":"                                                      \
 ) >UU/$file.c
 
