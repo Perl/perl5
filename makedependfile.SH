@@ -150,8 +150,14 @@ $echo "Finding dependencies for $filebase$_o"
         | $grep -v ":"                                                      \
 ) >UU/$file.c
 
+# Some files include this header, which may not be present on this system.
+# Some preprocessors abort at the point an #included file isn't found, giving
+# incomplete results.  Make sure a file with this name does exist.  The cpp
+# command looks in this directory..
+touch UU/git_version.h
+
 # Run the preprocess, and remove all the following irrelevant lines
-$cppstdin -DPERL_CORE $finc -I. $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
+$cppstdin -DPERL_CORE $finc -I. -IUU $cppflags $cppminus <UU/$file.c >$$.cout 2>$$.cerr
 $sed -e '1d'                                                                \
      -e '/^#.*<stdin>/d'                                                    \
      -e '/^#.*<builtin>/d'                                                  \
@@ -162,7 +168,11 @@ $sed -e '1d'                                                                \
      -e '/^#.*"-"/d'                                                        \
      -e '/^#.*"\/.*\/"/d'                                                   \
      -e '/: file path prefix .* never used$/d'                              \
+                                                                            \
+     -e '# This will be in the form of an #include, which isnt really a'    \
+     -e '# dependency'                                                      \
      -e '/^#.*git_version\.h/d'                                             \
+                                                                            \
      -e 's#\.[0-9][0-9]*\.c#'"$file.c#"                                     \
      -e 's/^[	 ]*#[	 ]*line/#/'                                         \
      -e '/^# *[0-9][0-9]* *[".\/]/!d'                                       \
