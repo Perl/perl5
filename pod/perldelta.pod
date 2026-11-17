@@ -536,15 +536,6 @@ checking if that value is a reference and what it is a reference to.
 
 =item *
 
-No longer crashes when using multivariable C<foreach> loops with both
-refaliasing and the C<builtin::indexed> function. [GH #24999]
-
-    foreach my ( $idx, \@arr ) ( builtin::indexed @list_of_arefs ) {
-        say "Array number [$idx] contains <@arr>";
-    }
-
-=item *
-
 C<PL_sv_zero>, introduced in 5.28, has a zero numeric value and a "0"
 string value. Its flags did not indicate which value should be treated
 as authoritative when serializing or encoding to an external format.
@@ -557,6 +548,63 @@ been created as a number and then later gained a string representation.
 This change is intended to make it easier for serialization modules to
 output C<0> rather than C<"0">, provided that such modules actually do
 differentiate between "created as number" and "created as string".
+
+=item * Various bugfixes to C<foreach> loops
+
+Perl 5.44.0 expanded the ability of C<foreach> loops to make use of
+reference aliasing when using multiple loop iterator variables. Several small
+bugs were found when these are combined, and have been fixed in this release.
+
+=over 4
+
+=item * C<foreach> loop with refaliasing crashes when run a second time
+
+[GH #25051]
+
+=item * Multivariable C<foreach> with more than 32 variables confuses which
+ones are refaliases
+
+[GH #25055]
+
+=item * C<foreach> with refaliasing fails to run magic
+
+[GH #25056]
+
+=back
+
+Perl 5.44.0 also added internal optimisations on multivariable C<foreach>
+loops that call the C<builtin::indexed> function and assign the resulting list
+of index / value pairs into two iterator variables. Two bugs were found when
+these are combined, and have been fixed in this release:
+
+=over 4
+
+=item * C<foreach> with C<indexed> and C<reverse> assigns
+indexes backwards
+
+[GH #25052]
+
+=item * C<foreach> with C<indexed> performs aliasing rather than copying
+values
+
+[GH #25053]
+
+=back
+
+Finally, a bug was found when both refaliasing and C<builtin::indexed> are
+combined in a multivariable C<foreach> loop, and has now been fixed:
+
+=over 4
+
+=item * C<foreach> with refaliasing and C<indexed> crashes
+
+    foreach my ( $idx, \@arr ) ( indexed @list_of_arefs ) {
+        say "Array number [$idx] contains <@arr>";
+    }
+
+[GH #24999]
+
+=back
 
 =back
 
