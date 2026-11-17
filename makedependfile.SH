@@ -194,7 +194,44 @@ $echo "Finding dependencies for $filebase$_o"
         -e '/^#line/d'                                                      \
         -e '/^#[    ]+[0-9][0-9]* /d'                                       \
                                                                             \
-        -e 's/.\{255\}/&\\\n/g'                                             \
+        -e '# Some preprocessors have a very finite limit of acceptable'    \
+        -e '# line length.  Our joining may have exceeded that, so split'   \
+        -e '# long lines.  This is painful in strict sed, as the'           \
+        -e '# replacement string in an s/// need not recognize escape'      \
+        -e '# sequences like \n '                                           \
+        -e ': longs'                                                        \
+                                                                            \
+        -e '# Look for a line that has at least one char beyond the limit'  \
+        -e '/.\{255\}./{'                                                   \
+                                                                            \
+            -e '# Save a copy of this line'                                 \
+            -e h                                                            \
+                                                                            \
+            -e '# Change the working copy to have only the characters in'   \
+            -e '# excess of the allowable length, allowing room for an'     \
+            -e '# appended terminating backslash continuation marker'       \
+            -e 's/.\{254\}//'                                               \
+                                                                            \
+            -e '# Swap the buffers so the excess is saved away, and we are' \
+            -e '# working on the full line again'                           \
+            -e x                                                            \
+                                                                            \
+            -e '# From the full line, delete the excess, replacing it with' \
+            -e '# the backslash continuation marker'                        \
+            -e 's/\(.\{254\}\).*/\1\\/'                                     \
+                                                                            \
+            -e '# Append the excess that has been saved.  The G inserts'    \
+            -e '# our desired \n '                                          \
+            -e G                                                            \
+                                                                            \
+            -e '# Print the initial, acceptable-length, portion'            \
+            -e P                                                            \
+                                                                            \
+            -e '# Bring the excess into the working buffer; go see if it'   \
+            -e '# needs further splitting'                                  \
+            -e g                                                            \
+            -e 'b longs'                                                    \
+        -e '}'                                                              \
         | $grep -v ":"                                                      \
 ) >UU/$file.c
 
