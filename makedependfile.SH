@@ -88,37 +88,11 @@ esac
 
 $echo "Finding dependencies for $filebase$_o"
 
-# Below, we strip out all but preprocessor directives.
-# We have to take care of situations like
-#       #if defined(FOO) BAR   /* comment line 1
-#                                 more comment lines */
-# If we just delete text starting from the '/*' to the end of line, we will
-# screw up cases like
-#      #if defined(FOO)    /* comment */ \
-#          && defined(BAR) /* comment */ \
-#          && defined(BAZ) /* comment */ \
-#               etc.
-# Also, in lines like
-#      #defined FOO(a,b)    a/**/b
-# the comment may be important and so needs to be retained.
-# This code processes the single-line comments first; it assumes there is
-# at most one straightforward comment per continued preprocessor line,
-# replacing each non-empty comment (and its surrounding white space) by a
-# single space.  (sed only has a greedy '*' quantifier, so this doesn't
-# work right if there are multiple comments per line, and strings can look
-# like comments to it; both are unlikely in a preprocessor statement.) Any
-# continuation line is joined, and the process repeated on the enlarged
-# line as long as there are continuations.  At the end, if there are any
-# comments remaining, they are either completely empty or are like the
-# first situation.  The latter are just deleted by first deleting to the
-# end of line (including preceding white space) things that start with '/*'
-# and the next char isn't a '*'; then things that start with '/**', but the
-# next char isn't a '/'.  (Subsequent lines of the comment are irrelevant
-# and get dropped.)  At the end, we unjoin very long lines to avoid
-# preprocessor limitations
+# Below, we strip out all but preprocessor directives.  This has complications
+# because of continuation lines and comments potentially spanning multiple
+# lines.
 #
 # sed labels here use 7 characters max due to a solaris restriction
-
 (     $echo "#line 2 \"$file\"";                                            \
       $sed -n <$file                                                        \
         -e "/^${filebase}_init(/q"                                          \
@@ -150,8 +124,50 @@ $echo "Finding dependencies for $filebase$_o"
             -e '# Now that there are no interior asterisks, we can use a'   \
             -e '# pattern that avoids the greediness issues'                \
             -e 's:[ 	]*/\*[^*]\{1,\}\*/[ 	]*: :g'                     \
-        -e '}'                                                              \
                                                                             \
+            -e '# Any remaining /* begins a comment that goes onto the'     \
+            -e '# next line(s).  We want to convert things like'            \
+            -e '#   #ifdef FOO /* comment line 1            '               \
+            -e '#                 more comment lines        '               \
+            -e '#                 final comment */  BAR /* trail comment */'\
+            -e '# into                                            '         \
+            -e '#   #ifdef FOO BAR                          '               \
+            -e '\:/\*:{'                                                    \
+                                                                            \
+                -e '# Remove the trailing comment and save.  So the hold'   \
+                -e '# buffer now contains "#ifdef FOO"'                     \
+                -e 's:/\*.*::'                                              \
+                -e h                                                        \
+                                                                            \
+                -e '# Loop, reading and deleting the succeeding lines'      \
+                -e '# until find the closing "*/" '                         \
+                -e ': in_multi'                                             \
+                -e 'N'                                                      \
+                -e '\:\*/:!{'                                               \
+                    -e 's/.*//'                                             \
+                    -e 'b in_multi'                                         \
+                -e '}'                                                      \
+                                                                            \
+                -e '# Here at final line in comment.  Convert:'             \
+                -e '#   final comment */  BAR /* trail comment */'          \
+                -e '# to:'                                                  \
+                -e '#   /* final comment */  BAR /* trail comment */'       \
+                -e 's:^:/*:'                                                \
+                                                                            \
+                -e '# Append to the hold buffer, yielding there:'           \
+                -e '#   #ifdef FOO /* final comment */ BAR /* trail comment */'\
+                -e 'H'                                                      \
+                                                                            \
+                -e '# Bring the hold buffer into the working one.  We have' \
+                -e '# now reduced this multi-line comment to a case'        \
+                -e '# we already know how to handle, including any'         \
+                -e '# complications such as if there are interior'          \
+                -e '# asterisks and/or it ends with a continuation marker.' \
+                -e '# Go there to handle'                                   \
+                -e g                                                        \
+                -e 'b tstcont'                                              \
+            -e '}'                                                          \
+        -e '}'                                                              \
                                                                             \
         -e '# If this line is continued, join the next one to it, and'      \
         -e '# loop.  The loop removes comments on this next joined segment' \
@@ -169,8 +185,6 @@ $echo "Finding dependencies for $filebase$_o"
         -e '/^#[    ]+[0-9][0-9]* /d'                                       \
                                                                             \
         -e '/^[ 	]*#/{'                                              \
-            -e 's|[ 	]*/\*[^*].*$||'                                     \
-            -e 's|[ 	]*/\*\*[^/].*$||'                                   \
             -e 's/.\{255\}/&\\\n/g'                                         \
             -e p                                                            \
         -e '}'                                                              \
