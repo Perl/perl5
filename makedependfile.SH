@@ -169,6 +169,11 @@ $echo "Finding dependencies for $filebase$_o"
             -e '}'                                                          \
         -e '}'                                                              \
                                                                             \
+        -e '# Now that we have done /*...*/ comments, we can do //'         \
+        -e '# ones.  The other way round doesnt work because of things'     \
+        -e '# like /* ... // ... */'                                        \
+        -e 's:[ 	]*//.*: :'                                          \
+                                                                            \
         -e '# If this line is continued, join the next one to it, and'      \
         -e '# loop.  The loop removes comments on this next joined segment' \
         -e '/\\$/{'                                                         \
