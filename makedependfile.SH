@@ -189,6 +189,11 @@ $echo "Finding dependencies for $filebase$_o"
         -e '# of the lines joined with their continuations'                 \
         -e 's/\\\n//g'                                                      \
                                                                             \
+        -e '# For debugging: uncomment the following line and the cp at'    \
+        -e '# the end of this sed.  This line turns normally deleted lines' \
+        -e '# into comments so that context is retained'                    \
+        -e '#/^[ 	]*#/!s:^://:p'                                      \
+                                                                            \
         -e '# We only output preprocessor control lines; now that the'      \
         -e '# current line has no continuations or multi-line comments,'    \
         -e '# we know enough to skip non-preprocessor lines'                \
@@ -237,6 +242,8 @@ $echo "Finding dependencies for $filebase$_o"
             -e 'b longs'                                                    \
         -e '}'                                                              \
 ) >UU/$file.c
+
+#cp UU/$file.c $file.i  # For debugging, to see what the result is of sed
 
 # Some files include this header, which may not be present on this system.
 # Some preprocessors abort at the point an #included file isn't found, giving
