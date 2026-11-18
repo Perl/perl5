@@ -8,6 +8,7 @@ permissions:
 
 jobs:
   block-merge-and-autosquash-commits:
+    if: github.repository != 'Perl/perl-security'
     name: Block merge and autosquash commits
     runs-on: ubuntu-latest
     steps:
