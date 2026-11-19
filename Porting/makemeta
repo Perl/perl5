@@ -70,7 +70,9 @@ my $distmeta = {
   'dynamic_config' => 1,
   'resources' => {
     'repository' => {
-      'url' => 'https://github.com/Perl/perl5'
+      'url' => 'https://github.com/Perl/perl5.git',
+      'web' => 'https://github.com/Perl/perl5',
+      'type' => 'git'
     },
     'homepage' => 'https://www.perl.org/',
     'bugtracker' => {
