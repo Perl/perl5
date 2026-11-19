@@ -2329,6 +2329,13 @@ my %delta = (
         removed => {
         }
     },
+    5.045006 => {
+        delta_from => 5.045005,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 %utilities = Module::CoreList::_undelta(\%delta);
