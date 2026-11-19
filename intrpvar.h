@@ -1133,6 +1133,10 @@ PERLVARI(I, load_mathoms, shutdown_proc_t, PERL_LOAD_MATHOMS_HOOK)
  * See its description in perlvar for the meanings of its value. */
 PERLVARI(I, re_superlinear_cache_delay, IV, 0)
 
+#ifdef HAS_WARNING_ON_DEPRECATED_USE
+PERLVARI(I, seen_deprecated, HV *, NULL)
+#endif
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

@@ -4505,6 +4505,23 @@ ATds	|Size_t |my_strlcpy	|NULLOK char *dst			\
 ATdip	|Size_t |my_strnlen	|NN const char *str			\
 				|Size_t maxlen
 #endif
+#if defined(HAS_WARNING_ON_DEPRECATED_USE)
+p	|void	|warn_on_first_deprecated_use_helper			\
+				|U32 category				\
+				|NN const char * const key		\
+				|NN const char * const name		\
+				|NN const char * const alternative	\
+				|NN const char * const when		\
+				|NN const char * const file		\
+				|line_t line
+CIp	|void	|warn_on_first_deprecated_use_inlined			\
+				|U32 category				\
+				|NN const char * const name		\
+				|NN const char * const alternative	\
+				|NN const char * const when		\
+				|NN const char * const file		\
+				|line_t line
+#endif
 #if defined(HAVE_INTERP_INTERN)
 Cp	|void	|sys_intern_clear
 Cp	|void	|sys_intern_init
@@ -6667,15 +6684,6 @@ RS	|char * |unexpected_non_continuation_text			\
 				|STRLEN print_len			\
 				|const STRLEN non_cont_byte_pos 	\
 				|const STRLEN expect_len
-# if 0
-S	|void	|warn_on_first_deprecated_use				\
-				|U32 category				\
-				|NN const char * const name		\
-				|NN const char * const alternative	\
-				|const bool use_locale			\
-				|NN const char * const file		\
-				|const unsigned line
-# endif
 #endif /* defined(PERL_IN_UTF8_C) */
 #if defined(PERL_IN_UTIL_C)
 S	|bool	|ckwarn_common	|U32 w

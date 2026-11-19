@@ -3876,53 +3876,6 @@ Perl_to_uni_fold_flags_(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
     }
 }
 
-#if 0	/* Not currently used, but may be needed in the future */
-PERLVAR(I, seen_deprecated_macro, HV *)
-
-static void
-S_warn_on_first_deprecated_use(pTHX_ U32 category,
-                                     const char * const name,
-                                     const char * const alternative,
-                                     const bool use_locale,
-                                     const char * const file,
-                                     const unsigned line)
-{
-    PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE;
-
-    const char * key;
-
-    if (ckWARN_d(category)) {
-
-        key = form("%s;%d;%s;%d", name, use_locale, file, line);
-        if (! hv_fetch(PL_seen_deprecated_macro, key, strlen(key), 0)) {
-            if (! PL_seen_deprecated_macro) {
-                PL_seen_deprecated_macro = newHV();
-            }
-            if (! hv_store(PL_seen_deprecated_macro, key,
-                           strlen(key), &PL_sv_undef, 0))
-            {
-                croak("panic: hv_store() unexpectedly failed");
-            }
-
-            if (instr(file, "mathoms.c")) {
-                warner(category,
-                       "In %s, line %d, starting in Perl v5.32, %s()"
-                       " will be removed.  Avoid this message by"
-                       " converting to use %s().\n",
-                       file, line, name, alternative);
-            }
-            else {
-                warner(category,
-                       "In %s, line %d, starting in Perl v5.32, %s() will"
-                       " require an additional parameter.  Avoid this"
-                       " message by converting to use %s().\n",
-                       file, line, name, alternative);
-            }
-        }
-    }
-}
-#endif
-
 /* returns the number of bytes comprising the UTF8-encoded character that
  * starts at <p>, and extending no further than <e - 1> if it is in the
  * inversion list <invlist>; or 0 if it isn't */
