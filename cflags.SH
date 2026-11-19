@@ -220,7 +220,7 @@ Intel*) ;; # # Is that you, Intel C++?
        case " $ccflags " in
        *" $opt "*) ;; # Skip if already there.
        *) rm -f _cflags$_exe
-          # TODO: Currently (5.45.5), we need -DPERL_NO_INLINE_FUNCTIONS here
+          # TODO: Currently (5.45.6), we need -DPERL_NO_INLINE_FUNCTIONS here
           # even with C99.  Without it, GCC at -O0 emits the unused static
           # Perl_croak_memory_wrap function.  The probe then fails to link
           # because PL_memory_wrap and Perl_croak are unresolved.  At some
