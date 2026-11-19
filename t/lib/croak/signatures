@@ -87,6 +87,12 @@ sub f (:$x, :$x) { }
 EXPECT
 Duplicated subroutine parameter name at - line 3, near ":$x) "
 ########
+# NAME duplicated named parameter after positional [GH#25057]
+no warnings 'experimental::signature_named_parameters';
+sub f ($x, :$y, :$y) { }
+EXPECT
+Duplicated subroutine parameter name at - line 3, near ":$y) "
+########
 # NAME mandatory named after optional positional
 no warnings 'experimental::signature_named_parameters';
 sub f ($x = 1, :$y) { }
