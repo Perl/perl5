@@ -18070,7 +18070,7 @@ Perl_subsignature_append_named(pTHX_ const char *paramname, PADOFFSET padix, OPC
 
     SV *namesv = newSVpvn_utf8(paramname, strlen(paramname), true);
 
-    for(size_t parami = 0; parami < signature->named_params; parami++) {
+    for(size_t parami = 0; parami < signature->nparams; parami++) {
         struct yy_parser_signature_param *param = signature->params + parami;
 
         if(!param->paramname || !sv_streq(param->paramname, namesv))
