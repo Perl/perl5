@@ -2213,6 +2213,13 @@ ABCF|BCD[Ee]|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 (?:zz|(?:a(*THEN)b|c)|d)	a	n	$&	a	-	(*THEN) stays nested (no match)
 (?:zz|(?:a(*THEN)b|c)|d)	d	y	$&	d	-	(*THEN) stays nested (match)
 
+# Nested branch flattening and NOTHING nodes are studied correctly
+^(?:|(?:)a+)$	aa	y	$&	aa	-	NOTHING branch followed by valid nodes
+^(?:|(?:(?:a+|b)|))$	aa	y	$&	aa	-	NOTHING branch followed by valid nodes
+^(?:|(?:(?:(a)|b)|))$	a	y	$1	a	-	NOTHING branch followed by valid nodes
+^(?:(?:a|)|b)c$	c	y	$&	c	-	flattening handles a trailing NOTHING branch
+^(?:(?:|a+)|b)c$	aac	y	$&	aac	-	flattening handes a leading NOTHING branch
+
 # Prefixes extracted from jump tries must remain attached to those tries.
 # Otherwise an enclosing trie pass can discard the branch structure needed
 # by backtracking control verbs.  Keep both failing and successful paths here
@@ -2403,6 +2410,8 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 (?{})\A(?:(a)?b)+(?(1)a|c)\z	abbc	y	$&	abbc	-	conditional sees the skipped capture as unset
 (?{})\A(?:(\x{100})?b)+\z	\x{100}bb	y	${\(defined($1) ? $1 : q(undef))}	undef	-	Unicode optional capture
 (?{})\A(?:(a)?b)+\z	abab	y	$1	a	-	final participating capture is preserved
+(?:(?:y(b)|a)|x)+	ybx	y	${\(defined($1) ? $1 : q(undef))}	undef	-	branch flattening preserves capture reset
+(?:x(b)|(?:(?:y|z)|w))+	xby	y	${\(defined($1) ? $1 : q(undef))}	undef	-	branch flattening preserves capture reset
 
 # GH #24944
 /\A\ba*\z/m	a	y	$&	a	-	SBOL and BOUND start class should match
