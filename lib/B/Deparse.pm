@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.92;
+package B::Deparse 1.93;
 use strict;
 use builtin qw( true false );
 use Carp;
@@ -1231,19 +1231,18 @@ sub deparse_multiparam {
     $o = $o->sibling;
     return unless $$o and $o->name eq 'multiparam';
 
-    my ($min_args, $max_args, $slurpy, @rest) = $o->aux_list($cv);
+    my ($min_args, $max_args, $slurpy, $param_padixes, $slurpy_padix) =
+        $o->aux_list($cv);
     my $nparams = $max_args;
-    my @param_padix = splice @rest, 0, $nparams, ();
-    my ($slurpy_padix) = @rest;
 
-    my @param_padname    = map { $_ ? $self->padname($_) : '$' } @param_padix;
+    my @param_padname    = map { $_ ? $self->padname($_) : '$' } @$param_padixes;
     my ($slurpy_padname) = map { $_ ? $self->padname($_) : $slurpy } $slurpy_padix;
 
     my %parami_for_padix;
 
     # Initial scalars
     foreach my $parami ( 0 .. $max_args-1 ) {
-        my $padix = $param_padix[$parami];
+        my $padix = $param_padixes->[$parami];
         $parami_for_padix{$padix} = $parami;
     }
 
@@ -1281,7 +1280,7 @@ sub deparse_multiparam {
         warn "Expected first signature argument to be named \$self"
             unless @param_padname and $param_padname[0] eq '$self';
 
-        shift @param_padix;
+        shift @$param_padixes;
         shift @param_padname;
         shift @param_defmode;
         shift @param_defexpr;
@@ -1290,7 +1289,7 @@ sub deparse_multiparam {
     if ($use_feature_sig) {
         my @sig;
 
-        foreach my $parami ( 0 .. $#param_padix ) {
+        foreach my $parami ( 0 .. $#$param_padixes ) {
             my $param_sig = $param_padname[$parami];
             if ($param_defmode[$parami]) {
                 length $param_sig > 1 ?
@@ -1326,7 +1325,7 @@ EOF
 die sprintf("Odd name/value argument for subroutine at %s line %d.\\n", (caller)[1, 2]) if \@_ > $nparams && ((\@_ - $nparams) & 1);
 EOF
 
-    foreach my $parami ( 0 .. $#param_padix ) {
+    foreach my $parami ( 0 .. $#$param_padixes ) {
         my $argix = $parami;
 
         my $stmt = "my $param_padname[$parami] = ";
@@ -1360,7 +1359,7 @@ EOF
 
             # Anonymous mandatory params can be entirely ignored. Their pad
             # index will be zero.
-            $param_padix[$parami] or next;
+            $param_padixes->[$parami] or next;
 
             $stmt .= "\$_[$argix]";
         }

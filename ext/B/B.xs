@@ -1465,14 +1465,19 @@ aux_list(o, cv)
             {
                 struct op_multiparam_aux *p = (struct op_multiparam_aux *)aux;
                 size_t nparams = p->n_positional;
-                EXTEND(SP, (IV)(3 + nparams + 1));
+                AV *param_padixes = newAV();
+
+                EXTEND(SP, 5);
                 mPUSHu(p->min_args);
                 mPUSHu(p->n_positional);
                 PUSHs(sv_2mortal(p->slurpy ? newSVpvf("%c", p->slurpy) : &PL_sv_no));
-                for(size_t parami = 0; parami < nparams; parami++)
-                    mPUSHu(p->param_padix[parami]);
+                mPUSHs(newRV_noinc((SV *)param_padixes));
                 mPUSHu(p->slurpy_padix);
-                XSRETURN(3 + nparams + 1);
+
+                for(size_t parami = 0; parami < nparams; parami++)
+                    av_push(param_padixes, newSVuv(p->param_padix[parami]));
+
+                XSRETURN(5);
             }
         } /* switch */
 
