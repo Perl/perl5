@@ -5167,7 +5167,7 @@ S_my_setlocale_debug_string_i(pTHX_
 static const char *
 S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
                         const char * new_locale,
-                        const line_t caller_line DEBUG_ONLY)
+                        DEBUG_ONLY(const line_t caller_line))
 {
     PERL_ARGS_ASSERT_TOGGLE_LOCALE_I;
 
@@ -5223,7 +5223,7 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
 static void
 S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
                                  const char * restore_locale,
-                                 const line_t caller_line DEBUG_ONLY)
+                                 DEBUG_ONLY(const line_t caller_line))
 {
     PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I;
 
