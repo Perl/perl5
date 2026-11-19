@@ -1466,18 +1466,33 @@ aux_list(o, cv)
                 struct op_multiparam_aux *p = (struct op_multiparam_aux *)aux;
                 size_t nparams = p->n_positional;
                 AV *param_padixes = newAV();
-
-                EXTEND(SP, 5);
-                mPUSHu(p->min_args);
-                mPUSHu(p->n_positional);
-                PUSHs(sv_2mortal(p->slurpy ? newSVpvf("%c", p->slurpy) : &PL_sv_no));
-                mPUSHs(newRV_noinc((SV *)param_padixes));
-                mPUSHu(p->slurpy_padix);
+                AV *named_param_details = NULL;
 
                 for(size_t parami = 0; parami < nparams; parami++)
                     av_push(param_padixes, newSVuv(p->param_padix[parami]));
 
-                XSRETURN(5);
+                for(size_t parami = 0; parami < p->n_named; parami++) {
+                    struct op_multiparam_named_aux *pnamed = p->named + parami;
+
+                    AV *param_detail = newAV();
+                    av_push(param_detail, newSVpvn_flags(pnamed->namepv, pnamed->namelen, SVf_UTF8));
+                    av_push(param_detail, newSVuv(pnamed->padix));
+
+                    av_create_and_push(&named_param_details, newRV_noinc((SV *)param_detail));
+                }
+
+                EXTEND(SP, 6);
+                mPUSHu(p->min_args);
+                mPUSHu(p->n_positional);
+                PUSHs(sv_2mortal(p->slurpy ? newSVpvf("%c", p->slurpy) : &PL_sv_no));
+                mPUSHs(newRV_noinc((SV *)param_padixes));
+                if (named_param_details)
+                    mPUSHs(newRV_noinc((SV *)named_param_details));
+                else
+                    PUSHs(&PL_sv_undef);
+                mPUSHu(p->slurpy_padix);
+
+                XSRETURN(6);
             }
         } /* switch */
 
