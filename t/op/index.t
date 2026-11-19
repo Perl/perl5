@@ -8,7 +8,6 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 424 );
 
 run_tests() unless caller;
 
@@ -367,6 +366,10 @@ EOS
     }
 
     {
+        my $test_magic;
+        unless (is_miniperl()) {
+            $test_magic = eval { require XS::APItest; 1 };
+        }
         local ${^UTF8CACHE} = 1; # enable cache, disable debugging
         for my $text ("", "abc", "\x{100}" x 3) {
             my $s = $text;
@@ -375,7 +378,20 @@ EOS
             is(index($s, "", $len), $len, 'index at the cached end');
             is(index($s, "", $len+1), $len, 'index beyond the cached end');
             is(rindex($s, "", $len+1), $len, 'rindex beyond the cached end');
+          SKIP:
+            {
+                skip "No XS::APItest", 1 unless $test_magic;
+                my @cache = XS::APItest::Magic::utf8_magic($s);
+                is(@cache, 1, "length magic stored");
+                my $z = $s;
+                is($cache[0], length $z, "... correctly");
+            }
         }
     }
 
+    # needs to be done here for index_thr.t
+    done_testing();
+
 } # end of sub run_tests
+
+1;
