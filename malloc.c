@@ -2137,7 +2137,7 @@ Perl_putenv(char *a)
   else
       var = (char *)Perl_malloc(l + 1);
   Copy(a, var, l, char);
-  var[l + 1] = 0;
+  var[l] = 0;
   my_setenv(var, val+1);
   if (var != buf)
       Perl_mfree(var);
