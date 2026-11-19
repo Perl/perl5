@@ -85,6 +85,12 @@ versions updated.
 Compare the current Perl source tree and a given tag for modules that have
 identical version numbers but different contents.
 
+=head2 F<compare-perl-install-files>
+
+Builds and installs two perl versions and then performs a diff on the list of
+installed files.  The diff results will typically have at least one difference
+related to the addition of a version-specific perldelta file.
+
 =head2 F<config_H>
 
 This file is a sample F<config.h> file.  If you are unable to successfully run
