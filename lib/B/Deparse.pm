@@ -1231,9 +1231,10 @@ sub deparse_multiparam {
     $o = $o->sibling;
     return unless $$o and $o->name eq 'multiparam';
 
-    my ($min_args, $max_args, $slurpy, $param_padixes, $slurpy_padix) =
+    my ($min_args, $max_args, $slurpy, $param_padixes, $named_param_details, $slurpy_padix) =
         $o->aux_list($cv);
-    my $nparams = $max_args;
+    my $npositional = $max_args;
+    my $nnamed      = $named_param_details ? scalar @$named_param_details : 0;
 
     my @param_padname    = map { $_ ? $self->padname($_) : '$' } @$param_padixes;
     my ($slurpy_padname) = map { $_ ? $self->padname($_) : $slurpy } $slurpy_padix;
@@ -1244,6 +1245,13 @@ sub deparse_multiparam {
     foreach my $parami ( 0 .. $max_args-1 ) {
         my $padix = $param_padixes->[$parami];
         $parami_for_padix{$padix} = $parami;
+    }
+
+    foreach my $i ( 0 .. $nnamed-1 ) {
+        my $parami = $npositional + $i;
+        my $pnamed = $named_param_details->[$i];
+
+        $parami_for_padix{$pnamed->[1]} = $parami;
     }
 
     my @param_defmode;
@@ -1289,6 +1297,19 @@ sub deparse_multiparam {
     if ($use_feature_sig) {
         my @sig;
 
+        my @defexpr_for_parami;
+        foreach my $parami ( 0 .. $npositional + $nnamed - 1 ) {
+            if ($param_defmode[$parami]) {
+                my $param_sig = "";
+                $param_sig .= $param_defmode[$parami];
+
+                my $defexpr = $param_defexpr[$parami];
+                $param_sig .= " $defexpr" if defined $defexpr;
+
+                $defexpr_for_parami[$parami] = $param_sig;
+            }
+        }
+
         foreach my $parami ( 0 .. $#$param_padixes ) {
             my $param_sig = $param_padname[$parami];
             if ($param_defmode[$parami]) {
@@ -1296,10 +1317,23 @@ sub deparse_multiparam {
                     ( $param_sig .= ' ' ) :
                     ( $param_sig = '$' ); # intentionally no trailing space
 
-                $param_sig .= $param_defmode[$parami];
+                $param_sig .= $defexpr_for_parami[$parami];
+            }
 
-                my $defexpr = $param_defexpr[$parami];
-                $param_sig .= " $defexpr" if defined $defexpr;
+            push @sig, $param_sig;
+        }
+
+        foreach my $i ( 0 .. $nnamed-1 ) {
+            my $parami = $npositional + $i;
+            my $pnamed = $named_param_details->[$i];
+
+            # TODO(leonerd): This won't work if we ever support renaming params; e.g.
+            #    (:$foo_bar :name(foo-bar))
+            # we'd have to look it up by padix and insert a :name attribute in
+            # that case
+            my $param_sig = ':$' . $pnamed->[0];
+            if ($param_defmode[$parami]) {
+                $param_sig .= ' ' . $defexpr_for_parami[$parami];
             }
 
             push @sig, $param_sig;
@@ -1314,7 +1348,7 @@ sub deparse_multiparam {
     my $code = "";
 
     $code .= <<"EOF" if !$slurpy_padix;
-die sprintf("Too many arguments for subroutine at %s line %d.\\n", (caller)[1, 2]) unless \@_ <= $nparams;
+die sprintf("Too many arguments for subroutine at %s line %d.\\n", (caller)[1, 2]) unless \@_ <= $npositional;
 EOF
 
     $code .= <<"EOF" if $min_args > 0;
@@ -1322,7 +1356,7 @@ die sprintf("Too few arguments for subroutine at %s line %d.\\n", (caller)[1, 2]
 EOF
 
     $code .= <<EOF if $slurpy and $slurpy eq '%';
-die sprintf("Odd name/value argument for subroutine at %s line %d.\\n", (caller)[1, 2]) if \@_ > $nparams && ((\@_ - $nparams) & 1);
+die sprintf("Odd name/value argument for subroutine at %s line %d.\\n", (caller)[1, 2]) if \@_ > $npositional && ((\@_ - $npositional) & 1);
 EOF
 
     foreach my $parami ( 0 .. $#$param_padixes ) {
@@ -1368,7 +1402,7 @@ EOF
     }
 
     if ($slurpy) {
-        $code .= "my $slurpy_padname = \@_[$nparams..\$#_];\n";
+        $code .= "my $slurpy_padname = \@_[$npositional..\$#_];\n";
     }
 
     $code =~ s/;\n\z//;

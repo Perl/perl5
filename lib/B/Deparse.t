@@ -3036,6 +3036,22 @@ sub ($a ||= 'default') {
 }
 ;
 ####
+# named parameters
+no warnings;
+use feature 'signatures';
+sub (:$alpha, :$beta, :$gamma = 123) {
+    ;
+}
+;
+####
+# mixed positional and named parameters
+no warnings;
+use feature 'signatures';
+sub ($x, $y = 123, :$alpha = 456) {
+    ;
+}
+;
+####
 # padrange op within pattern code blocks
 /(?{ my($x, $y) = (); })/;
 my $a;
