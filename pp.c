@@ -62,12 +62,13 @@ PP(pp_introcv)
 
 PP(pp_clonecv)
 {
-    dTARGET;
+
     CV * const protocv = PadnamePROTOCV(
         PadlistNAMESARRAY(CvPADLIST(find_runcv(NULL)))[ARGTARG]
     );
-    assert(SvTYPE(TARG) == SVt_PVCV);
     assert(protocv);
+    dTARGET;
+    assert(SvTYPE(TARG) == SVt_PVCV);
     if (CvISXSUB(protocv)) { /* constant */
         /* XXX Should we clone it here? */
         /* If this changes to use SAVECLEARSV, we can move the SAVECLEARSV
