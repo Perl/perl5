@@ -12,7 +12,7 @@ our @EXPORT = qw( );
 # More or less this same list is in Makefile.PL.  Should unify.
 our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
                  getitimer setitimer nanosleep clock_gettime clock_getres
-                 clock clock_nanosleep
+                 clock clock_nanosleep hrtime
                  CLOCKS_PER_SEC
                  CLOCK_BOOTTIME
                  CLOCK_HIGHRES
@@ -45,7 +45,7 @@ our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
                  TIMER_ABSTIME
                  d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
                  d_nanosleep d_clock_gettime d_clock_getres
-                 d_clock d_clock_nanosleep d_hires_stat
+                 d_clock d_clock_nanosleep d_hrtime d_hires_stat
                  d_futimens d_utimensat d_hires_utime
                  stat lstat utime
                 );
@@ -82,6 +82,7 @@ sub import {
             ($i eq 'nanosleep'       && !&d_nanosleep)       ||
             ($i eq 'usleep'          && !&d_usleep)          ||
             ($i eq 'utime'           && !&d_hires_utime)     ||
+            ($i eq 'hrtime'          && !&d_hrtime)          ||
             ($i eq 'ualarm'          && !&d_ualarm)) {
             require Carp;
             Carp::croak("Time::HiRes::$i(): unimplemented in this platform");
@@ -152,6 +153,11 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   clock_nanosleep(CLOCK_REALTIME, time()*1e9 + 10e9, TIMER_ABSTIME);
 
   my $ticktock = clock();
+
+  use Time::HiRes qw( hrtime );
+
+  my $nanoseconds = hrtime();
+  my ($seconds, $nanosec) = hrtime(1);
 
   use Time::HiRes qw( stat lstat );
 
@@ -428,6 +434,27 @@ somewhat like the second value returned by the times() of core Perl,
 but not necessarily identical.  Note that due to backward
 compatibility limitations the returned value may wrap around at about
 2147 seconds or at about 36 minutes.
+
+=item hrtime ()
+
+=item hrtime ($as_array)
+
+Returns a 64-bit unsigned integer representing the value of the
+CLOCK_MONOTONIC clock in nanoseconds.  When called with a true
+argument, returns a two-element array of (seconds, nanoseconds)
+from the same clock.
+
+This is a monotonic clock, meaning that it is unaffected by system
+clock adjustments.  The reference epoch of this clock is not
+specified, so only I<differences> between hrtime() values are
+meaningful.
+
+On 64bit systems the counter will roll after 584 years. On 32bit
+systems the counter will roll after ~4.2 seconds.
+
+This function was added in Time::HiRes 1.9780 and requires a
+system that supports clock_gettime() (i.e., a POSIX-like system
+or equivalent).
 
 =item stat
 
