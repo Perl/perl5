@@ -1,0 +1,238 @@
+#!/usr/bin/env perl
+
+#
+# During the release process, there is a step to compare the installed files.
+# This script automates that task. It can compare two tar files or will
+# download the tar file(s), or can use a named source directory. It builds and
+# installs both versions to locations in a (usually temporary) build-dir and
+# then compares the installed files from each and produces a diff. The diff
+# will typically have at least a difference of adding a version-specific
+# perldelta file.
+#
+use v5.36;
+
+use Cwd            qw(abs_path getcwd);
+use File::Basename qw(basename);
+use File::Find     qw(find);
+use File::Temp     qw(tempdir);
+use File::Spec;
+use HTTP::Tiny;
+
+my $build_dir;
+my $created_tmp_build_dir = 0;
+my $keep_build_dir        = 0;
+my $verbose               = 0;
+
+use Getopt::Long;
+
+my $usage =
+	"Usage: $0 [--verbose] [--build-dir DIR] [--keep-build-dir] OLD NEW\n";
+
+GetOptions(
+	'build_dir|build-dir=s'         => \$build_dir,
+	'keep_build_dir|keep-build-dir' => \$keep_build_dir,
+	'verbose+'                      => \$verbose,
+) or die $usage;
+
+die $usage unless @ARGV == 2;
+
+my ( $old_input, $new_input ) = @ARGV;
+
+if ( !defined $build_dir ) {
+	$build_dir = tempdir(
+		'perl-compare-XXXXXX',
+		TMPDIR  => 1,
+		CLEANUP => !$keep_build_dir
+	);
+	$created_tmp_build_dir = 1;
+}
+else {
+	mkdir $build_dir unless -d $build_dir;
+	$build_dir = abs_path($build_dir);
+}
+
+die "Cannot use build directory: $build_dir\n" unless -d $build_dir;
+info("Build directory: $build_dir");
+
+my $old = prepare_install( $old_input, 'old', $build_dir );
+my $new = prepare_install( $new_input, 'new', $build_dir );
+
+my @old_files = installed_files( $old->{prefix} );
+my @new_files = installed_files( $new->{prefix} );
+
+info("Normalizing the old version in paths for diff");
+my $old_version = $old->{version};
+my $new_version = $new->{version};
+s/\Q$old_version\E/$new_version/g for @old_files;
+
+@old_files = sort @old_files;
+@new_files = sort @new_files;
+
+my $old_list = File::Spec->catfile( $build_dir, "files-$old_version.txt" );
+my $new_list = File::Spec->catfile( $build_dir, "files-$new_version.txt" );
+
+write_list( $old_list, @old_files );
+write_list( $new_list, @new_files );
+
+info("Comparing installed file lists:");
+system( 'diff', '-u', $old_list, $new_list );
+
+if ( $created_tmp_build_dir && $keep_build_dir ) {
+	print "Build directory retained at: $build_dir\n";
+	print "File lists saved in:\n\t$old_list\n\t$new_list\n";
+}
+
+sub prepare_install( $input, $label, $build_dir ) {
+	debug("prepare_install($input, $label, $build_dir)");
+
+	my ( $source, $version );
+
+	if ( $input =~ m{\Ahttps?://}i ) {
+		my $archive = download( $input, $build_dir, $label );
+		( $source, $version ) =
+			unpack_source( $archive, $build_dir, $label );
+	}
+	elsif ( $input =~ /^\d+\.\d+\.\d+$/ ) {
+		$version = $input;
+		my $archive = File::Spec->catfile( $build_dir,
+			"perl-$version.tar.gz" );
+		my $url = "https://www.cpan.org/src/5.0/perl-$version.tar.gz";
+		download( $url, $build_dir, $label, $archive );
+		($source) = unpack_source( $archive, $build_dir, $label );
+	}
+	elsif ( -d $input ) {
+		$source  = abs_path($input);
+		$version = version_from_name( basename($source) ) // 'unknown';
+	}
+	elsif ( -f $input ) {
+		my $archive = abs_path($input);
+		( $source, $version ) =
+			unpack_source( $archive, $build_dir, $label );
+	}
+	else {
+		die "Input is not a version, URL, source directory, or tar:"
+			. $input . "\n";
+	}
+
+	die "No Configure script: $source\n"
+		unless -f File::Spec->catfile( $source, 'Configure' );
+
+	$version //= version_from_name( basename($source) )
+		// die "Could not determine Perl version for $label input;"
+		. " use a versioned directory or tarball name\n";
+
+	my $prefix = File::Spec->catdir( $build_dir, "perl-$version" );
+	info("Building Perl $version from $source");
+
+	run_in_dir( $source, './Configure', '-des', '-Dusedevel',
+		"-Dprefix=$prefix" );
+	run_in_dir( $source, 'make' );
+	run_in_dir( $source, 'make', 'install' );
+
+	return { version => $version, prefix => $prefix };
+}
+
+sub download( $url, $build_dir, $label, $destination = undef ) {
+	die "Cannot determine archive filename from URL: $url\n"
+		if basename($url) eq '';
+	$destination //= File::Spec->catfile( $build_dir, basename($url) );
+	my $response = HTTP::Tiny->new->mirror( $url, $destination );
+	die "failed to fetch $url" if !$response->{success};
+	return $destination;
+}
+
+sub unpack_source ( $archive, $build_dir, $label ) {
+	debug("unpack_source ( $archive, $build_dir, $label )");
+
+	my $extract_dir = File::Spec->catdir( $build_dir, "src-$label" );
+	mkdir $extract_dir or die "Cannot create $extract_dir: $!\n";
+
+	if ( $archive =~ /\.tar\.gz$|\.tgz$/i ) {
+		run_in_dir( $extract_dir, 'tar', 'xzf', $archive );
+	}
+	elsif ( $archive =~ /\.tar\.bz2$/i ) {
+		run_in_dir( $extract_dir, 'tar', 'xjf', $archive );
+	}
+	elsif ( $archive =~ /\.tar\.xz$/i ) {
+		run_in_dir( $extract_dir, 'tar', 'xJf', $archive );
+	}
+	else {
+		die "Unsupported archive format: $archive\n";
+	}
+
+	opendir my $dh, $extract_dir or die "Cannot read $extract_dir: $!\n";
+	my @dirs = grep {
+			   $_ ne '.'
+			&& $_ ne '..'
+			&& -d File::Spec->catdir( $extract_dir, $_ )
+	} readdir $dh;
+	closedir $dh;
+
+	my $source =
+		@dirs == 1
+		? File::Spec->catdir( $extract_dir, $dirs[0] )
+		: $extract_dir;
+	my $version = version_from_name( basename($archive) )
+		// version_from_name( basename($source) );
+
+	return ( $source, $version );
+}
+
+sub installed_files($prefix) {
+	debug("installed_files($prefix)");
+	my @files;
+
+	find(
+		{
+			no_chdir => 1,
+			wanted   => sub {
+				return unless -f $_;
+				my $relative =
+					File::Spec->abs2rel( $File::Find::name,
+					$prefix );
+				$relative =~ s{\\}{/}g;
+				push @files, "./$relative";
+			},
+		},
+		$prefix
+	);
+
+	return @files;
+}
+
+sub write_list ( $path, @lines ) {
+	info("Writing $path");
+	open my $fh, '>', $path or die "Cannot write $path: $!\n";
+	print {$fh} "$_\n" for @lines;
+	close $fh or die "Cannot close $path: $!\n";
+}
+
+sub run_in_dir ( $dir, @command ) {
+	debug( "run_in_dir ( $dir, " . join( ' ', @command ) . " )" );
+	my $original_dir = getcwd();
+	chdir $dir or die "Cannot change to $dir: $!\n";
+	system { $command[0] } @command;
+	my $status = $? >> 8;
+	chdir $original_dir or die "Cannot return to $original_dir: $!\n";
+	die "Command failed (exit $status): @command\n" if $status != 0;
+}
+
+sub version_from_name ($name) {
+	return $1 if $name =~ /perl[-_]?(5\.\d+\.\d+)/i;
+	return $1 if $name =~ /(5\.\d+\.\d+)/;
+	return;
+}
+
+sub print_if( $min_verbose, $message ) {
+	if ( $verbose >= $min_verbose ) {
+		print $message, "\n";
+	}
+}
+
+sub info($message) {
+	print_if( 1, $message );
+}
+
+sub debug($message) {
+	print_if( 2, $message );
+}
