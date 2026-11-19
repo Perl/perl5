@@ -429,6 +429,19 @@ unless ($define{USE_LOCALE} && (     $define{WIN32}
     );
 }
 
+unless ($define{USE_LOCALE} && (   $define{WIN32}
+                                || $define{WIN32_USE_FAKE_OLD_MINGW_LOCALES}))
+{
+    ++$skip{$_} foreach qw(
+        PL_win_bscratch
+        PL_win_bscratch_size
+        PL_wrap_wsetlocale_result
+        PL_wrap_wsetlocale_size
+        PL_wrap_wsetlocale_wlocale
+        PL_wrap_wsetlocale_wlocale_result_size
+    );
+}
+
 unless ($define{EMULATE_THREAD_SAFE_LOCALES})
 {
     ++$skip{$_} foreach qw(
