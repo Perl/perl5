@@ -165,12 +165,19 @@ Here's another example of using C<..>:
 X<regex, XML> X<regex, HTML> X<XML> X<HTML> X<pain> X<frustration>
 X<sucking out, will to live>
 
-Do not use regexes. Use a module and forget about the
-regular expressions. The L<XML::LibXML>, L<HTML::TokeParser> and
-L<HTML::TreeBuilder> modules are good starts, although each namespace
-has other parsing modules specialized for certain tasks and different
-ways of doing it. Start at CPAN Search ( L<http://metacpan.org/> )
-and wonder at all the work people have done for you already! :)
+Regular expressions in Perl versions prior to 5.10.0 could not handle
+recursion. Therefore the recommendation for recursive languages
+like C<XML> or C<HTML> was to avoid using regexes, and use specific
+parsing modules instead, like L<XML::LibXML>, L<HTML::TokeParser> or
+L<HTML::TreeBuilder>. If you need a full parse tree, that recommendation
+is still the best advice.
+
+Since version 5.10.0, Perl regexes I<can> parse recursive constructs,
+either through regexes crafted by hand, or through helper modules
+like L<Regexp::Common> or L<Regexp::Grammars>. 
+Therefore, if you need to extract some specific subset of information from
+an C<XML> or C<HTML> document, you I<can> construct a regexp to do so -
+but this is not an easy task and it may require a fair amount of testing.
 
 =head2 I put a regular expression into $/ but it didn't work. What's wrong?
 X<$/, regexes in> X<$INPUT_RECORD_SEPARATOR, regexes in>
@@ -807,31 +814,18 @@ These strings do not match /\Bam\B/
     "I am Sam" # "am" surrounded by non-word chars
 
 
-=head2 Why does using $&, $`, or $' slow my program down?
+=head2 Why did using $&, $`, or $' slow my program down in older Perls?
 X<$MATCH> X<$&> X<$POSTMATCH> X<$'> X<$PREMATCH> X<$`>
 
-(contributed by Anno Siegel)
+(contributed by Anno Siegel, revised by Laurent Dami)
 
-Once Perl sees that you need one of these variables anywhere in the
-program, it provides them on each and every pattern match. That means
-that on every pattern match the entire string will be copied, part of it
-to $`, part to $&, and part to $'. Thus the penalty is most severe with
-long strings and patterns that match often. Avoid $&, $', and $` if you
-can, but if you can't, once you've used them at all, use them at will
-because you've already paid the price. Remember that some algorithms
-really appreciate them. As of the 5.005 release, the $& variable is no
-longer "expensive" the way the other two are.
-
-Since Perl 5.6.1 the special variables @- and @+ can functionally replace
-$`, $& and $'. These arrays contain pointers to the beginning and end
-of each match (see perlvar for the full story), so they give you
-essentially the same information, but without the risk of excessive
-string copying.
-
-Perl 5.10 added three specials, C<${^MATCH}>, C<${^PREMATCH}>, and
-C<${^POSTMATCH}> to do the same job but without the global performance
-penalty. Perl 5.10 only sets these variables if you compile or execute the
-regular expression with the C</p> modifier.
+In versions prior to 5.20.0, 
+once Perl saw that you needed one of these variables anywhere in the
+program, it provided them on each and every pattern match. That meant
+that on every pattern match the entire string was copied, part of it
+to $`, part to $&, and part to $'. Thus the penalty was most severe with
+long strings and patterns that match often. Since version 5.20.0 that
+problem has been solved and is no longer a concern.
 
 =head2 What good is C<\G> in a regular expression?
 X<\G>
