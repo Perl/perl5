@@ -1,0 +1,436 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5455delta - what is new for perl v5.45.5
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.45.4 release and the 5.45.5
+release.
+
+If you are upgrading from an earlier release such as 5.45.3, first read
+L<perl5454delta>, which describes differences between 5.45.3 and 5.45.4.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Case-insensitive literal alternatives such as C<foo|bar|a_word|_qux> can
+compile into a single trie again.  Characters that do not participate in
+Unicode case folding can join neighboring folded literals after the
+optimizer records their fixed substrings.
+[L<GH #19953|https://github.com/Perl/perl5/issues/19953>]
+
+=item *
+
+Non-folded trie matching against native byte strings now consumes a
+character's encoded octets in one iteration. This reduces reader bookkeeping
+when the character requires two UTF-8 or UTF-EBCDIC octets.
+
+=item *
+
+The Aho-Corasick regex scanner uses Boyer-Moore-Horspool shift tables to skip
+positions where no literal alternative can start.  It can also skip repeated
+blocks of octets that cannot start an alternative.  These filters apply to
+eligible case-sensitive literals, with separate shift tables for Latin-1 and
+UTF-8 targets.
+
+Eligible case-insensitive literal alternatives use a start-octet map that
+includes their possible folds.  They do not use the shift tables, because
+folding can change encoded lengths.  Locale-dependent folding uses the
+existing scanner.
+
+The scanner also reduces the cost of tracking match positions, especially
+for case-sensitive matching against non-UTF-8 targets, and avoids repeated
+alignment checks while finding a rejected block of octets.
+
+=item *
+
+The C<isa> operator now does a cached lookup of the C<isa> method,
+improving performance when that isa() method happens to be
+C<UNIVERSAL::isa>. [L<GH #24997|https://github.com/Perl/perl5/issues/24997>]
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B::Concise> has been upgraded from version 1.012 to 1.013.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.860 to 1.861.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.75 to 3.76.
+
+=item *
+
+L<Encode> has been upgraded from version 3.24 to 3.25.
+
+=item *
+
+L<encoding> has been upgraded from version 3.00 to 3.01.
+
+=item *
+
+C<libnet> has been upgraded from version 3.15 to 3.16.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20261022 to 5.20261119.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302225 to 1.302226.
+
+=item *
+
+L<Win32> has been upgraded from version 0.64 to 0.65.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.52 to 1.53.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+GCC and Clang configuration probes now work with C<-Werror> when detecting
+library functions, the size of C<long double>, supported compiler options,
+time headers, memory-mapping and shared-memory return types, and the
+in-memory representation of floating-point zero.
+
+=item *
+
+Fix some build noise and technical undefined behaviour with
+C<-Duselongdouble> builds on ARM64:
+
+=over
+
+=item *
+
+C<Configure> would detect C<double> format strings rather than the
+correct C<long double> format string as the format string for NV when NV
+was C<long double>, resulting in C<-Wformat> warnings.
+
+=item *
+
+F<perl.h> would disable C<USE_LONG_DOUBLE> when C<double> and C<long
+double> were the same size leaving NV as C<long double>.  This would
+result in calls to a C library function that expected a C<double>
+pointer being supplied a <long double> pointer, resulting in type
+mismatch warnings.
+
+=back
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item * t/TEST and t/harness now run generated tests
+
+F<t/TEST> and F<t/harness> are the programs which are the engines underneath
+C<make test> and C<make test_harness>.  Up till now the list of test files that
+they run was composed by examination of F<MANIFEST>.  However in 2020 the test
+files for the Devel-PPPort library (shipped with core in the
+F<dist/Devel-PPPort> directory) were overhauled such that they were composed
+during that library's own build process from data files found underneath that
+directory.  As such they were no longer listed as test files in F<MANIFEST> --
+but F<t/TEST> and F<t/harness> were not updated to account for the possibility
+of generated tests in addition to "MANIFEST-listed" tests.  This was not
+noticed until [L<GH #24855|https://github.com/Perl/perl5/issues/24855>].
+
+This has been corrected.  Testers will now see F<dist/Devel-PPPort/t/*.t> test
+files being run as part of C<make test> and C<make test_harness>.  In
+addition, F<t/porting/test_testlist.t> now verifies that generated tests are
+being run and more thoroughly exercises the various ways in which running the
+test suite can be triggered.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item * macOS (Darwin)
+
+Given GCC 3.3 20030304 (Apple Computer, Inc. build 1435) from the June 2003 GCC
+update or newer, it should be possible to build current Perl on Mac OS X 10.2
+Jaguar (Darwin 6) once again.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item * CODE magic for Magic v2
+
+A new sub-type of magic has been added, designed to be applied to subroutines
+(i.e. SVs having the type C<SVt_PVCV>). This magic sub-type has various
+trigger functions relating to compile-time or runtime management of the
+subroutine to which it is attached.
+
+For more details, see L<perlapi/"struct CodeMagicFunctions">.
+
+=item * save_scalar_flags
+
+Added a new function analogous to C<save_aelem_flags> and C<save_helem_flags>, to have more control over saving scalars.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Resolving a deferred array or hash element no longer frees the element when
+the deferred alias holds the container's last reference. Assigning through a
+deferred array element that can no longer extend its array no longer leaks the
+array. [L<GH #25038|https://github.com/Perl/perl5/issues/25038>]
+
+=item *
+
+Various operations in the parser have now been made deterministic where
+they used to be at the mercy of the C compiler. Parser errors and warnings
+should now be emitted in consistent order in all build contexts. Line
+attribution for the implicit statements in a C<use> no longer depends on
+C compiler argument evaluation order.
+
+=item *
+
+A case-insensitive regex trie no longer accepts a word ending partway through
+an input character's fold. For example, C</s|zoo/iu> no longer matches a
+sharp-s, whose full fold is C<ss>. Later alternatives are tried in order.
+
+=item *
+
+A folded regex trie now updates its minimum and maximum lengths independently.
+An alternative which changes both bounds could previously cause a valid
+match to be missed or an assertion failure during Aho-Corasick scanning.
+
+=item *
+
+Case-insensitive trie prefix extraction no longer splits a multi-character
+fold between regex nodes. For example, a UTF-8 flagged C<ssx|sy> pattern
+under C</iu> now matches C<"\x{df}x">.
+
+=item *
+
+A case-insensitive regular expression with a folded literal start class
+could loop indefinitely when searching at the end of a UTF-8 string.
+This could occur on a subsequent C</g> match after a successful match.
+
+[L<GH #24934|https://github.com/Perl/perl5/issues/24934>]
+
+=item *
+
+L<perlfunc/caller> is better able to identify the correct call site when
+multiple branches of an C<if>/C<elsif>/C<else> chain call the same function.
+
+=item *
+
+L<B::Xref> is able to use line numbers stored within nulled COPs.
+[L<GH #7947|https://github.com/Perl/perl5/issues/7947>]
+
+=item *
+
+Perl 5.44.0 introduced some internal changes that broke uses of C<substr> when
+the string argument it is operating on was itself a special lvalue scalar
+created by another C<substr> call. This would cause debugging assertions or
+invalid C<free()> crashes from code that had a structure such as the following
+examples:
+
+    my $ref = \substr($str, $offset);
+    substr($$ref, 0, 1, "replacement");
+
+Z<>
+
+    substr(substr($str, $offset), 0, 1, "replacement");
+
+This bug has now been fixed.
+[L<GH #24933|https://github.com/Perl/perl5/issues/24933>]
+
+=item * Properly initialize ${^UTF8CACHE} in new threads
+
+Previously the UTF-8 cache wasn't enabled in new threads, leading to
+performance issues.
+
+=item *
+
+The C<isa> operator now calls get magic on its left argument before
+checking if that value is a reference and what it is a reference to.
+[L<GH #24997|https://github.com/Perl/perl5/issues/24997>]
+
+=item *
+
+C<PL_sv_zero>, introduced in 5.28, has a zero numeric value and a "0"
+string value. Its flags did not indicate which value should be treated
+as authoritative when serializing or encoding to an external format.
+This could lead to what was originally a numerical return value being
+output as the string representation instead, which might not have the
+same meaning (e.g. in JSON).
+
+The flags on C<PL_sv_zero> have been modified so that it appears to have
+been created as a number and then later gained a string representation.
+This change is intended to make it easier for serialization modules to
+output C<0> rather than C<"0">, provided that such modules actually do
+differentiate between "created as number" and "created as string".
+
+=item * Various bugfixes to C<foreach> loops
+
+Perl 5.44.0 expanded the ability of C<foreach> loops to make use of
+reference aliasing when using multiple loop iterator variables. Several small
+bugs were found when these are combined, and have been fixed in this release.
+
+=over 4
+
+=item * C<foreach> loop with refaliasing crashes when run a second time
+
+[L<GH #25051|https://github.com/Perl/perl5/issues/25051>]
+
+=item * Multivariable C<foreach> with more than 32 variables confuses which
+ones are refaliases
+
+[L<GH #25055|https://github.com/Perl/perl5/issues/25055>]
+
+=item * C<foreach> with refaliasing fails to run magic
+
+[L<GH #25056|https://github.com/Perl/perl5/issues/25056>]
+
+=back
+
+Perl 5.44.0 also added internal optimisations on multivariable C<foreach>
+loops that call the C<builtin::indexed> function and assign the resulting list
+of index / value pairs into two iterator variables. Two bugs were found when
+these are combined, and have been fixed in this release:
+
+=over 4
+
+=item * C<foreach> with C<indexed> and C<reverse> assigns
+indexes backwards
+
+[L<GH #25052|https://github.com/Perl/perl5/issues/25052>]
+
+=item * C<foreach> with C<indexed> performs aliasing rather than copying
+values
+
+[L<GH #25053|https://github.com/Perl/perl5/issues/25053>]
+
+=back
+
+Finally, a bug was found when both refaliasing and C<builtin::indexed> are
+combined in a multivariable C<foreach> loop, and has now been fixed:
+
+=over 4
+
+=item * C<foreach> with refaliasing and C<indexed> crashes
+
+    foreach my ( $idx, \@arr ) ( indexed @list_of_arefs ) {
+        say "Array number [$idx] contains <@arr>";
+    }
+
+[L<GH #24999|https://github.com/Perl/perl5/issues/24999>]
+
+=back
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.45.5 represents approximately 4 weeks of development since Perl
+5.45.4 and contains approximately 14,000 lines of changes across 400 files
+from 17 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 9,200 lines of changes to 320 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.45.5:
+
+Chad Granum, Chris 'BinGOs' Williams, Dan Kogai, David Mitchell, Eric
+Herman, Firas Khalil Khana, James E Keenan, Jan Dubois, Karl Williamson,
+Leon Timmermans, Nikolay Shaplov, Paul Evans, Paul Marquess, Philippe
+Bruhat (BooK), Richard Leach, Sevan Janiyan, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+The Perl Core Development Fund, managed by the Perl and Raku Foundation,
+financially supports the work of several core developers.
+L<https://perlfoundation.org/perl-core-development-fund.html>
+
+During the development cycle leading up to Perl 5.46, the following
+organizations each contributed the equivalent of one or more months of
+full-time core developer work to the Perl Core Development Fund:
+
+L<DuckDuckGo|https://duckduckgo.com/>.
+
+We would like to thank them here for their support to the continued
+development of Perl.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>. There may also be information at
+L<https://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>. Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
