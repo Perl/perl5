@@ -8756,11 +8756,12 @@ PP(pp_paramtest)
 PP_wrapped(pp_paramstore, 1, 0)
 {
     dSP;
-    dTARGET;
     SV *value = POPs;
+    SV **padentry = &PAD_SVl(PL_op->op_targ);
 
-    SvPADSTALE_off(TARG);
-    SvSetMagicSV(TARG, value);
+    save_clearsv(padentry);
+    SvPADSTALE_off(*padentry);
+    SvSetMagicSV(*padentry, value);
 
     RETURN;
 }

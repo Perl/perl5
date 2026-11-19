@@ -1006,6 +1006,17 @@ is eval("tnamed07(w => 'W', x => 'X', y => 'Y', z => 'Z')"), "x=X y=Y";
     is $tnamed11->(x => 123, y => 456, z => 789), "x=123 y=456 <z 789>";
 }
 
+# Named params are assigned to fresh variables (GH#25054)
+{
+    sub tnamed12 (:$x) { return sub { $x++ }; }
+    is join("", map { $_->() } map { tnamed12(x => 0) } 1 .. 5), "00000",
+        'Mandatory named parameters get fresh variables on each call';
+
+    sub tnamed13 (:$x = 0) { return sub { $x++ }; }
+    is join("", map { $_->() } map { tnamed13() } 1 .. 5), "00000",
+        'Optional named parameters get fresh variables on each call';
+}
+
 sub t085
     (
     $
