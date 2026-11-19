@@ -17,10 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.45.5 - Donald A. Adams - Rotary's Ideal of Service, 1926
+
+L<Announced on 2026-11-19 by Eric Herman|https://www.nntp.perl.org/group/perl.perl5.porters/2026/11/msg271352.html>
+
+  To give real service you must add something which cannot be bought or
+  measured with money and that thing is sincerity and integrity.
+
 =head2 v5.45.4 - Leonard Nimoy - You and I have Learned
 
 L<Announced on 2026-10-22 by Eric Herman|https://www.nntp.perl.org/group/perl.perl5.porters/2026/10/msg271322.html>
-
 
   The miracle is this
   The more we share ...
