@@ -87,6 +87,9 @@ Individual members of C<PL_parser> have their own documentation.
 #  define PL_nexttoke		(PL_parser->nexttoke)
 #  define PL_nexttype		(PL_parser->nexttype)
 #  define PL_nextval		(PL_parser->nextval)
+#  define PL_intuit_more_prev_lbracket_pos                                  \
+                                (PL_parser->intuit_more_prev_lbracket_pos)
+#  define PL_intuit_more_prev_return (PL_parser->intuit_more_prev_return)
 
 #define SvEVALED(sv) \
     (SvTYPE(sv) >= SVt_PVNV \
@@ -993,6 +996,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
                                                         |LEX_DONT_CLOSE_RSFP));
 
     parser->in_pod = parser->filtered = 0;
+    parser->intuit_more_prev_lbracket_pos = NULL;
 }
 
 
@@ -4572,7 +4576,7 @@ S_is_existing_identifier(pTHX_ char *s, Size_t len, char sigil, bool is_utf8)
 
 /* This is the one truly awful dwimmer necessary to conflate C and sed. */
 
-static int
+static bool
 S_intuit_more(pTHX_ char *s, char *e,
               U8 caller_context,    /* Who's calling us? basically an enum */
               char * caller_s,      /* If non-NULL, the name of the identifier
@@ -4580,6 +4584,13 @@ S_intuit_more(pTHX_ char *s, char *e,
               Size_t caller_length) /* And the length of that name */
 {
     PERL_ARGS_ASSERT_INTUIT_MORE;
+    const char * start;
+    int retval;
+
+    /* Unsigned version of current character */
+    U8 un_char = 0;
+
+    bool under_strict_vars = PL_hints & HINT_STRICT_VARS;
 
     /* This function has been mostly untouched for a long time, due to its
      * 'scariness', and lack of comments.  khw has gone through and done some
@@ -4595,11 +4606,14 @@ S_intuit_more(pTHX_ char *s, char *e,
      * variable $0.  I think this should be special cased. */
 
     /* If recursed within brackets, there is more to the expression */
-    if (PL_lex_brackets)
-        return TRUE;
+    if (PL_lex_brackets) {
+        retval = TRUE;
+        goto do_clear_and_return;
+    }
 
     if (e <= s) {
-        return false;
+        retval = false;
+        goto do_clear_and_return;
     }
 
     /* If begins with '->' ... */
@@ -4607,7 +4621,8 @@ S_intuit_more(pTHX_ char *s, char *e,
 
         /* '->[' and '->{' imply more to the expression */
         if (s[2] == '[' || s[2] == '{') {
-            return TRUE;
+            retval = TRUE;
+            goto do_clear_and_return;
         }
 
         /* Any post deref construct implies more to the expression */
@@ -4616,19 +4631,24 @@ S_intuit_more(pTHX_ char *s, char *e,
                                     || (s[3] == '#' && s[4] == '*')))
                 || (s[2] == '@' && memCHRs("*[{", s[3])) ))
         {
-            return TRUE;
+            retval = TRUE;
+            goto do_clear_and_return;
         }
     }
 
-    if (s[0] != '{' && s[0] != '[')
-        return FALSE;
+    if (s[0] != '{' && s[0] != '[') {
+        retval = FALSE;
+        goto do_clear_and_return;
+    }
 
     /* quit immediately from any errors from now on */
     PL_parser->sub_no_recover = TRUE;
 
     /* Here is '{' or '['.  Outside patterns, they're always subscripts */
-    if (!PL_lex_inpat)
-        return TRUE;
+    if (!PL_lex_inpat) {
+        retval = TRUE;
+        goto do_clear_and_return;
+    }
 
     /* In a pattern, so maybe we have {n,m}, in which case, there isn't more to
      * the expression.
@@ -4638,18 +4658,31 @@ S_intuit_more(pTHX_ char *s, char *e,
      * written, and regcurly never required a comma, as in {0}.  Probably it is
      * ok as-is */
     if (s[0] == '{') {
-        return ! regcurly(s, e, NULL);
+        retval = ! regcurly(s, e, NULL);
+        goto do_clear_and_return;
     }
 
     /* Here is '[': maybe we have a character class.  Examine the guts */
     s++;
+    start = s;
+
+    /* If called from the same position as before, return what was computed
+     * before.  This finesses the issue where we get called from
+     * LEX_INTERPENDMAYBE without the parse having advanced from when we were
+     * called from somewhere else, but without the context that was used in
+     * that previous call.  Lacking that context can cause this to come to a
+     * different (and worse) conclusion than we already made.  So simply
+     * return that previous conclusion */
+    if (start == PL_intuit_more_prev_lbracket_pos) {
+        return PL_intuit_more_prev_return;
+    }
 
     /* '^' implies a character class; An empty '[]' isn't legal, and it means
      * there isn't more to come */
-    if (s[0] == ']' || s[0] == '^')
-        return FALSE;
-
-    bool under_strict_vars = PL_hints & HINT_STRICT_VARS;
+    if (s[0] == ']' || s[0] == '^') {
+        retval = FALSE;
+        goto do_save_and_return;
+    }
 
     /* If the input is of the form '$foo[...', and there is a $foo scalar and
      * no @foo array, then '...' is more likely to be a character class.
@@ -4657,9 +4690,7 @@ S_intuit_more(pTHX_ char *s, char *e,
      * variables, so in that case it MUST be a character class.)  If the
      * situation is reversed, it is more likely to be (or must be) a
      * subscript.  */
-    if (   caller_context == FROM_DOLLAR
-        || (caller_context == FROM_INTERDEPENDMAYBE && caller_s[0] == '$'))
-    {
+    if (caller_context == FROM_DOLLAR) {
         assert (caller_s);
 
         /* See if there is a known scalar for the input identifier */
@@ -4678,7 +4709,8 @@ S_intuit_more(pTHX_ char *s, char *e,
             /* If none are, is an error.  Return false to stop useless further
              * parsing. */
             if (count == 0) {
-                return false;
+                retval = false;
+                goto do_save_and_return;
             }
 
             /* When just one variable is declared, the construct has to match
@@ -4686,7 +4718,8 @@ S_intuit_more(pTHX_ char *s, char *e,
              * subscript which needs further processing; otherwise it is a
              * character class needing nothing further. */
             if (count == 1) {
-                return has_array;
+                retval = has_array;
+                goto do_save_and_return;
             }
 
             /* Here have both an array and a scalar with the same name.  Drop
@@ -4717,7 +4750,8 @@ S_intuit_more(pTHX_ char *s, char *e,
     if (isDIGIT(s[0]) && (   (e - s >= 2 &&                  s[1] == ']')
                           || (e - s >= 3 && isDIGIT(s[1]) && s[2] == ']')))
     {
-        return true;
+        retval = true;
+        goto do_save_and_return;
     }
 
     /* this is terrifying, and it mostly works.  See GH #16478.
@@ -4741,9 +4775,6 @@ S_intuit_more(pTHX_ char *s, char *e,
         weight = 2;
     }
 
-    /* Unsigned version of current character */
-    U8 un_char = 0;
-
     /* Keep track of how many multiple occurrences of the same character there
      * are */
     char seen[256];
@@ -4757,7 +4788,6 @@ S_intuit_more(pTHX_ char *s, char *e,
      * \xC2 or \xC3.  The heuristics below will count those as repeated bytes,
      * and thus lean more towards this being a character class than when not
      * in UTF-8. */
-    const char * start = s;
     while (s < e) {
         U8 prev_un_char = un_char;
         un_char = (U8) s[0];
@@ -4774,7 +4804,8 @@ S_intuit_more(pTHX_ char *s, char *e,
              * as ..."  Perhaps suppress the message if all (or maybe almost
              * all) the evidence points to the same outcome.  This would
              * involve two weight variables */
-            return (weight < 0);
+            retval = (weight < 0);
+            goto do_save_and_return;
 
           case '@':
           case '&':
@@ -4815,7 +4846,8 @@ S_intuit_more(pTHX_ char *s, char *e,
 
                 /* An illegal identifier means this can't be a subscript;
                  * it's an error or it could be a charclass */
-                return false;
+                retval = false;
+                goto do_save_and_return;
             }
 
             /* Here, is a syntactically valid identifier */
@@ -4825,7 +4857,8 @@ S_intuit_more(pTHX_ char *s, char *e,
              * set tmpbuf[1] to NUL.  This is either an error or a character
              * class. */
             if (len == 0) {
-                return false;
+                retval = false;
+                goto do_save_and_return;
             }
 
             /* If there is extra stuff in the source, like braces, it means
@@ -4840,7 +4873,8 @@ S_intuit_more(pTHX_ char *s, char *e,
                 /* &41 and &6b are illegal subroutine names so is an error or
                  * a charclass */
                 if (tmpbuf[0] == '&') {
-                    return false;
+                    retval = false;
+                    goto do_save_and_return;
                 }
 
                 /* scan_ident will stop at the first non-digit, which is
@@ -4851,7 +4885,8 @@ S_intuit_more(pTHX_ char *s, char *e,
                     && isWORDCHAR_lazy_if_safe(s_after_ident,
                                                PL_bufend, UTF))
                 {
-                    return false;
+                    retval = false;
+                    goto do_save_and_return;
                 }
 
                 /* We don't get here if this potential identifier starts with
@@ -4866,7 +4901,8 @@ S_intuit_more(pTHX_ char *s, char *e,
                  * that this is meant to be a charclass matching either '$' or
                  * '0'.  */
                 if (tmpbuf[1+0] == '0') {
-                    return false;
+                    retval = false;
+                    goto do_save_and_return;
                 }
 
                 /* Here it is either something like $1 which is supposed to
@@ -4919,7 +4955,8 @@ S_intuit_more(pTHX_ char *s, char *e,
                 /* Under strict, an unknown variable means an error or a
                  * character class */
                 if (under_strict_vars && ! is_known) {
-                    return false;
+                    retval = false;
+                    goto do_save_and_return;
                 }
 
                 /* Look at all possible combinations of the conditions.
@@ -5247,7 +5284,18 @@ S_intuit_more(pTHX_ char *s, char *e,
     }   /* End of loop through each character of the construct */
 
     /* No terminating ']', has to be an expression */
-    return TRUE;
+    retval = TRUE;
+    /* FALLTHROUGH */
+
+  do_save_and_return:
+    PL_intuit_more_prev_lbracket_pos = start;
+    PL_intuit_more_prev_return = retval;
+    return retval;
+
+  do_clear_and_return:  /* We didn't get far enough to see a '[' */
+    PL_intuit_more_prev_lbracket_pos = NULL;
+    PL_intuit_more_prev_return = retval;
+    return retval;
 }
 
 /*
@@ -10420,8 +10468,7 @@ Perl_yylex(pTHX)
         return yylex();
 
     case LEX_INTERPENDMAYBE:
-        if (intuit_more(PL_bufptr, PL_bufend, FROM_INTERDEPENDMAYBE,
-                        PL_oldbufptr, PL_bufptr - PL_oldbufptr))
+        if (intuit_more(PL_bufptr, PL_bufend, FROM_INTERDEPENDMAYBE, NULL, 0))
         {
             PL_lex_state = LEX_INTERPNORMAL;	/* false alarm, more expr */
             break;

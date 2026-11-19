@@ -94,6 +94,10 @@ typedef struct yy_parser {
     char	*linestart;	/* beginning of most recently read line */
     char	*last_uni;	/* position of last named-unary op */
     char	*last_lop;	/* position of last list operator */
+
+    /* position of '[' in the most recent call to S_intuit_more */
+    const char        *intuit_more_prev_lbracket_pos;
+
     /* copline is used to pass a specific line number to newSTATEOP.  It
        is a one-time line number, as newSTATEOP invalidates it (sets it to
        NOLINE) after using it.  The purpose of this is to report line num-
@@ -121,6 +125,9 @@ typedef struct yy_parser {
     bool        sig_seen;       /* the currently parsing sub has a signature */
 
     bool        recheck_charset_validity;
+
+    /* Cache the return value of the most recent call to S_intuit_more() */
+    bool         intuit_more_prev_return;
 
     PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */
     PERL_BITFIELD16	filtered:1;    /* source filters in evalbytes */
