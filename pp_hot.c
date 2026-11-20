@@ -5399,36 +5399,29 @@ pp_match is just a simpler version of the above.
 PP(pp_subst)
 {
     dTARG;
-    PMOP *pm = cPMOP;
-    PMOP *rpm = pm;
+    const PMOP *rpm = cPMOP;
     char *s;
     char *strend;
     const char *c;
-    STRLEN clen;
+    STRLEN clen = 0;
     SSize_t iters = 0;
     SSize_t maxiters;
-    bool once;
     U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits.
                         See "how taint works" above */
     char *orig;
-    U8 r_flags;
-    REGEXP *rx = PM_GETRE(pm);
+    REGEXP *rx = PM_GETRE(rpm);
     regexp *prog = ReANY(rx);
     STRLEN len;
     int force_on_match = 0;
     const I32 oldsave = PL_savestack_ix;
     bool doutf8 = FALSE; /* whether replacement is in utf8 */
-#ifdef PERL_ANY_COW
-    bool was_cow;
-#endif
-    SV *nsv = NULL;
     SSize_t sp_offset = 0; /* number of items left on stack */
     SV *dstr;
     SV *retval;
 
     PERL_ASYNC_CHECK();
 
-    if (pm->op_pmflags & PMf_CONST) {
+    if (rpm->op_pmflags & PMf_CONST) {
         /* known replacement string */
         dstr = *PL_stack_sp;
         sp_offset++;
@@ -5456,7 +5449,7 @@ PP(pp_subst)
     SvGETMAGIC(TARG); /* must come before cow check */
 #ifdef PERL_ANY_COW
     /* note that a string might get converted to COW during matching */
-    was_cow = cBOOL(SvIsCOW(TARG));
+    const bool was_cow = cBOOL(SvIsCOW(TARG));
 #endif
     if (!(rpm->op_pmflags & PMf_NONDESTRUCT)) {
 #ifndef PERL_ANY_COW
@@ -5478,30 +5471,20 @@ PP(pp_subst)
         force_on_match = 1;
 
     /* only replace once? */
-    once = !(rpm->op_pmflags & PMf_GLOBAL);
+    const bool once = !(rpm->op_pmflags & PMf_GLOBAL);
 
     /* See "how taint works" above */
     if (TAINTING_get) {
         rxtainted  = (
             (SvTAINTED(TARG) ? SUBST_TAINT_STR : 0)
           | (RXp_ISTAINTED(prog) ? SUBST_TAINT_PAT : 0)
-          | ((pm->op_pmflags & PMf_RETAINT) ? SUBST_TAINT_RETAINT : 0)
+          | ((rpm->op_pmflags & PMf_RETAINT) ? SUBST_TAINT_RETAINT : 0)
           | ((  (once && !(rpm->op_pmflags & PMf_NONDESTRUCT))
              || (PL_op->op_private & OPpTRUEBOOL)) ? SUBST_TAINT_BOOLRET : 0));
         TAINT_NOT;
     }
 
-  force_it:
-    if (!pm || !orig)
-        DIE(aTHX_ "panic: pp_subst, pm=%p, orig=%p", pm, orig);
-
-    strend = orig + len;
-    /* We can match twice at each position, once with zero-length,
-     * second time with non-zero.
-     * Don't handle utf8 specially; we can use length-in-bytes as an
-     * upper bound on length-in-characters, and avoid the cpu-cost of
-     * computing a tighter bound. */
-    maxiters = 2 * len + 10;
+    PMOP *pm = cPMOP;
 
     /* handle the empty pattern */
     if (!RX_PRELEN(rx) && PL_curpm && !prog->mother_re) {
@@ -5521,7 +5504,7 @@ PP(pp_subst)
     }
 
 #ifdef PERL_SAWAMPERSAND
-    r_flags = (    RXp_NPARENS(prog)
+    const U8 r_flags = (    RXp_NPARENS(prog)
                 || PL_sawampersand
                 || (RXp_EXTFLAGS(prog) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
                 || (rpm->op_pmflags & PMf_KEEPCOPY)
@@ -5529,8 +5512,19 @@ PP(pp_subst)
           ? REXEC_COPY_STR
           : 0;
 #else
-    r_flags = REXEC_COPY_STR;
+    const U8 r_flags = REXEC_COPY_STR;
 #endif
+
+  force_it:
+    assert(pm || orig); /* pm should always be non-NULL here anyway. */
+
+    strend = orig + len;
+    /* We can match twice at each position, once with zero-length,
+     * second time with non-zero.
+     * Don't handle utf8 specially; we can use length-in-bytes as an
+     * upper bound on length-in-characters, and avoid the cpu-cost of
+     * computing a tighter bound. */
+    maxiters = 2 * len + 10;
 
     if (!CALLREGEXEC(rx, orig, strend, orig, 0, TARG, NULL, r_flags))
     {
@@ -5548,16 +5542,13 @@ PP(pp_subst)
 
     /* known replacement string? */
     if (dstr) {
-        /* replacement needing upgrading? */
+        /* Stringify once to avoid duplicate calls to GET magic/overloads */
+        c = SvPV_const(dstr, clen);
+        doutf8 = DO_UTF8(dstr);
+
         if (DO_UTF8(TARG) && !doutf8) {
-             nsv = sv_mortalcopy_flags(dstr, SV_GMAGIC|SV_DO_COW_SVSETSV);
-             sv_utf8_upgrade(nsv);
-             c = SvPV_const(nsv, clen);
-             doutf8 = TRUE;
-        }
-        else {
-            c = SvPV_const(dstr, clen);
-            doutf8 = DO_UTF8(dstr);
+            c = (const char *)bytes_to_utf8_temp_pv((const U8 *)c, &clen);
+            doutf8 = true;
         }
 
         if (UNLIKELY(TAINT_get))
@@ -5565,7 +5556,7 @@ PP(pp_subst)
     }
     else {
         c = NULL;
-        doutf8 = FALSE;
+        doutf8 = false;
     }
     
     if (c
@@ -5595,14 +5586,12 @@ PP(pp_subst)
             /* redo the first match, this time with the orig var
              * forced into being a string */
             force_on_match = 0;
-            orig = SvPV_force_nomg(TARG, len);
+            orig = sv_pvn_force_flags(TARG, &len, 0);
             goto force_it;
         }
 
         if (once) {
             char *d, *m;
-            if (RXp_MATCH_TAINTED(prog)) /* run time pattern taint, eg locale */
-                rxtainted |= SUBST_TAINT_PAT;
             m = orig + RXp_OFFS_START(prog,0);
             d = orig + RXp_OFFS_END(prog,0);
             s = orig;
@@ -5639,9 +5628,6 @@ PP(pp_subst)
                 SSize_t i;
                 if (UNLIKELY(iters++ > maxiters))
                     DIE(aTHX_ "Substitution loop");
-                /* run time pattern taint, eg locale */
-                if (UNLIKELY(RXp_MATCH_TAINTED(prog)))
-                    rxtainted |= SUBST_TAINT_PAT;
                 m = RXp_OFFS_START(prog,0) + orig;
                 if ((i = m - s)) {
                     if (s != d)
@@ -5668,7 +5654,6 @@ PP(pp_subst)
     }
     else {
         /* not known replacement string or can't do in-place substitution) */
-        bool first;
         char *m;
         SV *repl;
         if (force_on_match) {
@@ -5681,20 +5666,39 @@ PP(pp_subst)
                    However, I suspect it isn't worth the complexity of
                    unravelling the C<goto force_it> for the small number of
                    cases where it would be viable to drop into the copy code. */
-                TARG = sv_mortalcopy_flags(TARG, SV_GMAGIC|SV_NOSTEAL);
+
+                /* Note: GMAGIC check should have already occurred, prior to
+                 * earlier COW check. Don't double-GET. */
+                TARG = sv_mortalcopy_flags(TARG, SV_NOSTEAL);
             }
-            orig = SvPV_force_nomg(TARG, len);
+            orig = sv_pvn_force_flags(TARG, &len, 0);
             goto force_it;
         }
 #ifdef PERL_ANY_COW
       have_a_cow:
 #endif
-        if (RXp_MATCH_TAINTED(prog)) /* run time pattern taint, eg locale */
-            rxtainted |= SUBST_TAINT_PAT;
         repl = dstr;
         s = RXp_OFFS_START(prog,0) + orig;
-        dstr = newSVpvn_flags(orig, s-orig,
-                    SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
+
+        dstr = sv_2mortal(newSV(
+            (once && c && cBOOL(DO_UTF8(TARG) == doutf8))
+                /* We can exactly size this buffer */
+                ? len - (RXp_OFFS_END(prog,0) - RXp_OFFS_START(prog,0))
+                  + clen + 1 /* +1 for COW byte */
+
+                /* Final buffer size is unknowable. For a /g substitution,
+                 * it seems better to initially match size with the source
+                 * and shrink at the end, rather than start small but
+                 * potentially incur multiple calls to Renew() - which
+                 * could result in an unnecessarily large final allocation
+                 * that is either wasteful or has to be shrunk. */
+                : len + clen + 1 /* +1 for COW byte */
+        ));
+        SvCUR_set(dstr, s-orig);
+        *SvEND(dstr) = '\0';
+        SvFLAGS(dstr) |= SVf_POK|SVp_POK|(DO_UTF8(TARG) ? SVf_UTF8 : 0);
+        Copy(orig, SvPVX(dstr), s-orig, char);
+
         if (!c) {
         /* not known replacement string - call out to ops and OP_SUBSTCONT */
             PERL_CONTEXT *cx;
@@ -5711,41 +5715,128 @@ PP(pp_subst)
         /* We get here if it's a known replacement string, but can't
          * substitute in-place */
 
-        first = TRUE;
-        do {
-            if (UNLIKELY(iters++ > maxiters))
-                DIE(aTHX_ "Substitution loop");
-            if (UNLIKELY(RXp_MATCH_TAINTED(prog)))
-                rxtainted |= SUBST_TAINT_PAT;
-            if (RXp_MATCH_COPIED(prog) && RXp_SUBBEG(prog) != orig) {
-                char *old_s    = s;
-                char *old_orig = orig;
-                assert(RXp_SUBOFFSET(prog) == 0);
+        iters = 1;
+        if (RXp_MATCH_COPIED(prog) && RXp_SUBBEG(prog) != orig) {
+            char *old_orig = orig;
+            assert(RXp_SUBOFFSET(prog) == 0);
 
-                orig = RXp_SUBBEG(prog);
-                s = orig + (old_s - old_orig);
-                strend = s + (strend - old_s);
+            orig = RXp_SUBBEG(prog);
+            strend = orig + (strend - old_orig);
+        }
+        m = RXp_OFFS_START(prog,0) + orig;
+        assert(SvCUR(dstr) == (STRLEN)(m - orig));
+        s = RXp_OFFS_END(prog,0) + orig;
+
+        const U32 repl_flags = SvFLAGS(repl) & (SVs_GMG|SVf_ROK|SVf_READONLY);
+
+        if ( ( repl_flags == SVf_READONLY
+               || (!repl_flags && !(RXp_EXTFLAGS(prog) & RXf_NO_INPLACE_SUBST)))
+             && cBOOL(DO_UTF8(TARG)) == doutf8
+        ) {
+            /* The replacement SV definitely:
+             *  -  has no GET magic
+             *  -  has no overloading (a ROK SV might have some)
+             *  -  cannot be modified by the pattern
+             *  -  matches the plain/UTF-8 status of the target
+             * then the existing values of c and clen can safely be reused. */
+            char *d = SvEND(dstr);
+            char *dlim = SvPVX(dstr) + SvLEN(dstr);
+
+            assert(strend >= s);
+            assert(SvLEN(dstr) > (STRLEN)(d - SvPVX(dstr)) + clen + 1);
+
+            /* Copy the first replacement */
+            Copy(c, d, clen, char);
+            d += clen;
+
+            if (once) {
+                assert( SvLEN(dstr) > (STRLEN)(d - SvPVX(dstr)) + (STRLEN)(strend - s) + 1 );
+            } else {
+
+#define SUBST_RESERVE(n)                                        \
+            STMT_START {                                        \
+                const STRLEN n_ = (STRLEN)(n);                  \
+                if (UNLIKELY(n_ + 1 >= (STRLEN)(dlim - d))) {   \
+                    const STRLEN cur_ = d - SvPVX(dstr);        \
+                    SvCUR_set(dstr, cur_);                      \
+                    d = sv_grow(dstr, cur_ + n_ + 1) + cur_;    \
+                    dlim = SvPVX(dstr) + SvLEN(dstr);           \
+                }                                               \
+            } STMT_END
+
+            while (CALLREGEXEC(rx, s, strend, orig,
+                                 s == m,
+                                 TARG, NULL,
+                                 REXEC_NOT_FIRST|REXEC_IGNOREPOS
+                                 |REXEC_FAIL_ON_UNDERFLOW))
+            {
+                if (UNLIKELY(iters++ > maxiters))
+                    DIE(aTHX_ "Substitution loop");
+                if (RXp_MATCH_COPIED(prog) && RXp_SUBBEG(prog) != orig) {
+                    char *old_s    = s;
+                    char *old_orig = orig;
+                    assert(RXp_SUBOFFSET(prog) == 0);
+
+                    orig = RXp_SUBBEG(prog);
+                    s = orig + (old_s - old_orig);
+                    strend = s + (strend - old_s);
+                }
+                m = RXp_OFFS_START(prog,0) + orig;
+                assert(m >= s);
+                SUBST_RESERVE((m - s) + clen);
+                if (m > s) {
+                    Copy(s, d, m - s, char);
+                    d += m - s;
+                }
+                s = RXp_OFFS_END(prog,0) + orig;
+                if (clen) {
+                    Copy(c, d, clen, char);
+                    d += clen;
+                }
             }
-            m = RXp_OFFS_START(prog,0) + orig;
-            sv_catpvn_nomg_maybeutf8(dstr, s, m - s, DO_UTF8(TARG));
-            s = RXp_OFFS_END(prog,0) + orig;
-            if (first) {
-                /* replacement already stringified */
-              if (clen)
-                sv_catpvn_nomg_maybeutf8(dstr, c, clen, doutf8);
-              first = FALSE;
-            }
-            else {
-                sv_catsv(dstr, repl);
-            }
-            if (once)
-                break;
-        } while (CALLREGEXEC(rx, s, strend, orig,
+            assert(strend >= s);
+            SUBST_RESERVE(strend - s);
+#undef SUBST_RESERVE
+            } /* End of (!once) block */
+            Copy(s, d, strend - s, char);
+            d += strend - s;
+            *d = '\0';
+            SvCUR_set(dstr, d - SvPVX(dstr));
+        } else {
+            /* It seems unsafe to reuse the existing values of c and clen
+             * for every iteration, or there could be repeated UTF-8 upgrade
+             * work required. Stick to the traditional loop. */
+            if (clen)
+               sv_catpvn_nomg_maybeutf8(dstr, c, clen, doutf8);
+
+            if (!once) {
+            while (CALLREGEXEC(rx, s, strend, orig,
                              s == m,    /* Yields minend of 0 or 1 */
                              TARG, NULL,
-                    REXEC_NOT_FIRST|REXEC_IGNOREPOS|REXEC_FAIL_ON_UNDERFLOW));
-        assert(strend >= s);
-        sv_catpvn_nomg_maybeutf8(dstr, s, strend - s, DO_UTF8(TARG));
+                    REXEC_NOT_FIRST|REXEC_IGNOREPOS|REXEC_FAIL_ON_UNDERFLOW))
+            {
+                if (UNLIKELY(iters++ > maxiters))
+                    DIE(aTHX_ "Substitution loop");
+                if (RXp_MATCH_COPIED(prog) && RXp_SUBBEG(prog) != orig) {
+                    char *old_s    = s;
+                    char *old_orig = orig;
+                    assert(RXp_SUBOFFSET(prog) == 0);
+
+                    orig = RXp_SUBBEG(prog);
+                    s = orig + (old_s - old_orig);
+                    strend = s + (strend - old_s);
+                }
+                m = RXp_OFFS_START(prog,0) + orig;
+                sv_catpvn_nomg_maybeutf8(dstr, s, m - s, DO_UTF8(TARG));
+                s = RXp_OFFS_END(prog,0) + orig;
+                sv_catsv(dstr, repl);
+            }
+            }
+            assert(strend >= s);
+            sv_catpvn_nomg_maybeutf8(dstr, s, strend - s, DO_UTF8(TARG));
+        }
+
+        SvPV_shrink_to_cur(dstr);
 
         if (rpm->op_pmflags & PMf_NONDESTRUCT) {
             /* From here on down we're using the copy, and leaving the original
@@ -5784,8 +5875,7 @@ PP(pp_subst)
     if (PL_op->op_private & OPpTRUEBOOL)
         retval = &PL_sv_yes;
     else {
-        retval = sv_newmortal();
-        sv_setiv(retval, iters);
+        retval = sv_2mortal(newSViv(iters));
     }
 
   ret:

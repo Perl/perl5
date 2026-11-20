@@ -264,8 +264,6 @@ PP(pp_substcont)
                  else
                       sv_catpvn_nomg(dstr, s, cx->sb_strend - s);
             }
-            if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
-                cx->sb_rxtainted |= SUBST_TAINT_PAT;
 
             if (pm->op_pmflags & PMf_NONDESTRUCT) {
                 retval = dstr;

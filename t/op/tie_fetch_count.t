@@ -9,7 +9,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan (tests => 347);
+plan (tests => 350);
 
 use strict;
 use warnings;
@@ -341,6 +341,16 @@ substr$var1,0,0,"\x{100}"; check_count '4-arg substr with utf8 replacement';
     $dummy  =  warn         ; check_count 'warn() with $@ tied (str)';
     untie $@;
 }
+
+{
+    no warnings 'uninitialized';
+    tie $var, "main", undef;
+    $dummy = $var =~ s/^/x/r; check_count 's///r on undef';
+}
+tie $var, "main", v1.2.3;
+$dummy = $var =~ s/^/x/r; check_count 's///r on v-string';
+tie $var, "main", *dummy;
+$dummy = $var =~ s/^/x/r; check_count 's///r on glob';
 
 ###############################################
 #        Tests for  $foo binop $foo           #
