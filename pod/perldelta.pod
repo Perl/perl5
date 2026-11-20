@@ -366,6 +366,15 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Adding an empty group could make a regex stop matching.  For example,
+C<"a" =~ /\A(?:|(?:)a)\z/> failed, although an empty group should not
+change which strings match.
+
+The optimizer now looks past empty groups when identifying the contents
+of an alternative, preserving the literals that follow them.  [GH #25083]
+
+=item *
+
 XXX
 
 =back
