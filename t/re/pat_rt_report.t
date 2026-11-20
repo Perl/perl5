@@ -21,7 +21,7 @@ use 5.010;
 use utf8;
 use Config;
 
-plan tests => 2531;  # Update this when adding/deleting tests.
+plan tests => 2533;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -29,6 +29,22 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+
+    {
+        local $::gh25084_value = 'outer';
+        my @seen;
+        '' =~ /()(?(?!(?{local $::gh25084_value = 'inner'; 1}))X|(?{push @seen, $::gh25084_value}))/;
+        is(join(',', @seen) . ":$::gh25084_value", 'outer:outer',
+           'GH #25084: capture-free negative assertion unwinds localized values');
+    }
+
+    {
+        local $::gh25084_value = 'outer';
+        my @seen;
+        'ab' =~ /()(?:(?=(?{local $::gh25084_value = 'inner'}))ac|a(?{push @seen, $::gh25084_value}))b/;
+        is(join(',', @seen) . ":$::gh25084_value", 'outer:outer',
+           'GH #25084: abandoning a capture-free assertion unwinds localized values');
+    }
 
     {
         # GH #25081: reuse the match stack before entering an atomic group

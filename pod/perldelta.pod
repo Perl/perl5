@@ -366,6 +366,15 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Captures from a successful lookaround or atomic group could survive after
+backtracking abandoned it.  Those stale values could change later capture
+results or make a conditional or backreference take the wrong path.
+
+The matcher now restores the previous capture values when abandoning the
+construct.  [GH #25084]
+
+=item *
+
 Quantified C<\R> could split a CRLF pair during backtracking and allow a
 match that should fail.  C<\R> must treat CRLF as a single newline.
 

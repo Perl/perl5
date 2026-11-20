@@ -6231,8 +6231,16 @@ ERST	|I32	|reg_check_named_buff_matched				\
 				|NN const regnode *scan
 ESW	|void	|regcppop	|NN regexp *rex 			\
 				|NN U32 *maxopenparen_p
+ESW	|void	|regcppop_range |NN regexp *rex 			\
+				|U32 parenceiling			\
+				|NN U32 *maxopenparen_p
 ESW	|CHECKPOINT|regcppush	|NN const regexp *rex			\
 				|I32 parenfloor 			\
+				|U32 maxopenparen
+ESW	|CHECKPOINT|regcppush_range					\
+				|NN const regexp *rex			\
+				|I32 parenfloor 			\
+				|U32 parenceiling			\
 				|U32 maxopenparen
 ESW	|void	|regcp_restore	|NN regexp *rex 			\
 				|I32 ix 				\

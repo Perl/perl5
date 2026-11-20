@@ -2423,6 +2423,27 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 /eeeeee|a\xB5\xDFSss([a-z]?)/iu	??a\xB5\xDFSssabZ	y	$-[0]:$+[0]	2:9	-	AC ring covers the longest folded alternative
 /a\xB5\xDFSss|eeeeee/iu	??a\xB5\xDFSssabZ	y	$-[0]:$+[0]	2:8	-	AC ring covers the longest folded alternative
 
+# GH #25084: backtracking out of a successful assertion restores captures
+\A(a)b*(?=b|())b\z	ab	y	$1-${\(defined($2) ? $2 : q(undef))}	a-undef
+\A(a)b*(?=(?|b|()))b\z	ab	y	$1-${\(defined($2) ? $2 : q(undef))}	a-undef
+\Aa*(?:\A|())?+a\z	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef
+\A(?(DEFINE)(?<A>a*(?=a|())a))(?<outer>(?&A))\z	a	y	$+{outer}-${\(defined($2) ? $2 : q(undef))}	a-undef
+^a*(?=^|())a	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef
+\Aa*(?=\A|())a\z	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef
+\Aa*(?=\A|())a\1\z	a	n	-	-
+\Aa*(?=\A|())a(?(1)b|c)\z	ac	y	$&	ac
+\Aa*(?(?=\A|())a|x)\z	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef
+\A(?=(a|ab))\1c\z	abc	n	-	-
+\Aa*(?=(?=\A)|(()))a\z	a	y	${\(defined($1) || defined($2) ? q(defined) : q(undef))}	undef
+\Aa*(?>\A|())a\z	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef
+\Aa*(?=\A|(a?))a\z	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef
+\A(a)(?:(?=(b))bc|b)\z	ab	y	$1-${\(defined($2) ? $2 : q(undef))}	a-undef
+\A(?=(a))a\1\z	aa	y	$1	a
+\A(?=(a*))a\z	a	y	$1	a
+\A(?=())a\z	a	y	<${\(defined($1) ? q(defined) : q(undef))}=$1>	<defined=>
+\A(?>())a\z	a	y	<${\(defined($1) ? q(defined) : q(undef))}=$1>	<defined=>
+\A\x{100}*(?=\A|())\x{100}\z	\x{100}	y	${\(defined($1) ? q(defined) : q(undef))}	undef
+
 # GH #14387, GH #24946: negative assertions must discard their captures
 \A(?!(a)b)a\z	a	y	${\(defined($1) ? $1 : q(undef))}	undef	-	partial negative lookahead body
 \A(?!(a)b)\1\z	a	n	-	-	-	backreference must not use a failed assertion capture
