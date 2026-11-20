@@ -354,6 +354,8 @@ my @death =
  '/\p{nv=\b5\b}/' => 'Can\'t find Unicode property definition "nv=\\b5\\b" {#} m/\\p{nv=\\b5\\b}{#}/',
  '/\p{nv=:(?g)10:}/' => 'Use of modifier \'g\' is not allowed in Unicode property wildcard subpatterns {#} m/(?g{#})10/',
  '/\p{gc=:L*:}/' => 'Use of quantifier \'*\' is not allowed in Unicode property wildcard subpatterns {#} m/L*{#}/',
+ '/\p{gc=:L\R*:}/' => 'Use of quantifier \'*\' is not allowed in Unicode property wildcard subpatterns {#} m/L\R*{#}/',
+ '/\p{gc=:L(?:\R)*:}/' => 'Use of quantifier \'*\' is not allowed in Unicode property wildcard subpatterns {#} m/L(?:\R)*{#}/',
  '/\p{gc=:L\G:}/' => 'Use of \'\G\' is not allowed in Unicode property wildcard subpatterns {#} m/L\G{#}/',
  '/\p{gc=:(?a)L:}/' => 'Use of modifier \'a\' is not allowed in Unicode property wildcard subpatterns {#} m/(?a){#}L/',
  '/\p{gc=:(?u)L:}/' => 'Use of modifier \'u\' is not allowed in Unicode property wildcard subpatterns {#} m/(?u){#}L/',

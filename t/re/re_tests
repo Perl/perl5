@@ -1411,6 +1411,27 @@ X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	aa	y	$&	aa
 \x{100}?(??{""})xxx	xxx	y	$&	xxx
 
+# GH #25085: quantified generic newlines must not split CRLF
+\A\R?\n\z	\r\n	n	-	-
+\A\R*\n\z	\r\n	n	-	-
+\A\R+\n\z	\r\n	n	-	-
+\A\R{0,1}\n\z	\r\n	n	-	-
+\A\R{1,2}\n\z	\r\n\r\n	n	-	-
+\A\R??\n\z	\r\n	n	-	-
+\A\R*?\n\z	\r\n	n	-	-
+\A\R+?\n\z	\r\n	n	-	-
+\A\R{0,2}?\n\z	\r\n\r\n	n	-	-
+\A\R?\r\n\z	\r\n	y	$&	\r\n
+\A\R*\r\n\z	\r\n\r\n	y	$&	\r\n\r\n
+\A\R+\r\n\z	\r\n\r\n	y	$&	\r\n\r\n
+\A\R{1,2}\r\n\z	\r\n\r\n	y	$&	\r\n\r\n
+\A(\R){1,2}\r\n\z	\r\n\r\n	y	$1	\r\n
+\A\R?\n\z	\n	y	$&	\n
+\A\R?\n\z	\r\n\n	y	$&	\r\n\n
+\A\R{2}\z	\r\n	n	-	-
+\A\R{2}\z	\r\n\r\n	y	$&	\r\n\r\n
+\A\R?\x{2028}\z	\r\n\x{2028}	y	$&	\r\n\x{2028}
+
 foo(\R)bar	foo\r\nbar	y	$1	\r\n
 foo(\R)bar	foo\nbar	y	$1	\n
 foo(\R)bar	foo\rbar	y	$1	\r

@@ -291,6 +291,6 @@ abc(*ACCEPT)xyz	3	0+abc	-	-
 # LNBREAK does get its own start class
 \R	1	-	-	stclass=LNBREAK	\R start class
 \Rfoo	4	-	1:2+foo	stclass=LNBREAK	\R start class with floating substr
-\R+foo	4	-	1+foo	skip,stclass=LNBREAK	\R+ start class with PLUS and floating substr
+\R+foo	4	-	1+foo	stclass=LNBREAK	\R+ start class with general repetition and floating substr
 
 \A(?=a*)[0-9]a	2	1+a	-	noscan,anchor SBOL,stclass=~^ANYOF\[0-9\]	nullable lookahead does not restrict the start class
