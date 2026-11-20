@@ -236,7 +236,9 @@ It will live forever (along with Perl), so make it a good one.
 During the testing phase of the release you have created, you will be
 asked to compare the installed files with a previous install. Save yourself
 some time on release day, and have a (clean) install of the previous
-version ready.
+version ready. Alternatively, you may wish to use the script
+C<Porting/compare-perl-install-files> to download and install the previous
+version at the time of comparison.
 
 =head3 Email account subscribed to perl5-porters
 
@@ -1232,6 +1234,12 @@ previous is 5.10.0:
  $ cd installdir-5.10.1/
  $ find . -type f | sort > /tmp/f2
  $ diff -u /tmp/f[12]
+
+Alternatively, you may wish to use C<Porting/compare-perl-install-files> which
+builds and installs two versions and then performs a process similar to the one
+above:
+
+ $ Porting/compare-perl-install-files 5.LAST /path/to/perl-5.X.Y.tar.xz
 
 =head4 Disable C<local::lib> if it's turned on
 
