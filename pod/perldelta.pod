@@ -91,6 +91,16 @@ There may well be none in a stable release.
 
 XXX
 
+=item *
+
+Patterns such as C</(?:abx|aby)\d|efgcd/> lost the filter that identifies
+possible starting characters.  The matcher should know that a match must
+start with C<a> or C<e>, so it can skip other characters.
+
+The optimizer now combines the starting characters from each alternative
+to restore that filter.  The earlier fix for nested trie merging remains
+in place.  [GH #25059]
+
 =back
 
 =head1 Modules and Pragmata

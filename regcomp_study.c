@@ -1740,10 +1740,29 @@ Perl_study_chunk(pTHX_
                         if (data_fake.flags & SF_HAS_EVAL)
                             data->flags |= SF_HAS_EVAL;
                     }
-                    if (flags & SCF_DO_STCLASS)
-                        ssc_or(pRExC_state, &accum, (regnode_charclass*)&this_class);
+                    if (flags & SCF_DO_STCLASS) {
+                        /* Seed ordinary alternations from their first branch.
+                         * ssc_init_zero() matches everything, so ORing into
+                         * that initial class cannot narrow the result.
+                         * Keep the conservative class for control verbs,
+                         * executable code, and IFTHEN's possible implicit
+                         * empty alternative.  Skipping start positions must
+                         * not skip effects such as an early (*COMMIT). */
+                        if (num == 1 && code != IFTHEN
+                            && !(RExC_seen & (REG_VERBARG_SEEN
+                                             |REG_PESSIMIZE_SEEN)))
+                            StructCopy(&this_class, &accum, regnode_ssc);
+                        else
+                            ssc_or(pRExC_state, &accum,
+                                   (regnode_charclass *)&this_class);
+                    }
                     DEBUG_STUDYDATA("end BRANCH", data, depth, is_inf, min, stopmin, delta);
                 }
+                /* An unfolded multi-character fold can start with part of
+                 * its expansion, outside the literal's fold closure. */
+                if ((flags & SCF_DO_STCLASS)
+                    && (RExC_seen & REG_UNFOLDED_MULTI_SEEN))
+                    ssc_init_zero(pRExC_state, &accum);
                 if (code == IFTHEN && num < 2) /* Empty ELSE branch */
                     min1 = 0;
                 if (flags & SCF_DO_SUBSTR) {

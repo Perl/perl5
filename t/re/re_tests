@@ -2269,6 +2269,21 @@ ABCF|BCD[Ee]|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 (?:zz|(?:a(*THEN)b|c)|d)	a	n	$&	a	-	(*THEN) stays nested (no match)
 (?:zz|(?:a(*THEN)b|c)|d)	d	y	$&	d	-	(*THEN) stays nested (match)
 
+# GH #25059: a synthetic start class can filter the enclosing alternatives
+# without absorbing an extracted prefix into another trie.
+(?:abx|aby)\d|efgcd	zzabx3	y	$&	abx3	-	extracted prefix first word after skipped input
+(?:abx|aby)\d|efgcd	zzaby4	y	$&	aby4	-	extracted prefix second word after skipped input
+(?:abx|aby)\d|efgcd	zzefgcd	y	$&	efgcd	-	other branch after an extracted prefix
+efgcd|(?:abx|aby)\d	zzaby4	y	$&	aby4	-	extracted prefix in the final branch
+(?:abx|aby)\d|efgcd	efgcd abx3	y	$&	efgcd	-	start class preserves the earliest alternative
+(?:abx|aby)\d|efgcd	zzabz3	n	-	-	-	start class does not imply a complete match
+(?:abx|aby)\d|efgcd	zzabx	n	-	-	-	start class preserves required continuation
+(?:\x{100}x|\x{100}y)\d|efgcd	zz\x{100}y2	y	$&	\x{100}y2	-	UTF-8 extracted prefix remains reachable
+(?:\x00x|\x00y)\d|efgcd	zz\x00y2	y	$&	\x00y2	-	NUL extracted prefix remains reachable
+(?:abx|aby)?\d|efgcd	zz2	y	$&	2	-	nullable prefix includes the continuation's start class
+(*COMMIT)(?:abx|aby)\d|efgcd	zzabx3	n	-	-	-	start class must not skip an early COMMIT
+(?:abx|aby)\d|	zz	y	$+[0]	0	-	empty alternative must remain reachable
+
 # Prefixes extracted from jump tries must remain attached to those tries.
 # Otherwise an enclosing trie pass can discard the branch structure needed
 # by backtracking control verbs.  Keep both failing and successful paths here
