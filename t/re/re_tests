@@ -2423,6 +2423,28 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 /eeeeee|a\xB5\xDFSss([a-z]?)/iu	??a\xB5\xDFSssabZ	y	$-[0]:$+[0]	2:9	-	AC ring covers the longest folded alternative
 /a\xB5\xDFSss|eeeeee/iu	??a\xB5\xDFSssabZ	y	$-[0]:$+[0]	2:8	-	AC ring covers the longest folded alternative
 
+# GH #25086: overlapping folds must not overestimate the minimum length
+/(?<=\x{3A9}\x{1FD3})a/u	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iu	\x{3C9}\x{390}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iu	\x{3C9}\x{3B9}\x{308}\x{301}a	y	$&	a
+/(?<=\x{3C9}\x{3B9}\x{308}\x{301})a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=\x{1FF3}\x{308}\x{301})a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iu	\x{1FF3}\x{308}\x{301}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iaa	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<!\x{3A9}\x{1FD3})a/iu	\x{3A9}\x{1FD3}a	n	-	-
+/(?<!\x{3A9}\x{1FD3})a/iu	\x{3A9}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3}|bbbb)a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=bbbb|\x{3A9}\x{1FD3})a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/\A(?:\x{3A9}\x{1FD3}|bbbb)\z/iu	\x{3A9}\x{1FD3}	y	$&	\x{3A9}\x{1FD3}
+/\A(?:bbbb|\x{3A9}\x{1FD3})\z/iu	\x{3A9}\x{1FD3}	y	$&	\x{3A9}\x{1FD3}
+/\A(?:\x{3A9}\x{1FD3}b|\x{3A9}\x{1FD3}c)\z/iu	\x{3A9}\x{1FD3}b	y	$&	\x{3A9}\x{1FD3}b
+/\A(?:\x{3A9}\x{1FD3}b|\x{3A9}\x{1FD3}c)\z/iu	\x{3A9}\x{1FD3}c	y	$&	\x{3A9}\x{1FD3}c
+/(?<=\x{3A9}\x{1FD3}b|\x{3A9}\x{1FD3}c)a/iu	\x{3A9}\x{1FD3}ca	y	$&	a
+/(?<=\x{3A9}\x{1FD3}\x{3A9}\x{1FD3})a/iu	\x{3A9}\x{1FD3}\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=ss)a/iaa	\x{1E9E}a	n	-	-
+/(?<=ss)a/iu	\x{1E9E}a	y	$&	a
+
 # GH #25084: backtracking out of a successful assertion restores captures
 \A(a)b*(?=b|())b\z	ab	y	$1-${\(defined($2) ? $2 : q(undef))}	a-undef
 \A(a)b*(?=(?|b|()))b\z	ab	y	$1-${\(defined($2) ? $2 : q(undef))}	a-undef

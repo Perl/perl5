@@ -13,6 +13,7 @@ my @tests;
 
 my $file="../lib/unicore/CaseFolding.txt";
 my @folds;
+my %multi_folds;
 use Unicode::UCD;
 
 # Use the Unicode data file if we are on an ASCII platform (which its data is
@@ -58,6 +59,10 @@ for  (@folds) {
     $comment = "" unless defined $comment;
     my ($cp,$type,@folded)=split/[\s;]+/,$line||'';
     next unless $type and ($type eq 'F' or $type eq 'C');
+    if (@folded > 1) {
+        my $text = join '', map { chr hex $_ } @folded;
+        $multi_folds{$text} = chr hex $cp;
+    }
     my $fold_above_latin1 = grep { hex("0x$_") > 255 } @folded;
     $_="\\x{$_}" for @folded;
     my $cpv=hex("0x$cp");
@@ -104,6 +109,50 @@ for  (@folds) {
                 }
             }
         }
+    }
+}
+
+# GH #25086: a greedy choice between overlapping folds can overestimate the
+# minimum input length. Build every crossing overlap from the Unicode data,
+# then try every segmentation into single characters and complete folds.
+# Exhaustive enumeration keeps the expected spellings independent of the
+# engine's minimum-width calculation.
+my %overlaps;
+for my $left (sort keys %multi_folds) {
+    for my $right (sort keys %multi_folds) {
+        for my $shared (1 .. length($left) - 1) {
+            next if $shared >= length $right;
+            next unless substr($left, -$shared) eq substr($right, 0, $shared);
+            $overlaps{$left . substr($right, $shared)} = 1;
+        }
+    }
+}
+
+for my $text (sort keys %overlaps) {
+    my @pending = ([$text, '']);
+    my %spellings;
+    while (my $part = pop @pending) {
+        my ($remaining, $input) = @$part;
+        if ($remaining eq '') {
+            $spellings{$input} = 1;
+            next;
+        }
+
+        for my $span (1 .. length $remaining) {
+            my $prefix = substr($remaining, 0, $span);
+            next if $span > 1 && !exists $multi_folds{$prefix};
+            my $char = $span == 1 ? $prefix : $multi_folds{$prefix};
+            push @pending, [substr($remaining, $span), $input . $char];
+        }
+    }
+
+    my $pattern = join '', map { sprintf '\\x{%X}', ord $_ } split //, $text;
+    for my $input (sort keys %spellings) {
+        my $subject = join '', map { sprintf '\\x{%X}', ord $_ } split //, $input;
+        push @tests,
+            qq[like "${subject}a", qr/(?<=$pattern)a/iu, 'overlapping folds: $pattern lookbehind on $subject'],
+            qq[like "$subject", qr/\\A(?:$pattern|zzzzzzzz)\\z/iu, 'overlapping folds: $pattern trie on $subject'],
+            qq[like "${subject}b", qr/\\A(?:${pattern}b|${pattern}c)\\z/iu, 'overlapping folds: $pattern trie prefix on $subject'];
     }
 }
 
