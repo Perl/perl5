@@ -4720,6 +4720,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
 
             reginsert(pRExC_state, node, ret, depth+1);
+            if (RExC_npar - 1 > npar_before_regbranch) {
+                SUBPATTERN_FIRST_CAPTURE_SET(REGNODE_p(ret),
+                                            (U16)npar_before_regbranch + 1);
+                SUBPATTERN_LAST_CAPTURE_SET(REGNODE_p(ret), (U16)RExC_npar - 1);
+            }
             if (node != SUSPEND)
                 LOOKBEHIND_MAX_CHARS_SET(REGNODE_p(ret), flag);
             if (! REGTAIL_STUDY(pRExC_state, ret, reg_node(pRExC_state, TAIL)))
@@ -5168,14 +5173,21 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
     }
 
+    /* Preserve the wildcard restriction for LNBREAK even though its
+     * variable width requires the general repetition path. */
+    if (max == REG_INFTY && min == 0
+        && UNLIKELY(RExC_pm_flags & PMf_WILDCARD)
+        && ((flags & SIMPLE)
+            || (OP(REGNODE_p(ret)) == LNBREAK
+                && !regnext(REGNODE_p(ret)))))
+    {
+        goto min0_maxINF_wildcard_forbidden;
+    }
+
     /* 'SIMPLE' operands don't require full generality */
     if ((flags&SIMPLE)) {
         if (max == REG_INFTY) {
             if (min == 0) {
-                if (UNLIKELY(RExC_pm_flags & PMf_WILDCARD)) {
-                    goto min0_maxINF_wildcard_forbidden;
-                }
-
                 reginsert(pRExC_state, STAR, ret, depth+1);
                 MARK_NAUGHTY(4);
                 goto done_main_op;
@@ -5252,6 +5264,10 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             REQUIRE_BRANCHJ(flagp, 0);
         }
         reginsert(pRExC_state, SUSPEND, ret, depth+1);
+        if (npar_after != npar_before) {
+            SUBPATTERN_FIRST_CAPTURE_SET(REGNODE_p(ret), (U16)npar_before + 1);
+            SUBPATTERN_LAST_CAPTURE_SET(REGNODE_p(ret), (U16)npar_after);
+        }
         ender = reg_node(pRExC_state, TAIL);
         if (! REGTAIL(pRExC_state, ret, ender)) {
             REQUIRE_BRANCHJ(flagp, 0);
@@ -6160,7 +6176,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
         case 'R':
             ret = reg_node(pRExC_state, LNBREAK);
-            *flagp |= HASWIDTH|SIMPLE;
+            /* CRLF is one newline but two characters.  The simple-quantifier
+             * paths backtrack by character and cannot preserve this unit. */
+            *flagp |= HASWIDTH;
             goto finish_meta_pat;
 
         case 'd':

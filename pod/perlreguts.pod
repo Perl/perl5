@@ -475,15 +475,15 @@ REFFAN           num 2      Match already matched string, using /aai
 BRANCHJ          off 2 1    BRANCH with long offset.
 
 # Special Case Regops
-IFMATCH          off 1 1    Succeeds if the following matches; non-zero
+IFMATCH          off 2 1    Succeeds if the following matches; non-zero
                             flags "f", next_off "o" means lookbehind
                             assertion starting "f..(f-o)" characters
                             before current
-UNLESSM          off 1 1    Fails if the following matches; non-zero
+UNLESSM          off 2 1    Fails if the following matches; non-zero
                             flags "f", next_off "o" means lookbehind
                             assertion starting "f..(f-o)" characters
                             before current
-SUSPEND          off 1 1    "Independent" sub-RE.
+SUSPEND          off 2 1    "Independent" sub-RE.
 IFTHEN           off 1 1    Switch, should be preceded by switcher.
 RENUM            off 1 1    Group with independently numbered parens.
                             Not used yet.

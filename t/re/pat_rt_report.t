@@ -21,7 +21,7 @@ use 5.010;
 use utf8;
 use Config;
 
-plan tests => 2515;  # Update this when adding/deleting tests.
+plan tests => 2533;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -29,6 +29,74 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+
+    {
+        local $::gh25084_value = 'outer';
+        my @seen;
+        '' =~ /()(?(?!(?{local $::gh25084_value = 'inner'; 1}))X|(?{push @seen, $::gh25084_value}))/;
+        is(join(',', @seen) . ":$::gh25084_value", 'outer:outer',
+           'GH #25084: capture-free negative assertion unwinds localized values');
+    }
+
+    {
+        local $::gh25084_value = 'outer';
+        my @seen;
+        'ab' =~ /()(?:(?=(?{local $::gh25084_value = 'inner'}))ac|a(?{push @seen, $::gh25084_value}))b/;
+        is(join(',', @seen) . ":$::gh25084_value", 'outer:outer',
+           'GH #25084: abandoning a capture-free assertion unwinds localized values');
+    }
+
+    {
+        # GH #25081: reuse the match stack before entering an atomic group
+        # inside a lookbehind. Run in fresh processes so earlier tests cannot
+        # determine the saved endpoint in the reused stack slot.
+        my @cases = (
+            [ 'plain lookbehind', '"a"', '(?<=a)', 'match' ],
+            [ 'atomic lookbehind', '"a"', '(?<=(?>a))', 'match' ],
+            [ 'atomic lookbehind rejects wrong text',
+              '"b"', '(?<=(?>a))\\z', 'no match' ],
+            [ 'negative atomic lookbehind',
+              '"a"', '(?<!(?>a))\\z', 'no match' ],
+            [ 'negative atomic lookbehind accepts wrong text',
+              '"b"', '(?<!(?>a))\\z', 'match' ],
+            [ 'negative atomic lookbehind accepts empty text',
+              '""', '(?<!(?>a))\\z', 'match' ],
+            [ 'atomic group before suffix',
+              '"ab"', '(?<=(?>a)b)\\z', 'match' ],
+            [ 'atomic group after prefix',
+              '"ab"', '(?<=a(?>b))\\z', 'match' ],
+            [ 'nested atomic groups',
+              '"a"', '(?<=(?>(?>a)))\\z', 'match' ],
+            [ 'lookahead inside atomic group',
+              '"a"', '(?<=(?>(?=a)a))\\z', 'match' ],
+            [ 'atomic group in lookahead',
+              '"a"', '(?=(?>a))a\\z', 'match' ],
+            [ 'wide atomic lookbehind',
+              '"\\x{100}"', '(?<=(?>\\x{100}))\\z', 'match' ],
+            [ 'variable lookbehind rejects an early atomic endpoint',
+              '"ab"', '(?<=(?>a)|bc)\\z', 'no match' ],
+            [ 'negative variable lookbehind rejects an early endpoint',
+              '"ab"', '(?<!(?>a)|bc)\\z', 'match' ],
+            [ 'variable lookbehind accepts the longer alternative',
+              '"bc"', '(?<=(?>a)|bc)\\z', 'match' ],
+        );
+
+        for my $case (@cases) {
+            my ($name, $subject, $pattern, $expected) = @$case;
+            my $program = <<"END_PROGRAM";
+"" =~ /x?y?/;
+print(($subject =~ /$pattern/) ? "match\\n" : "no match\\n");
+END_PROGRAM
+            fresh_perl_is($program, "$expected\n", {}, "GH #25081: $name");
+        }
+    }
+
+    fresh_perl_is(
+        q{no warnings 'experimental::uniprop_wildcards';
+          eval q{qr/\p{gc=:L(?:\RA)*:}/};
+          print $@ ? 'error' : 'compiled';},
+        'compiled', {},
+        'GH #25085: preserve wildcard parsing for a group starting with \\R');
 
     like("A \x{263a} B z C", qr/A . B (??{ "z" }) C/,
 	 "Match UTF-8 char in presence of (??{ }); Bug 20000731.001 (#3600)");

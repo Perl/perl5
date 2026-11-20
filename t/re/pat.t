@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 6822 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 6824 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -42,6 +42,16 @@ sub run_tests {
     my $n_tilde = uni_to_native("\x{f1}");
     my $sharp_s_native = uni_to_native("\x{df}");
     my $micro_sign_native = uni_to_native("\x{b5}");
+
+    {
+        # These alternatives need the starts of multi-character folds, not
+        # just the single-character fold closure of the sharp-s literal.
+        my $target = "\x{17f}\x{17f}";
+        ok($target =~ /$sharp_s_native|q/id && $& eq $target,
+           'unfolded multi-character alternative keeps long-s starts under /d');
+        ok($target =~ /(?aa:[${sharp_s_native}_])/i && $& eq $target,
+           'unfolded multi-character alternative keeps long-s starts under /aa');
+    }
 
     {
         # Vary the offsets of rejected windows and their lengths around the

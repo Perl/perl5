@@ -276,14 +276,22 @@ abc(*ACCEPT)xyz	3	0+abc	-	-
 (a(*ACCEPT)){2}	1	0+a	-	-
 
 # Nested branches that should be flattened
+# GH #25059: retain a synthetic start class when an extracted prefix keeps
+# the outer alternation from becoming a trie.
+(?:abx|aby)\d|efgcd	4	-	-	stclass=ANYOF[ae]	extracted prefix with a digit continuation
+efgcd|(?:abx|aby)\d	4	-	-	stclass=ANYOF[ae]	extracted prefix in the final branch
+(?:abx|aby)\d|efgcd|z\w	2	-	-	stclass=ANYOF[aez]	extracted prefix with additional alternatives
+(?:abx|aby)\d|	0	-	-	-	empty alternative has no mandatory start class
+(*COMMIT)(?:abx|aby)\d|efgcd	4	-	-	-	start-class filtering must not skip an early COMMIT
+
 (?:mat3|mat4)|mat1|mat2	4	0+mat	-	-	flattened single nested branch
 ^(?:mat1|mat2|(?:mat3|mat4)|mat5|(?:mat6|mat7))$	4	0+mat	-	noscan,anchor SBOL	flattened multiple, simple branches
 (?:foo|bar|(?:baz|bop|bing)|zoop)	3	-	-	stclass=AHOCORASICK-EXACT	flattened multiple branches
 (?:(?:frog|fan)|fog)|(?:farce|(?:forge|flambe))	3	0+f	-	-	flattened multiple, deeper branches
 
-(?:(?:cat|dog|fish)|bird)x	4	-	3:4+x	-	flattened trie, trailing literal floats
-(?:(?:(?:a|b)|(?:c|d))|(?:(?:e|f)|(?:g|h)))z	2	1+z	-	-	single-char trie, trailing literal anchored
-(?:(?:(?:aa|ab|ac)|(?:ba|bb|bc))|(?:(?:ca|cb|cc)|(?:da|db|dc)))e	3	2+e	-	-	two-char trie, trailing literal anchored
+(?:(?:cat|dog|fish)|bird)x	4	-	3:4+x	stclass=ANYOF[bcdf]	flattened trie, trailing literal floats
+(?:(?:(?:a|b)|(?:c|d))|(?:(?:e|f)|(?:g|h)))z	2	1+z	-	stclass=ANYOF[a-h]	single-char trie, trailing literal anchored
+(?:(?:(?:aa|ab|ac)|(?:ba|bb|bc))|(?:(?:ca|cb|cc)|(?:da|db|dc)))e	3	2+e	-	stclass=ANYOF[a-d]	two-char trie, trailing literal anchored
 
 # Nested branches that should not be flattened
 (?:(?:(?:|x)|(?:|y))|(?:(?:|z)|w))q	1	-	0:1+q	-	empty alternatives; prefix is zero-width, literal floats
@@ -291,6 +299,6 @@ abc(*ACCEPT)xyz	3	0+abc	-	-
 # LNBREAK does get its own start class
 \R	1	-	-	stclass=LNBREAK	\R start class
 \Rfoo	4	-	1:2+foo	stclass=LNBREAK	\R start class with floating substr
-\R+foo	4	-	1+foo	skip,stclass=LNBREAK	\R+ start class with PLUS and floating substr
+\R+foo	4	-	1+foo	stclass=LNBREAK	\R+ start class with general repetition and floating substr
 
 \A(?=a*)[0-9]a	2	1+a	-	noscan,anchor SBOL,stclass=~^ANYOF\[0-9\]	nullable lookahead does not restrict the start class

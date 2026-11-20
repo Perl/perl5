@@ -1376,48 +1376,11 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 s_end = d;
             } /* End of creating folded copy of EXACTFL string */
 
-            /* Examine the string for a multi-character fold sequence.  UTF-8
-             * patterns have all characters pre-folded by the time this code is
-             * executed */
-            while (s < s_end - 1) /* Can stop 1 before the end, as minimum
-                                     length sequence we are looking for is 2 */
-            {
-                int count = 0;  /* How many characters in a multi-char fold */
-                int len = is_MULTI_CHAR_FOLD_utf8_safe(s, s_end);
-                if (! len) {    /* Not a multi-char fold: get next char */
-                    s += UTF8SKIP(s);
-                    continue;
-                }
-
-                { /* Here is a generic multi-char fold. */
-                    U8* multi_end  = s + len;
-
-                    /* Count how many characters are in it.  In the case of
-                     * /aa, no folds which contain ASCII code points are
-                     * allowed, so check for those, and skip if found. */
-                    if (OP(scan) != EXACTFAA && OP(scan) != EXACTFAA_NO_TRIE) {
-                        count = utf8_length(s, multi_end);
-                        s = multi_end;
-                    }
-                    else {
-                        while (s < multi_end) {
-                            if (isASCII(*s)) {
-                                s++;
-                                goto next_iteration;
-                            }
-                            else {
-                                s += UTF8SKIP(s);
-                            }
-                            count++;
-                        }
-                    }
-                }
-
-                /* The delta is how long the sequence is minus 1 (1 is how long
-                 * the character that folds to the sequence is) */
-                total_count_delta += count - 1;
-              next_iteration: ;
-            }
+            /* UTF-8 patterns are pre-folded here.  Find the best segmentation
+             * into input characters even when possible folds overlap. */
+            total_count_delta = utf8_length(s, s_end)
+                - S_minimum_folded_chars(s, s_end,
+                        OP(scan) == EXACTFAA || OP(scan) == EXACTFAA_NO_TRIE);
 
             /* We created a temporary folded copy of the string in EXACTFL
              * nodes.  Therefore we need to be sure it doesn't go below zero,
@@ -1777,10 +1740,29 @@ Perl_study_chunk(pTHX_
                         if (data_fake.flags & SF_HAS_EVAL)
                             data->flags |= SF_HAS_EVAL;
                     }
-                    if (flags & SCF_DO_STCLASS)
-                        ssc_or(pRExC_state, &accum, (regnode_charclass*)&this_class);
+                    if (flags & SCF_DO_STCLASS) {
+                        /* Seed ordinary alternations from their first branch.
+                         * ssc_init_zero() matches everything, so ORing into
+                         * that initial class cannot narrow the result.
+                         * Keep the conservative class for control verbs,
+                         * executable code, and IFTHEN's possible implicit
+                         * empty alternative.  Skipping start positions must
+                         * not skip effects such as an early (*COMMIT). */
+                        if (num == 1 && code != IFTHEN
+                            && !(RExC_seen & (REG_VERBARG_SEEN
+                                             |REG_PESSIMIZE_SEEN)))
+                            StructCopy(&this_class, &accum, regnode_ssc);
+                        else
+                            ssc_or(pRExC_state, &accum,
+                                   (regnode_charclass *)&this_class);
+                    }
                     DEBUG_STUDYDATA("end BRANCH", data, depth, is_inf, min, stopmin, delta);
                 }
+                /* An unfolded multi-character fold can start with part of
+                 * its expansion, outside the literal's fold closure. */
+                if ((flags & SCF_DO_STCLASS)
+                    && (RExC_seen & REG_UNFOLDED_MULTI_SEEN))
+                    ssc_init_zero(pRExC_state, &accum);
                 if (code == IFTHEN && num < 2) /* Empty ELSE branch */
                     min1 = 0;
                 if (flags & SCF_DO_SUBSTR) {
@@ -1983,14 +1965,21 @@ Perl_study_chunk(pTHX_
                                                            noper_next_trietype)
                                     : NOTHING
                                 : noper_trietype;
+                            /* A leading NOTHING can precede a literal.  Use
+                             * that literal's type so we do not discard it as
+                             * part of an all-empty branch sequence. */
                             U8 compatible_trietype = trietype
-                                ? TRIE_COMPATIBLE_TYPE(trietype, noper_trietype)
-                                : noper_trietype == NOTHING
-                                    ? NOTHING
-                                    : noper_branch_trietype;
-                            const bool noper_next_is_trie =
-                                noper_next && noper_next < tail
-                                && REGNODE_TYPE(noper_next_type) == TRIE;
+                                ? TRIE_COMPATIBLE_TYPE(trietype,
+                                                       noper_branch_trietype)
+                                : noper_branch_trietype;
+                            /* Look past a leading NOTHING when checking for
+                             * a prefix extracted from an attached trie. */
+                            regnode * const word_next =
+                                noper_trietype == NOTHING && noper_next_trietype
+                                    ? regnext(noper_next) : noper_next;
+                            const bool has_attached_trie =
+                                word_next && word_next < tail
+                                && REGNODE_TYPE(OP(word_next)) == TRIE;
                             STRLEN noper_octets = noper_trietype == NOTHING
                                 ? noper_next_trietype ? STR_LEN(noper_next) : 0
                                 : noper_trietype ? STR_LEN(noper) : 0;
@@ -2029,7 +2018,7 @@ Perl_study_chunk(pTHX_
                                    * from an existing trie is likewise not an
                                    * independent branch word and must remain
                                    * attached to that trie. */
-                                  && !noper_next_is_trie
+                                  && !has_attached_trie
                                   && ( !noper_next_trietype
                                        || TRIE_COMPATIBLE_TYPE(
                                                 noper_trietype,
@@ -2101,8 +2090,8 @@ Perl_study_chunk(pTHX_
                                 }
                                 /* The same extracted-prefix restriction
                                  * applies when starting a fresh sequence. */
-                                if ( noper_trietype
-                                     && !noper_next_is_trie
+                                if ( noper_branch_trietype
+                                     && !has_attached_trie
 #ifdef NOJUMPTRIE
                                      && noper_next >= tail
 #endif
@@ -2278,7 +2267,7 @@ Perl_study_chunk(pTHX_
                 }
             } else {
                 paren = stopparen;
-                start = scan + 2;
+                start = REGNODE_AFTER_type(scan, tregnode_SUSPEND);
                 end = regnext(scan);
             }
             if (start) {

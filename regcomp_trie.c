@@ -809,7 +809,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     /* An input character can fold to several source
                      * characters. Do not extract a prefix ending inside
                      * that fold, including overlapping folds in "sss". */
-                    if (folder && UTF && wordlen < 256) {
+                    if (folder && is_utf8 && wordlen < 256) {
                         const STRLEN folded_octets
                             = is_MULTI_CHAR_FOLD_utf8_safe(uc, e);
                         if (folded_octets) {
@@ -845,23 +845,21 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     if (folder == NULL) {
                         minchars++;
                     }
-                    else if (foldlen > 0) {
-                        /* The remaining characters of a multi-character
-                         * fold are represented in the trie, but they do not
-                         * consume additional source characters. */
-                        foldlen -= (UTF) ? UTF8SKIP(uc) : 1;
-                    }
-                    else {
-                        minchars++;
-                        /* Count the first character of a fold normally, then
-                         * suppress the additional folded characters from the
-                         * minimum.  foldlen is measured in source octets. */
-                        if (UTF) {
-                            if ((foldlen = is_MULTI_CHAR_FOLD_utf8_safe(uc, e)))
-                                foldlen -= UTF8SKIP(uc);
-                        }
-                        else if ((foldlen = is_MULTI_CHAR_FOLD_latin1_safe(uc, e)))
+                    else if (!is_utf8) {
+                        if (foldlen > 0) {
+                            /* The remaining characters of a multi-character
+                             * fold are represented in the trie, but they do not
+                             * consume additional source characters. */
                             foldlen--;
+                        }
+                        else {
+                            minchars++;
+                            /* Count the first character of a fold normally, then
+                             * suppress the additional folded characters from the
+                             * minimum.  foldlen is measured in source octets. */
+                            if ((foldlen = is_MULTI_CHAR_FOLD_latin1_safe(uc, e)))
+                                foldlen--;
+                        }
                     }
 
                     if ( trie_needs_codepoint_processing ) {
@@ -897,6 +895,10 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                                 &next_alloc, &state_capacity,
                                                 &prev_states, &transition_count);
                     }
+                }
+                if (folder && is_utf8) {
+                    minchars = S_minimum_folded_chars((const U8 *)STRING(noper),
+                                                     e, flags == EXACTFAA);
                 }
             } else {
                 /* If we end up here it is because we skipped past a NOTHING, but did not end up
@@ -1598,11 +1600,17 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 if (str) {
                     TRIE_NEXT_set(convert, n - convert);
                     trie->startstate = state;
-                    /* The extracted prefix is now matched by convert, so remove
-                     * its character count from the length bounds that describe
-                     * the remaining trie.  In the processed path state - 1 counts
-                     * octet states, so use prefixlen_chars rather than state - 1. */
-                    trie->minlen -= trie->prefixlen_chars;
+                    /* No fold crosses the extracted prefix boundary.  Remove
+                     * its minimum input width from the minimum, and its full
+                     * folded width from the maximum.  A conservative original
+                     * minimum can be shorter than the prefix alone. */
+                    const STRLEN prefix_min = folder
+                        ? S_minimum_folded_chars((const U8 *)STRING(convert),
+                                (const U8 *)STRING(convert) + STR_LEN(convert),
+                                flags == EXACTFAA)
+                        : trie->prefixlen_chars;
+                    trie->minlen = trie->minlen > prefix_min
+                        ? trie->minlen - prefix_min : 0;
                     trie->maxlen -= trie->prefixlen_chars;
 #ifdef DEBUGGING
                     /* At least the UNICOS C compiler choked on this

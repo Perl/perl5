@@ -435,7 +435,6 @@ struct RExC_state_t {
 #define HASWIDTH        0x01    /* Known to not match null strings, could match
                                    non-null ones. */
 #define SIMPLE          0x02    /* Exactly one character wide */
-                                /* (or LNBREAK as a special case) */
 #define POSTPONED       0x08    /* (?1),(?&name), (??{...}) or similar */
 #define TRYAGAIN        0x10    /* Weeded out a declaration. */
 #define RESTART_PARSE   0x20    /* Need to redo the parse */
@@ -1198,6 +1197,54 @@ static const scan_data_t zero_scan_data = {
 #define MADE_TRIE       1
 #define MADE_JUMP_TRIE  2
 #define MADE_EXACT_TRIE 4
+
+/* Find the shortest input that can fold to this UTF-8 string.  Overlapping
+ * folds require considering every possible ending, rather than consuming the
+ * first fold found.  Unicode folds expand to at most three characters, so a
+ * rolling window holds all the prefix lengths needed by the next step. */
+PERL_STATIC_INLINE STRLEN
+S_minimum_folded_chars(const U8 *s, const U8 *end, bool ascii_restricted)
+{
+    const U8 *starts[UTF8_MAX_FOLD_CHAR_EXPAND + 1];
+    STRLEN costs[UTF8_MAX_FOLD_CHAR_EXPAND + 1] = { 0 };
+    STRLEN chars = 0;
+
+    while (s < end) {
+        const U8 *next = s + UTF8SKIP(s);
+        STRLEN best = costs[chars % C_ARRAY_LENGTH(costs)] + 1;
+
+        starts[chars % C_ARRAY_LENGTH(starts)] = s;
+        chars++;
+
+        for (STRLEN span = 2;
+             span <= UTF8_MAX_FOLD_CHAR_EXPAND && span <= chars;
+             span++)
+        {
+            const U8 *first = starts[(chars - span) % C_ARRAY_LENGTH(starts)];
+
+            if (ascii_restricted) {
+                const U8 *p = first;
+                while (p < next && !isASCII(*p))
+                    p += UTF8SKIP(p);
+                if (p < next)
+                    continue;
+            }
+
+            if (is_MULTI_CHAR_FOLD_utf8_safe(first, next)
+                    == (STRLEN)(next - first))
+            {
+                const STRLEN folded_cost =
+                    costs[(chars - span) % C_ARRAY_LENGTH(costs)] + 1;
+                best = MIN(best, folded_cost);
+            }
+        }
+
+        costs[chars % C_ARRAY_LENGTH(costs)] = best;
+        s = next;
+    }
+
+    return costs[chars % C_ARRAY_LENGTH(costs)];
+}
 
 #define INVLIST_INDEX                   0
 #define ONLY_LOCALE_MATCHES_INDEX       1
