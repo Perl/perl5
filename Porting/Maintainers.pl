@@ -1156,8 +1156,16 @@ our %Modules = (
     },
 
     'Text::Balanced' => {
-        'DISTRIBUTION' => 'SHAY/Text-Balanced-2.07.tar.gz',
+        'DISTRIBUTION' => 'SHAY/Text-Balanced-2.08.tar.gz',
         'FILES'        => q[cpan/Text-Balanced],
+        'EXCLUDED'     => [
+            qw( t/94_changes.t
+                t/95_critic.t
+                t/96_pmv.t
+                t/97_pod.t
+                t/98_pod_coverage.t
+                ),
+        ],
     },
 
     'Text::ParseWords' => {

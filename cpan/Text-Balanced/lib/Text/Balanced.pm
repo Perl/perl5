@@ -1,6 +1,6 @@
 # Copyright (C) 1997-2001 Damian Conway.  All rights reserved.
 # Copyright (C) 2009 Adam Kennedy.
-# Copyright (C) 2015, 2022 Steve Hay and other contributors.  All rights
+# Copyright (C) 2015, 2022, 2026 Steve Hay and other contributors.  All rights
 # reserved.
 
 # This module is free software; you can redistribute it and/or modify it under
@@ -18,7 +18,7 @@ use Exporter ();
 
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 BEGIN {
-    $VERSION     = '2.07';
+    $VERSION     = '2.08';
     @ISA         = 'Exporter';
     %EXPORT_TAGS = (
         ALL => [ qw{
@@ -54,6 +54,9 @@ our $RE_NUM = qr/\s*[+\-.0-9][+\-.0-9e]*/i; # numerical constant
 
 our %ref2slashvalid; # is quotelike /.../ pattern valid here for given textref?
 our %ref2qmarkvalid; # is quotelike ?...? pattern valid here for given textref?
+
+our $MAX_DEPTH = 10_000; # maximum recursion depth for _match_codeblock/_match_tagged
+our $_depth    = 0;      # current recursion depth (localised on each recursive entry)
 
 # HANDLE RETURN VALUES IN VARIOUS CONTEXTS
 
@@ -338,6 +341,11 @@ sub extract_tagged (;$$$$$) # ($text, $opentag, $closetag, $pre, \%options)
 sub _match_tagged       # ($$$$$$$)
 {
     my ($textref, $pre, $ldel, $rdel, $omode, $bad, $ignore) = @_;
+    local $_depth = $_depth + 1;
+    if ($_depth > $MAX_DEPTH) {
+        _failmsg "Recursion limit ($MAX_DEPTH) exceeded in _match_tagged", pos $$textref;
+        goto failed;
+    }
     my $rdelspec;
 
     my ($startpos, $opentagpos, $textpos, $parapos, $closetagpos, $endpos) = ( pos($$textref) = pos($$textref)||0 );
@@ -567,6 +575,11 @@ sub extract_codeblock (;$$$$$)
 sub _match_codeblock
 {
     my ($textref, $pre, $ldel_outer, $rdel_outer, $ldel_inner, $rdel_inner, $rd, $no_backcompat) = @_;
+    local $_depth = $_depth + 1;
+    if ($_depth > $MAX_DEPTH) {
+        _failmsg "Recursion limit ($MAX_DEPTH) exceeded in _match_codeblock", pos $$textref;
+        return;
+    }
     $rdel_outer = qr/\G\s*($rdel_outer)/ if !$no_backcompat; # Switch calls this func directly
     my $startpos = pos($$textref) = pos($$textref) || 0;
     unless ($$textref =~ m/$pre/gc)
@@ -1005,8 +1018,10 @@ sub extract_multiple (;$$$$)    # ($text, $functions_ref, $max_fields, $ignoreun
             {
                 $unkpos = pos($$textref)-1
                     unless $igunk || defined $unkpos;
-                _update_patvalid($textref, substr $$textref, defined $unkpos ? $unkpos : 0,
-                                 pos($$textref) - (defined $unkpos ? $unkpos : 0));
+                my $curpos = pos($$textref);
+                my $tailstart = $curpos > 10 ? $curpos - 10 : 0;
+                _update_patvalid($textref, substr $$textref, $tailstart,
+                                 $curpos - $tailstart);
             }
         }
 
@@ -2178,6 +2193,27 @@ That name may still be used, but is now deprecated.
 
 =back
 
+=head1 CONFIGURATION VARIABLES
+
+=over 4
+
+=item C<$Text::Balanced::MAX_DEPTH>
+
+Controls the maximum recursion depth permitted when matching nested constructs
+in C<extract_codeblock> and C<extract_tagged>.  The default is 10,000.
+
+If the input contains more levels of nesting than this limit, the extraction
+fails gracefully (returning C<undef> in scalar context, or a list whose first
+element is C<undef> in list context) rather than consuming unbounded memory.
+
+Callers that need to handle unusually deep but legitimate nesting can raise the
+limit before calling:
+
+    local $Text::Balanced::MAX_DEPTH = 50_000;
+    my ($extracted) = extract_codeblock($text);
+
+=back
+
 =head1 DIAGNOSTICS
 
 In a list context, all the functions return C<(undef,$original_text)>
@@ -2308,6 +2344,13 @@ C<extract_tagged> reached the end of the text without finding a closing tag
 to match the original opening tag (and the failure mode was not
 "MAX" or "PARA").
 
+=item C<Recursion limit (%d) exceeded in %s>
+
+The input contained more levels of nesting than allowed by
+C<$Text::Balanced::MAX_DEPTH>.  The affected function is named in the message
+(C<_match_codeblock> or C<_match_tagged>).  See L</"CONFIGURATION VARIABLES">
+for how to raise the limit if the input is legitimately deeply nested.
+
 =back
 
 =head1 EXPORTS
@@ -2409,8 +2452,8 @@ Copyright (C) 1997-2001 Damian Conway.  All rights reserved.
 
 Copyright (C) 2009 Adam Kennedy.
 
-Copyright (C) 2015, 2020, 2022 Steve Hay and other contributors.  All rights
-reserved.
+Copyright (C) 2015, 2020, 2022, 2026 Steve Hay and other contributors.  All
+rights reserved.
 
 =head1 LICENCE
 
@@ -2420,11 +2463,11 @@ License or the Artistic License, as specified in the F<LICENCE> file.
 
 =head1 VERSION
 
-Version 2.07
+Version 2.08
 
 =head1 DATE
 
-08 Aug 2025
+21 Nov 2026
 
 =head1 HISTORY
 

@@ -376,4 +376,42 @@ expect [ extract_multiple($slashmatch, [
 ]) ],
   [ '$_', ' = 1 unless defined ', '$_', ' and ', '/\\d\\b/', ";\n" ];
 
+# extract_multiple was O(n^2) on unmatched text because _update_patvalid was
+# called with the entire growing unmatched prefix on each step.  Verify the fix
+# does not regress the slash-validity tracking through a long unmatched run, and
+# that the performance is now linear.
+
+# Correctness: a /regex/ after a long run of unmatched text followed by "!~"
+# must still be recognised as a regex, not division.
+my $long_unmatched = 'x' x 50;
+my $long_slashmatch = "\$v = 1; ${long_unmatched} \$v !~ /abc/;";
+expect [ extract_multiple($long_slashmatch, [
+  \&extract_variable,
+  \&extract_quotelike,
+]) ],
+  [ '$v', " = 1; ${long_unmatched} ", '$v', ' !~ ', '/abc/', ';' ];
+
+# Correctness: same through a long run followed by "and"
+$long_slashmatch = "\$v = 1; ${long_unmatched} \$v and /abc/;";
+expect [ extract_multiple($long_slashmatch, [
+  \&extract_variable,
+  \&extract_quotelike,
+]) ],
+  [ '$v', " = 1; ${long_unmatched} ", '$v', ' and ', '/abc/', ';' ];
+
+# Performance: with quadratic behaviour, 64,000 bytes of unmatched input would
+# take ~800s (scaling from the reported ~20s at 8,000 bytes).  With the fix it
+# completes in milliseconds.  A 30-second limit is safe even on a heavily loaded
+# machine -- the gap between the expected (ms) and quadratic (~800s) outcomes is
+# too wide for load to bridge.
+# Use a no-op extractor to isolate the _update_patvalid fix from any separate
+# performance characteristics of the default extractors.
+{
+    use Time::HiRes qw(time);
+    my $t = time();
+    extract_multiple('z' x 64_000, [sub { () }]);
+    my $elapsed = time() - $t;
+    ok $elapsed < 30, "extract_multiple completes in reasonable time on long unmatched input (${elapsed}s)";
+}
+
 done_testing;
