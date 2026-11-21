@@ -11992,12 +11992,25 @@ S_optimize_regclass(pTHX_
                  * points) in the ASCII range, so we can't use it here to
                  * artificially restrict the fold domain, so we check if the
                  * class does or does not match some EXACTFish node.  Further,
-                 * if we aren't under /i, and and the folded-to character is
-                 * part of a multi-character fold, we can't do this
-                 * optimization, as the sequence around it could be that
-                 * multi-character fold, and we don't here know the context, so
-                 * we have to assume it is that multi-char fold, to prevent
-                 * potential bugs.
+                 * if we aren't under /i, both:
+                 *  1) the folds of all characters in the class must be
+                 *     included in the class.  Since the class consists of
+                 *     single characters, that means the folds must all be
+                 *     single characters.  If A folds to B which folds to C,
+                 *     the Unicode database skips the intermediate B, and says
+                 *     that A folds to C.  That means the folds of all
+                 *     characters in the class must be the same.
+                 *  2) the fold-to character can't be part of a
+                 *     multi-character fold.  That is if A folds to Z, we
+                 *     can't have anywhere in Unicode another character B,
+                 *     such that B folds to any of
+                 *          C Z
+                 *          Z D
+                 *          C Z D
+                 *     The reason for this as the sequence around Z could be
+                 *     that multi-character fold, and we don't here know the
+                 *     context, so we'd have to assume it is that multi-char
+                 *     fold, to prevent potential bugs.
                  *
                  * To do the general case, we first find the fold of the lowest
                  * code point (which may be higher than that lowest unfolded
@@ -12007,7 +12020,10 @@ S_optimize_regclass(pTHX_
 
                 Size_t foldlen;
                 U8 foldbuf[UTF8_MAXBYTES_CASE];
-                UV folded = to_uni_fold_flags_(lowest_cp, foldbuf, &foldlen, 0);
+                UV folded = to_uni_fold_flags_(lowest_cp, foldbuf, &foldlen,
+                                               FOLD_FLAGS_FULL);
+                /* Fold can't be multi-char */
+                if (foldlen == UNISKIP(folded)) {
                 U32 first_fold;
                 const U32 * remaining_folds;
                 Size_t folds_to_this_cp_count = inverse_folds_(
@@ -12115,6 +12131,7 @@ S_optimize_regclass(pTHX_
 
                 SvREFCNT_dec_NN(fold_list);
                 SvREFCNT_dec(all_cp_list);
+                }
             }
         }
 
