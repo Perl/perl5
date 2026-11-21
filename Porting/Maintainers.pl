@@ -745,8 +745,7 @@ our %Modules = (
     },
 
     'libnet' => {
-        'DISTRIBUTION' => 'SHAY/libnet-3.16.tar.gz',
-        'SYNCINFO'     => 'eric on Wed Oct 28 16:25:04 2026',
+        'DISTRIBUTION' => 'SHAY/libnet-3.17.tar.gz',
         'MAIN_MODULE'  => 'Net::Cmd',
         'FILES'        => q[cpan/libnet],
         'EXCLUDED'     => [

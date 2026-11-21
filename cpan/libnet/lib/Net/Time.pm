@@ -22,7 +22,7 @@ use Net::Config;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(inet_time inet_daytime);
 
-our $VERSION = "3.16";
+our $VERSION = "3.17";
 
 our $TIMEOUT = 120;
 
@@ -190,11 +190,11 @@ License or the Artistic License, as specified in the F<LICENCE> file.
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =head1 DATE
 
-24 Oct 2026
+21 Nov 2026
 
 =head1 HISTORY
 

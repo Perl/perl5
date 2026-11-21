@@ -1591,6 +1591,7 @@ cpan/libnet/t/netrc.t			libnet
 cpan/libnet/t/nntp.t			libnet
 cpan/libnet/t/nntp_ipv6.t		Test file related to libnet
 cpan/libnet/t/nntp_ssl.t		Test file related to libnet
+cpan/libnet/t/pasv_address_validation.t	Test file related to libnet
 cpan/libnet/t/pop3_ipv6.t		Test file related to libnet
 cpan/libnet/t/pop3_ssl.t		Test file related to libnet
 cpan/libnet/t/require.t			libnet

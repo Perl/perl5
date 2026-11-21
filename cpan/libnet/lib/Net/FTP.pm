@@ -1,7 +1,7 @@
 # Net::FTP.pm
 #
 # Copyright (C) 1995-2004 Graham Barr.  All rights reserved.
-# Copyright (C) 2013-2017, 2020, 2022 Steve Hay.  All rights reserved.
+# Copyright (C) 2013-2017, 2020, 2022, 2026 Steve Hay.  All rights reserved.
 # This module is free software; you can redistribute it and/or modify it under
 # the same terms as Perl itself, i.e. under the terms of either the GNU General
 # Public License or the Artistic License, as specified in the F<LICENCE> file.
@@ -23,7 +23,7 @@ use Net::Config;
 use Socket;
 use Time::Local;
 
-our $VERSION = '3.16';
+our $VERSION = '3.17';
 
 our $IOCLASS;
 my $family_key;
@@ -938,8 +938,7 @@ sub pasv {
   if ( $ftp->_PASV &&
     $ftp->message =~ m{(\d+,\d+,\d+,\d+),(\d+),(\d+)} ) {
     my $port = 256 * $2 + $3;
-    ( my $ip = $1 ) =~s{,}{.}g;
-    return ${*$ftp}{net_ftp_pasv} = [ $ip,$port ];
+    return ${*$ftp}{net_ftp_pasv} = [ $ftp->peerhost, $port ];
   }
   return;
 }
@@ -2014,7 +2013,7 @@ libnet as of version 1.22_02.
 
 Copyright (C) 1995-2004 Graham Barr.  All rights reserved.
 
-Copyright (C) 2013-2017, 2020, 2022 Steve Hay.  All rights reserved.
+Copyright (C) 2013-2017, 2020, 2022, 2026 Steve Hay.  All rights reserved.
 
 =head1 LICENCE
 
@@ -2024,11 +2023,11 @@ License or the Artistic License, as specified in the F<LICENCE> file.
 
 =head1 VERSION
 
-Version 3.16
+Version 3.17
 
 =head1 DATE
 
-24 Oct 2026
+21 Nov 2026
 
 =head1 HISTORY
 
