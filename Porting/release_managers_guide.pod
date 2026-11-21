@@ -1263,8 +1263,11 @@ Bootstrap the CPAN client on the clean install:
 Try installing a popular CPAN module that's reasonably complex and that
 has dependencies; for example:
 
- CPAN> install Inline::C
- CPAN> quit
+ # Bootstrap the CPAN client on the clean install:
+ PERL_MM_USE_DEFAULT=1 bin/cpan -T
+
+ # Install the Inline module with CPAN
+ PERL_MM_USE_DEFAULT=1 bin/cpan -i Inline::C
 
 Check that your perl can run this:
 
@@ -1278,8 +1281,11 @@ Check that your perl can run this:
 Try installing a popular CPAN module that's reasonably complex and that
 has dependencies; for example:
 
- CPAN> install Inline::C
- CPAN> quit
+ # Bootstrap the CPAN client on the clean install:
+ PERL_MM_USE_DEFAULT=1 bin/cpan5.X.Y -T
+
+ # Install the Inline module with CPAN
+ PERL_MM_USE_DEFAULT=1 bin/cpan5.X.Y -i Inline::C
 
 Check that your perl can run this:
 
