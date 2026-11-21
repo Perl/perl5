@@ -902,8 +902,11 @@ Extract code from the test file at the point where C<./miniperl -Ilib -c> was
 showing a compilation failure.  Use that in bisection with the C<miniperl>
 target.
 
-    .../Porting/bisect.pl --target=miniperl --start=2ec4590e \
-        -e 'q|ace| =~ /c(?=.$)/; $#{^CAPTURE} == -1); exit 0;'
+    .../Porting/bisect.pl \
+        --target=miniperl \
+        --start=v5.29.9 \
+        --end=v5.31.1 \
+        --one-liner '$_= "ace"; /c(?=.$)/; ($#{^CAPTURE} == -1) ? exit 0 : exit 1'
 
 =item * Reference
 
@@ -989,13 +992,13 @@ C<-DDEBUGGING>.
 Investigator used existing C<-DDEBUGGING> builds to determine the production
 cycle in which crash first appeared.  Then:
 
-    .../perl/Porting/bisect.pl \
-        --start v5.20.0 \
-        --end v5.22.1 \
-        -DDEBUGGING \
-        --target miniperl \
-        --crash \
-        -- ./miniperl -Ilib -DXvt -Mstrict -e 1
+  .../perl/Porting/bisect.pl \
+    --start v5.20.0 \
+    --end v5.22.1 \
+    -DDEBUGGING \
+    --target miniperl \
+    --crash \
+    -- ./miniperl -Ilib -DXvt -Mstrict -e 1
 
 First bad commit was identified as
 L<ed958fa315|https://github.com/Perl/perl5/commit/ed958fa315>.
@@ -1128,13 +1131,13 @@ We used F<perlbrew> to narrow down the range needing testing to the 5.25
 development cycle.  We then bisected with the C<--one-liner> switch and the
 following invocation:
 
-    export ERR=/tmp/err; rm $ERR
+  export ERR=/tmp/err; rm $ERR
 
-    perl Porting/bisect.pl \
-      --start=v5.24.0 \
-      --end=v5.26.0 \
-      --one-liner 'system(qq|./perl -we "q{ab} =~ /.{-1,4}/" 2>$ENV{ERR}|);
-                  die "See $ENV{ERR} for warnings thrown" if -s $ENV{ERR};'
+  perl Porting/bisect.pl \
+    --start=v5.24.0 \
+    --end=v5.26.0 \
+    --one-liner 'system(qq|./perl -we "q{ab} =~ /.{-1,4}/" 2>$ENV{ERR}|);
+                die "See $ENV{ERR} for warnings thrown" if -s $ENV{ERR};'
 
 Bisection pointed to a commit where a modification had been made to a warning.
 
