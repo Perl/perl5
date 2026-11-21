@@ -952,14 +952,29 @@ F<perlbrew>) to identify the first production release at which the code would
 not compile.  Used that information to shorten bisection time.
 
     .../perl Porting/bisect.pl \
-        --start=v5.14.4 \
-        --end=v5.16.3 \
-        --crash -- ./perl -Ilib /tmp/gh-17333-map.pl
+        --start=v5.14.0 \
+        --end=v5.16.0 \
+        --crash \
+        -- ./perl -Ilib /tmp/gh-17333-map.pl
 
     $ cat gh-17333-map.pl
 
     @N = 1..5;
     map { pop @N } @N;
+
+B<Note:> The crashing code could be written more succinctly with a one-liner.
+There would then be no need to refer to a file outside the core distribution.
+Also, given that the crashing code does not use any modules or XS code,
+bisection would run more quickly if we only targeted and built C<miniperl>
+rather than C<test_prep> (the implicit target in the above example).  That
+would suggest:
+
+    .../perl Porting/bisect.pl \
+        --start=v5.14.0 \
+        --end=v5.16.0 \
+        --target=miniperl \
+        --crash \
+        -e '@N = 1..5; map { pop @N } @N;'
 
 =item * Reference
 
