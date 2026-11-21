@@ -11670,14 +11670,15 @@ S_optimize_regclass(pTHX_
 {
     PERL_ARGS_ASSERT_OPTIMIZE_REGCLASS;
 
-    /* This function exists just to make S_regclass() smaller.  It extracts out
-     * the code that looks for potential optimizations away from a full generic
-     * ANYOF node.  The parameter names are the same as the corresponding
-     * variables in S_regclass.
+    /* This function exists just to make S_regclass() smaller.  It extracts
+     * out the code that looks for potential optimizations away from a full
+     * generic ANYOF node.  The parameter names are the same as the
+     * corresponding variables in S_regclass.
      *
      * It returns the new op (the impossible END one if no optimization found)
      * and sets *ret to any created regnode.  If the new op is sufficiently
-     * like plain ANYOF, it leaves *ret unchanged for allocation in S_regclass.
+     * like plain ANYOF, it leaves *ret unchanged for allocation in
+     * S_regclass.
      *
      * Certain of the parameters may be updated as a result of the changes
      * herein */
@@ -11742,16 +11743,16 @@ S_optimize_regclass(pTHX_
         }
 
         /* For well-behaved locales, some classes are subsets of others, so
-         * complementing the subset and including the non-complemented superset
-         * should match everything, like [\D[:alnum:]], and
+         * complementing the subset and including the non-complemented
+         * superset should match everything, like [\D[:alnum:]], and
          * [[:^alpha:][:alnum:]], but some implementations of locales are
          * buggy, and khw thinks its a bad idea to have optimization change
          * behavior, even if it avoids an OS bug in a given case */
 
 #define isSINGLE_BIT_SET(n) isPOWER_OF_2(n)
 
-        /* If is a single posix /l class, can optimize to just that op.  Such a
-         * node will not match anything in the Latin1 range, as that is not
+        /* If is a single posix /l class, can optimize to just that op.  Such
+         * a node will not match anything in the Latin1 range, as that is not
          * determinable until runtime, but will match whatever the class does
          * outside that range.  (Note that some classes won't match anything
          * outside the range, like [:ascii:]) */
@@ -11797,7 +11798,8 @@ S_optimize_regclass(pTHX_
         }
     }
 
-    /* khw can't think of any other possible transformation involving these. */
+    /* khw can't think of any other possible transformation involving these.
+     * */
     if (has_runtime_dependency & HAS_USER_DEFINED_PROPERTY) {
         return END;
     }
@@ -11834,22 +11836,22 @@ S_optimize_regclass(pTHX_
      * join this node with adjacent EXACTish ones, and ANYOF nodes require
      * runtime conversion to code point from UTF-8, which we'd like to avoid.
      *
-     * An EXACTFish node can be generated even if not under /i, and vice versa.
-     * But care must be taken.  An EXACTFish node has to be such that it only
-     * matches precisely the code points in the class, but we want to generate
-     * the least restrictive one that does that, to increase the odds of being
-     * able to join with an adjacent node.  For example, if the class contains
-     * [kK], we have to make it an EXACTFAA node to prevent the KELVIN SIGN
-     * from matching.  Whether we are under /i or not is irrelevant in this
-     * case.  Less obvious is the pattern qr/[\x{02BC}]n/i.  U+02BC is MODIFIER
-     * LETTER APOSTROPHE. That is supposed to match the single character U+0149
-     * LATIN SMALL LETTER N PRECEDED BY APOSTROPHE.  And so even though there
-     * is no simple fold that includes \X{02BC}, there is a multi-char fold
-     * that does, and so the node generated for it must be an EXACTFish one.
-     * On the other hand qr/:/i should generate an EXACT_NF node since the
-     * colon participates in no fold whatsoever, and marking it EXACT_NF
-     * tells the optimizer the target string cannot match unless it has a
-     * colon in it. */
+     * An EXACTFish node can be generated even if not under /i, and vice
+     * versa.  But care must be taken.  An EXACTFish node has to be such that
+     * it only matches precisely the code points in the class, but we want to
+     * generate the least restrictive one that does that, to increase the odds
+     * of being able to join with an adjacent node.  For example, if the class
+     * contains [kK], we have to make it an EXACTFAA node to prevent the
+     * KELVIN SIGN from matching.  Whether we are under /i or not is
+     * irrelevant in this case.  Less obvious is the pattern qr/[\x{02BC}]n/i.
+     * U+02BC is MODIFIER LETTER APOSTROPHE. That is supposed to match the
+     * single character U+0149 LATIN SMALL LETTER N PRECEDED BY APOSTROPHE.
+     * And so even though there is no simple fold that includes \X{02BC},
+     * there is a multi-char fold that does, and so the node generated for it
+     * must be an EXACTFish one.  On the other hand qr/:/i should generate an
+     * EXACT_NF node since the colon participates in no fold whatsoever, and
+     * marking it EXACT_NF tells the optimizer the target string cannot match
+     * unless it has a colon in it. */
     if (   ! posixl
         && ! *invert
 
@@ -11862,10 +11864,10 @@ S_optimize_regclass(pTHX_
         if (partial_cp_count == 1 && ! upper_latin1_only_utf8_matches) {
             if (LOC) {
 
-                /* Here is /l:  Use EXACTL, except if there is a fold not known
-                 * until runtime so shows as only a single code point here.
-                 * For code points above 255, we know which can cause problems
-                 * by having a potential fold to the Latin1 range. */
+                /* Here is /l:  Use EXACTL, except if there is a fold not
+                 * known until runtime so shows as only a single code point
+                 * here.  For code points above 255, we know which can cause
+                 * problems by having a potential fold to the Latin1 range. */
                 if (  ! FOLD
                     || (     lowest_cp > 255
                         && ! is_PROBLEMATIC_LOCALE_FOLD_cp(lowest_cp)))
@@ -11884,15 +11886,15 @@ S_optimize_regclass(pTHX_
 
                 /* Under /i, it gets a little tricky.  A code point that
                  * doesn't participate in a fold should be an EXACT_NF node.
-                 * We know this one isn't the result of a simple fold, or there'd
-                 * be more than one code point in the list, but it could be
-                 * part of a multi-character fold.  In that case we better not
-                 * create an EXACT_NF node, as we would wrongly be telling the
-                 * optimizer that this code point must be in the target string,
-                 * and that is wrong.  This is because if the sequence around
-                 * this code point forms a multi-char fold, what needs to be in
-                 * the string could be the code point that folds to the
-                 * sequence.
+                 * We know this one isn't the result of a simple fold, or
+                 * there'd be more than one code point in the list, but it
+                 * could be part of a multi-character fold.  In that case we
+                 * better not create an EXACT_NF node, as we would wrongly be
+                 * telling the optimizer that this code point must be in the
+                 * target string, and that is wrong.  This is because if the
+                 * sequence around this code point forms a multi-char fold,
+                 * what needs to be in the string could be the code point that
+                 * folds to the sequence.
                  *
                  * This handles the case of below-255 code points, as we have
                  * an easy look up for those.  The next clause handles the
@@ -11961,8 +11963,8 @@ S_optimize_regclass(pTHX_
                     }
                     else {
 
-                        /* Here, the only possible fold lowest_cp participates in
-                         * is with start[1].  /i or not isn't relevant */
+                        /* Here, the only possible fold lowest_cp participates
+                         * in is with start[1].  /i or not isn't relevant */
                         op = EXACTFU;
                     }
 
@@ -11982,11 +11984,11 @@ S_optimize_regclass(pTHX_
                  * of the lowest one is in the always-match list.  This test
                  * quickly excludes most of the false positives when there are
                  * /d UTF-8 depdendent matches.  These are like LATIN CAPITAL
-                 * LETTER A WITH GRAVE matching LATIN SMALL LETTER A WITH GRAVE
-                 * iff the target string is UTF-8.  (We don't have to worry
-                 * above about exceeding the array bounds of PL_fold_latin1[]
-                 * because any code point in 'upper_latin1_only_utf8_matches'
-                 * is below 256.)
+                 * LETTER A WITH GRAVE matching LATIN SMALL LETTER A WITH
+                 * GRAVE iff the target string is UTF-8.  (We don't have to
+                 * worry above about exceeding the array bounds of
+                 * PL_fold_latin1[] because any code point in
+                 * 'upper_latin1_only_utf8_matches' is below 256.)
                  *
                  * EXACTFAA would apply only to pairs (hence exactly 2 code
                  * points) in the ASCII range, so we can't use it here to
@@ -12012,11 +12014,11 @@ S_optimize_regclass(pTHX_
                  *     context, so we'd have to assume it is that multi-char
                  *     fold, to prevent potential bugs.
                  *
-                 * To do the general case, we first find the fold of the lowest
-                 * code point (which may be higher than that lowest unfolded
-                 * one), then find everything that folds to it.  (The data
-                 * structure we have only maps from the folded code points, so
-                 * we have to do the earlier step.) */
+                 * To do the general case, we first find the fold of the
+                 * lowest code point (which may be higher than that lowest
+                 * unfolded one), then find everything that folds to it.  (The
+                 * data structure we have only maps from the folded code
+                 * points, so we have to do the earlier step.) */
 
                 Size_t foldlen;
                 U8 foldbuf[UTF8_MAXBYTES_CASE];
@@ -12024,113 +12026,118 @@ S_optimize_regclass(pTHX_
                                                FOLD_FLAGS_FULL);
                 /* Fold can't be multi-char */
                 if (foldlen == UNISKIP(folded)) {
-                U32 first_fold;
-                const U32 * remaining_folds;
-                Size_t folds_to_this_cp_count = inverse_folds_(
+                    U32 first_fold;
+                    const U32 * remaining_folds;
+                    Size_t folds_to_this_cp_count = inverse_folds_(
                                                             folded,
                                                             &first_fold,
                                                             &remaining_folds);
-                Size_t folds_count = folds_to_this_cp_count + 1;
-                SV * fold_list = new_invlist_(folds_count);
-                unsigned int i;
+                    Size_t folds_count = folds_to_this_cp_count + 1;
+                    SV * fold_list = new_invlist_(folds_count);
+                    unsigned int i;
 
-                /* If there are UTF-8 dependent matches, create a temporary
-                 * list of what this node matches, including them. */
-                SV * all_cp_list = NULL;
-                SV ** use_this_list = &cp_list;
+                    /* If there are UTF-8 dependent matches, create a
+                     * temporary list of what this node matches, including
+                     * them. */
+                    SV * all_cp_list = NULL;
+                    SV ** use_this_list = &cp_list;
 
-                if (upper_latin1_only_utf8_matches) {
-                    all_cp_list = new_invlist_(0);
-                    use_this_list = &all_cp_list;
-                    invlist_union_(cp_list,
-                                   upper_latin1_only_utf8_matches,
-                                   use_this_list);
-                }
-
-                /* Having gotten everything that participates in the fold
-                 * containing the lowest code point, we turn that into an
-                 * inversion list, making sure everything is included. */
-                fold_list = add_cp_to_invlist(fold_list, lowest_cp);
-                fold_list = add_cp_to_invlist(fold_list, folded);
-                if (folds_to_this_cp_count > 0) {
-                    fold_list = add_cp_to_invlist(fold_list, first_fold);
-                    for (i = 0; i + 1 < folds_to_this_cp_count; i++) {
-                        fold_list = add_cp_to_invlist(fold_list,
-                                                    remaining_folds[i]);
+                    if (upper_latin1_only_utf8_matches) {
+                        all_cp_list = new_invlist_(0);
+                        use_this_list = &all_cp_list;
+                        invlist_union_(cp_list,
+                                       upper_latin1_only_utf8_matches,
+                                       use_this_list);
                     }
-                }
 
-                /* If the fold list is identical to what's in this ANYOF node,
-                 * the node can be represented by an EXACTFish one instead */
-                if (invlistEQ_(*use_this_list, fold_list,
-                               0 /* Don't complement */ )
-                ) {
+                    /* Having gotten everything that participates in the fold
+                     * containing the lowest code point, we turn that into an
+                     * inversion list, making sure everything is included. */
+                    fold_list = add_cp_to_invlist(fold_list, lowest_cp);
+                    fold_list = add_cp_to_invlist(fold_list, folded);
+                    if (folds_to_this_cp_count > 0) {
+                        fold_list = add_cp_to_invlist(fold_list, first_fold);
+                        for (i = 0; i + 1 < folds_to_this_cp_count; i++) {
+                            fold_list = add_cp_to_invlist(fold_list,
+                                                          remaining_folds[i]);
+                        }
+                    }
 
-                    /* But, we have to be careful, as mentioned above.  Just
-                     * the right sequence of characters could match this if it
-                     * is part of a multi-character fold.  That IS what we want
-                     * if we are under /i.  But it ISN'T what we want if not
-                     * under /i, as it could match when it shouldn't.  So, when
-                     * we aren't under /i and this character participates in a
-                     * multi-char fold, we don't optimize into an EXACTFish
-                     * node.  So, for each case below we have to check if we
-                     * are folding, and if not, if it is not part of a
-                     * multi-char fold.  */
-                    if (lowest_cp > 255) {    /* Highish code point */
-                        if (FOLD || ! invlist_contains_cp_(
-                                                   PL_InMultiCharFold, folded))
+                    /* If the fold list is identical to what's in this ANYOF
+                     * node, the node can be represented by an EXACTFish one
+                     * instead */
+                    if (invlistEQ_(*use_this_list, fold_list,
+                                   0 /* Don't complement */ )
+                    ) {
+
+                        /* But, we have to be careful, as mentioned above.
+                         * Just the right sequence of characters could match
+                         * this if it is part of a multi-character fold.  That
+                         * IS what we want if we are under /i.  But it ISN'T
+                         * what we want if not under /i, as it could match
+                         * when it shouldn't.  So, when we aren't under /i and
+                         * this character participates in a multi-char fold,
+                         * we don't optimize into an EXACTFish node.  So, for
+                         * each case below we have to check if we are folding,
+                         * and if not, if it is not part of a multi-char fold.
+                         * */
+                        if (lowest_cp > 255) {    /* Highish code point */
+                            if (FOLD || ! invlist_contains_cp_(
+                                                           PL_InMultiCharFold,
+                                                           folded))
+                            {
+                                op = (LOC)
+                                     ? EXACTFLU8
+                                     : (ASCII_FOLD_RESTRICTED)
+                                       ? EXACTFAA
+                                       : EXACTFU_REQ8;
+                                value = folded;
+                            }
+                        }   /* Below, the lowest code point < 256 */
+                        else if (    FOLD
+                                 &&  folded == 's'
+                                 &&  DEPENDS_SEMANTICS)
+                        {   /* An EXACTF node containing a single character
+                               's', can be an EXACTFU if it doesn't get joined
+                               with an adjacent 's' */
+                            op = EXACTFU_S_EDGE;
+                            value = folded;
+                        }
+                        else if (     FOLD
+                                 || ! HAS_NONLATIN1_FOLD_CLOSURE(lowest_cp))
                         {
-                            op = (LOC)
-                                 ? EXACTFLU8
-                                 : (ASCII_FOLD_RESTRICTED)
-                                   ? EXACTFAA
-                                   : EXACTFU_REQ8;
-                            value = folded;
-                        }
-                    }   /* Below, the lowest code point < 256 */
-                    else if (    FOLD
-                             &&  folded == 's'
-                             &&  DEPENDS_SEMANTICS)
-                    {   /* An EXACTF node containing a single character 's',
-                           can be an EXACTFU if it doesn't get joined with an
-                           adjacent 's' */
-                        op = EXACTFU_S_EDGE;
-                        value = folded;
-                    }
-                    else if (     FOLD
-                             || ! HAS_NONLATIN1_FOLD_CLOSURE(lowest_cp))
-                    {
-                        if (upper_latin1_only_utf8_matches) {
-                            op = EXACTF;
+                            if (upper_latin1_only_utf8_matches) {
+                                op = EXACTF;
 
-                            /* We can't use the fold, as that only matches
-                             * under UTF-8 */
-                            value = lowest_cp;
-                        }
-                        else if (     UNLIKELY(lowest_cp == MICRO_SIGN)
-                                 && ! UTF)
-                        {   /* EXACTFUP is a special node for this character */
-                            op = (ASCII_FOLD_RESTRICTED)
-                                 ? EXACTFAA
-                                 : EXACTFUP;
-                            value = MICRO_SIGN;
-                        }
-                        else if (     ASCII_FOLD_RESTRICTED
-                                 && ! isASCII(lowest_cp))
-                        {   /* For ASCII under /iaa, we can use EXACTFU below
-                             */
-                            op = EXACTFAA;
-                            value = folded;
-                        }
-                        else {
-                            op = EXACTFU;
-                            value = folded;
+                                /* We can't use the fold, as that only matches
+                                 * under UTF-8 */
+                                value = lowest_cp;
+                            }
+                            else if (     UNLIKELY(lowest_cp == MICRO_SIGN)
+                                     && ! UTF)
+                            {   /* EXACTFUP is a special node for this
+                                   character */
+                                op = (ASCII_FOLD_RESTRICTED)
+                                     ? EXACTFAA
+                                     : EXACTFUP;
+                                value = MICRO_SIGN;
+                            }
+                            else if (     ASCII_FOLD_RESTRICTED
+                                     && ! isASCII(lowest_cp))
+                            {   /* For ASCII under /iaa, we can use EXACTFU
+                                   below */
+                                op = EXACTFAA;
+                                value = folded;
+                            }
+                            else {
+                                op = EXACTFU;
+                                value = folded;
+                            }
                         }
                     }
-                }
 
-                SvREFCNT_dec_NN(fold_list);
-                SvREFCNT_dec(all_cp_list);
+                    SvREFCNT_dec_NN(fold_list);
+                    SvREFCNT_dec(all_cp_list);
                 }
             }
         }
@@ -12148,10 +12155,11 @@ S_optimize_regclass(pTHX_
 
                 /* This is a kludge to the special casing issues with this
                  * ligature under /aa.  FB05 should fold to FB06, but the call
-                 * above to to_uni_fold_flags_() didn't find this, as it didn't
-                 * use the /aa restriction in order to not miss other folds
-                 * that would be affected.  This is the only instance likely to
-                 * ever be a problem in all of Unicode.  So special case it. */
+                 * above to to_uni_fold_flags_() didn't find this, as it
+                 * didn't use the /aa restriction in order to not miss other
+                 * folds that would be affected.  This is the only instance
+                 * likely to ever be a problem in all of Unicode.  So special
+                 * case it. */
                 if (   value == LATIN_SMALL_LIGATURE_LONG_S_T
                     && ASCII_FOLD_RESTRICTED)
                 {
@@ -12196,14 +12204,14 @@ S_optimize_regclass(pTHX_
          * that mask we get 0x30.  Any other bytes ANDed yield something else.
          * So [01], which is a common usage, is optimizable into ANYOFM, and
          * can benefit from the speed up.  We can only do this on UTF-8
-         * invariant bytes, because they have the same bit patterns under UTF-8
-         * as not. */
+         * invariant bytes, because they have the same bit patterns under
+         * UTF-8 as not. */
         PERL_UINT_FAST8_T inverted = 0;
 
         /* Highest possible UTF-8 invariant is 7F on ASCII platforms; FF on
          * EBCDIC */
         const PERL_UINT_FAST8_T max_permissible
-                                    = nBIT_UMAX(7 + ONE_IF_EBCDIC_ZERO_IF_NOT);
+                                   = nBIT_UMAX(7 + ONE_IF_EBCDIC_ZERO_IF_NOT);
 
         /* If doesn't fit the criteria for ANYOFM, invert and try again.  If
          * that works we will instead later generate an NANYOFM, and invert
@@ -12256,10 +12264,10 @@ S_optimize_regclass(pTHX_
              * bits in lowest code point, call the count 'd'.  If the set we
              * found contains 2**d elements, it is the closure of all code
              * points that differ only in those bit positions.  To convince
-             * yourself of that, first note that the number in the closure must
-             * be a power of 2, which we test for.  The only way we could have
-             * that count and it be some differing set, is if we got some code
-             * points that don't differ from the lowest code point in any
+             * yourself of that, first note that the number in the closure
+             * must be a power of 2, which we test for.  The only way we could
+             * have that count and it be some differing set, is if we got some
+             * code points that don't differ from the lowest code point in any
              * position, but do differ from each other in some other position.
              * That means one code point has a 1 in that position, and another
              * has a 0.  But that would mean that one of them differs from the
@@ -12302,12 +12310,12 @@ S_optimize_regclass(pTHX_
             return op;
         }
 
-        /* XXX We could create an ANYOFR_LOW node here if we saved above if all
-         * were invariants, it wasn't inverted, and there is a single range.
-         * This would be faster than some of the posix nodes we create below
-         * like /\d/a, but would be twice the size.  Without having actually
-         * measured the gain, khw doesn't think the tradeoff is really worth it
-         * */
+        /* XXX We could create an ANYOFR_LOW node here if we saved above if
+         * all were invariants, it wasn't inverted, and there is a single
+         * range.  This would be faster than some of the posix nodes we create
+         * below like /\d/a, but would be twice the size.  Without having
+         * actually measured the gain, khw doesn't think the tradeoff is
+         * really worth it */
     }
 
     if (! (*anyof_flags & ANYOF_LOCALE_FLAGS)) {
@@ -12315,10 +12323,10 @@ S_optimize_regclass(pTHX_
         SV * intersection = NULL;
         SV* d_invlist = NULL;
 
-        /* See if this matches any of the POSIX classes.  The POSIXA and POSIXD
-         * ones are about the same speed as ANYOF ops, but take less room; the
-         * ones that have above-Latin1 code point matches are somewhat faster
-         * than ANYOF. */
+        /* See if this matches any of the POSIX classes.  The POSIXA and
+         * POSIXD ones are about the same speed as ANYOF ops, but take less
+         * room; the ones that have above-Latin1 code point matches are
+         * somewhat faster than ANYOF. */
 
         for (type = POSIXA; type >= POSIXD; type--) {
             int posix_class;
@@ -12342,8 +12350,8 @@ S_optimize_regclass(pTHX_
                     official_code_points = &PL_XPosix_ptrs[posix_class];
                 }
 
-                /* Skip non-existent classes of this type.  e.g. \v only has an
-                 * entry in PL_XPosix_ptrs */
+                /* Skip non-existent classes of this type.  e.g. \v only has
+                 * an entry in PL_XPosix_ptrs */
                 if (! *official_code_points) {
                     continue;
                 }
@@ -12376,9 +12384,9 @@ S_optimize_regclass(pTHX_
                         d_invlist = invlist_clone(cp_list, NULL);
 
                         /* But under UTF-8 it turns into using /u rules.  Add
-                         * the things it matches under these conditions so that
-                         * we check below that these are identical to what the
-                         * tested class should match */
+                         * the things it matches under these conditions so
+                         * that we check below that these are identical to
+                         * what the tested class should match */
                         if (upper_latin1_only_utf8_matches) {
                             invlist_union_(
                                         d_invlist,
@@ -12412,16 +12420,17 @@ S_optimize_regclass(pTHX_
                          * type, possibly inverted.
                          *
                          * Some of these nodes match a single range of
-                         * characters (or [:alpha:] matches two parallel ranges
-                         * on ASCII platforms).  The array lookup at execution
-                         * time could be replaced by a range check for such
-                         * nodes.  But regnodes are a finite resource, and the
-                         * possible performance boost isn't large, so this
-                         * hasn't been done.  An attempt to use just one node
-                         * (and its inverse) to encompass all such cases was
-                         * made in d62feba66bf43f35d092bb026694f927e9f94d38.
-                         * But the shifting/masking it used ended up being
-                         * slower than the array look up, so it was reverted */
+                         * characters (or [:alpha:] matches two parallel
+                         * ranges on ASCII platforms).  The array lookup at
+                         * execution time could be replaced by a range check
+                         * for such nodes.  But regnodes are a finite
+                         * resource, and the possible performance boost isn't
+                         * large, so this hasn't been done.  An attempt to use
+                         * just one node (and its inverse) to encompass all
+                         * such cases was made in
+                         * d62feba66bf43f35d092bb026694f927e9f94d38.  But the
+                         * shifting/masking it used ended up being slower than
+                         * the array look up, so it was reverted */
                         op = (try_inverted)
                             ? type + NPOSIXA - POSIXA
                             : type;
@@ -12438,12 +12447,13 @@ S_optimize_regclass(pTHX_
         SvREFCNT_dec(intersection);
     }
 
-    /* If it is a single contiguous range, ANYOFR is an efficient regnode, both
-     * in size and speed.  Currently, a 20 bit range base (smallest code point
-     * in the range), and a 12 bit maximum delta are packed into a 32 bit word.
-     * This allows for using it on all of the Unicode code points except for
-     * the highest plane, which is only for private use code points.  khw
-     * doubts that a bigger delta is likely in real world applications */
+    /* If it is a single contiguous range, ANYOFR is an efficient regnode,
+     * both in size and speed.  Currently, a 20 bit range base (smallest code
+     * point in the range), and a 12 bit maximum delta are packed into a 32
+     * bit word.  This allows for using it on all of the Unicode code points
+     * except for the highest plane, which is only for private use code
+     * points.  khw doubts that a bigger delta is likely in real world
+     * applications */
     if (     single_range
         && ! has_runtime_dependency
         &&   *anyof_flags == 0
@@ -12460,16 +12470,16 @@ S_optimize_regclass(pTHX_
         *ret = reg1node(pRExC_state, op,
                         (start[0] | (end[0] - start[0]) << ANYOFR_BASE_BITS));
 
-        /* Place the lowest UTF-8 start byte in the flags field, so as to allow
-         * efficient ruling out at run time of many possible inputs.  */
+        /* Place the lowest UTF-8 start byte in the flags field, so as to
+         * allow efficient ruling out at run time of many possible inputs.  */
         (void) uv_to_utf8(low_utf8, start[0]);
         (void) uv_to_utf8(high_utf8, end[0]);
 
         /* If all code points share the same first byte, this can be an
          * ANYOFRb.  Otherwise store the lowest UTF-8 start byte which can
          * quickly rule out many inputs at run-time without having to compute
-         * the code point from UTF-8.  For EBCDIC, we use I8, as not doing that
-         * transformation would not rule out nearly so many things */
+         * the code point from UTF-8.  For EBCDIC, we use I8, as not doing
+         * that transformation would not rule out nearly so many things */
         if (low_utf8[0] == high_utf8[0]) {
             op = ANYOFRb;
             OP(REGNODE_p(*ret)) = op;
@@ -12494,17 +12504,17 @@ S_optimize_regclass(pTHX_
 
         /* Currently the maximum allowed code point by the system is IV_MAX.
          * Higher ones are reserved for future internal use.  This particular
-         * regnode can be used for higher ones, but we can't calculate the code
-         * point of those.  IV_MAX suffices though, as it will be a large first
-         * byte */
+         * regnode can be used for higher ones, but we can't calculate the
+         * code point of those.  IV_MAX suffices though, as it will be a large
+         * first byte */
         Size_t low_len = uv_to_utf8(low_utf8, MIN(lowest_cp, IV_MAX))
                        - low_utf8;
 
-        /* We store the lowest possible first byte of the UTF-8 representation,
-         * using the flags field.  This allows for quick ruling out of some
-         * inputs without having to convert from UTF-8 to code point.  For
-         * EBCDIC, we use I8, as not doing that transformation would not rule
-         * out nearly so many things */
+        /* We store the lowest possible first byte of the UTF-8
+         * representation, using the flags field.  This allows for quick
+         * ruling out of some inputs without having to convert from UTF-8 to
+         * code point.  For EBCDIC, we use I8, as not doing that
+         * transformation would not rule out nearly so many things */
         *anyof_flags = NATIVE_UTF8_TO_I8(low_utf8[0]);
 
         op = ANYOFH;
@@ -12517,8 +12527,9 @@ S_optimize_regclass(pTHX_
             Size_t high_len = uv_to_utf8(high_utf8, highest_cp) - high_utf8;
 
             /* If the lowest and highest are the same, we can get an exact
-             * first byte instead of just a minimum or even a sequence of exact
-             * leading bytes.  We signal these with different regnodes */
+             * first byte instead of just a minimum or even a sequence of
+             * exact leading bytes.  We signal these with different regnodes
+             * */
             if (low_utf8[0] == high_utf8[0]) {
                 Size_t len = find_first_differing_byte_pos(low_utf8,
                                                            high_utf8,
@@ -12541,9 +12552,11 @@ S_optimize_regclass(pTHX_
                          * non-UTF8 targets.  The internal bitmap would serve
                          * both cases; with some extra code in regexec.c) */
                         op = ANYOFHbbm;
-                        *ret = REGNODE_GUTS(pRExC_state, op, REGNODE_ARG_LEN(op));
+                        *ret = REGNODE_GUTS(pRExC_state, op,
+                                            REGNODE_ARG_LEN(op));
                         FILL_NODE(*ret, op);
-                        FIRST_BYTE((struct regnode_bbm *) REGNODE_p(*ret)) = low_utf8[0],
+                        FIRST_BYTE((struct regnode_bbm *) REGNODE_p(*ret)) =
+                                                                low_utf8[0],
 
                         /* The 64 bit (or 32 on EBCCDIC) map can be looked up
                          * directly based on the continuation byte, without
@@ -12553,7 +12566,7 @@ S_optimize_regclass(pTHX_
 
                             /* The base code point is from the start byte */
                             TWO_BYTE_UTF8_TO_NATIVE(low_utf8[0],
-                                                    UTF8_MIN_CONTINUATION_BYTE),
+                                                  UTF8_MIN_CONTINUATION_BYTE),
 
                             ((struct regnode_bbm *) REGNODE_p(*ret))->bitmap,
                             REGNODE_BBM_BITMAP_LEN);
@@ -12582,12 +12595,12 @@ S_optimize_regclass(pTHX_
             }
             else if (NATIVE_UTF8_TO_I8(high_utf8[0]) <= MAX_ANYOF_HRx_BYTE) {
 
-                /* Here, the high byte is not the same as the low, but is small
-                 * enough that its reasonable to have a loose upper bound,
-                 * which is packed in with the strict lower bound.  See
-                 * comments at the definition of MAX_ANYOF_HRx_BYTE.  On EBCDIC
-                 * platforms, I8 is used.  On ASCII platforms I8 is the same
-                 * thing as UTF-8 */
+                /* Here, the high byte is not the same as the low, but is
+                 * small enough that its reasonable to have a loose upper
+                 * bound, which is packed in with the strict lower bound.  See
+                 * comments at the definition of MAX_ANYOF_HRx_BYTE.  On
+                 * EBCDIC platforms, I8 is used.  On ASCII platforms I8 is the
+                 * same thing as UTF-8 */
 
                 U8 bits = 0;
                 U8 max_range_diff = MAX_ANYOF_HRx_BYTE - *anyof_flags;
