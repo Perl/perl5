@@ -2431,6 +2431,12 @@ a(?:|(?:)(?:))|(\N)	x	y	$1	x	-	enclosing capturing alternative remains reachable
 a(?:|(?:)(?:))|\x{100}	\x{100}	y	$&	\x{100}	-	enclosing wide alternative remains reachable
 (?i)a(?:|(?:)(?:))|\N	b	y	$&	b	-	folded prefix preserves enclosing alternatives
 
+# (*atomic:...) is another way to write (?>...), not a lookaround, so \K is
+# allowed in it.
+(*atomic:a\K)b	ab	y	$-[0]:$+[0]	1:2	-	\K in an alphabetic atomic group
+(*atomic:a\K)*b	aab	y	$-[0]:$+[0]	2:3	-	\K in a repeated alphabetic atomic group
+(?>a\K)b	ab	y	$-[0]:$+[0]	1:2	-	\K in an atomic group
+
 # GH #24915
 x+(?:b{2}){2}	xxbbbb	y	$&	xxbbbb	-	quantified sub-pattern after PLUS
 

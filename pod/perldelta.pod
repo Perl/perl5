@@ -455,6 +455,12 @@ of an alternative, preserving the literals that follow them.  [GH #25083]
 
 =item *
 
+C<\K> is now allowed inside C<(*atomic:...)>, as it always has been inside
+C<< (?>...) >>, which means the same thing.  It was rejected with "\K not
+permitted in lookahead/lookbehind".
+
+=item *
+
 XXX
 
 =back

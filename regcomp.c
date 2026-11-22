@@ -3688,7 +3688,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 }
 
                 RExC_seen_zerolen++;
-                RExC_in_lookaround = true;
+                /* (*atomic:...) gets here too, but is not a lookaround;
+                 * it is (?>...) spelled out, and like it allows \K. */
+                if (paren != 't')
+                    RExC_in_lookaround = true;
                 RExC_seen |= seen_flag_set;
 
                 RExC_parse_set(start_arg);
