@@ -10644,6 +10644,7 @@ NULL
 #define ST st->u.ifmatch
 
         case SUSPEND:	/* (?>A) */
+            ST.prev_match_end = match_end;
             ST.wanted = 1;
             ST.start = locinput;
             ST.end = loceol;
