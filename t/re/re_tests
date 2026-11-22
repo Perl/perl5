@@ -2468,6 +2468,31 @@ a(?:|(?:)(?:))|\x{100}	\x{100}	y	$&	\x{100}	-	enclosing wide alternative remains
 \A(?(DEFINE)(?<K>a\K))(?(?!(?&K))X|ab)\z	ab	y	$-[0]:$+[0]:$&	0:2:ab	-	negative conditional restores the match start before its else arm
 \A(?(DEFINE)(?<K>a\K))(?:(?(?!(?&K))X|a)X|ab)\z	ab	y	$-[0]:$+[0]:$&	0:2:ab	-	negative conditional does not leak a reset into an outer alternative
 
+# When a later iteration of a group matches a different alternative, the
+# captures of the alternatives before it are cleared.  This must not depend
+# on whether the alternation was compiled into a trie.
+(?:x(1)|b)+	x1b	y	${\(defined($1) ? $1 : q(undef))}	undef	-	later iteration matches a later literal alternative
+(?:x(1)|\w)+	x1b	y	${\(defined($1) ? $1 : q(undef))}	undef	-	the same with an alternative that is not a literal
+(?:b|x(1))+	x1b	y	${\(defined($1) ? $1 : q(undef))}	1	-	captures of alternatives after the matching one are kept
+(?:x(1)|y(2)|b)+	x1y2b	y	${\(defined($1) ? $1 : q(undef))}-${\(defined($2) ? $2 : q(undef))}	undef-undef	-	third alternative clears the first two
+(?:x(1)|y(2)|b)+	x1y2	y	${\(defined($1) ? $1 : q(undef))}-${\(defined($2) ? $2 : q(undef))}	undef-2	-	second alternative clears the first
+(?:x(1)|y(2)|b)+	y2x1	y	${\(defined($1) ? $1 : q(undef))}-${\(defined($2) ? $2 : q(undef))}	1-2	-	first alternative leaves the second alone
+(?:x(1)|b|y(2))+	y2b	y	${\(defined($1) ? $1 : q(undef))}-${\(defined($2) ? $2 : q(undef))}	undef-2	-	middle alternative leaves the last alone
+(?:x(1)|b){2}	x1b	y	${\(defined($1) ? $1 : q(undef))}	undef	-	counted repeat
+(?|x(1)|b)+	x1b	y	${\(defined($1) ? $1 : q(undef))}	undef	-	branch reset
+(?:\x{100}(1)|b)+	\x{100}1b	y	${\(defined($1) ? $1 : q(undef))}	undef	-	wide literal alternative
+(?:x(1)|b)+z	x1bz	y	${\(defined($1) ? $1 : q(undef))}	undef	-	with a continuation
+(?:x(1)|b)+?b\z	x1bbb	y	${\(defined($1) ? $1 : q(undef))}	undef	-	lazy repeat
+(?:x(?:(1)|(2))|b)+	x1b	y	${\(defined($1) ? $1 : q(undef))}-${\(defined($2) ? $2 : q(undef))}	undef-undef	-	nested alternation in the tail
+a(?:x(1)|b)*	ax1b	y	${\(defined($1) ? $1 : q(undef))}	undef	-	starred group after a literal
+(?:(?:x(1)|b))+	x1b	y	${\(defined($1) ? $1 : q(undef))}	undef	-	alternation nested in the repeated group
+(?:x(1)|b|c|d|e)+	x1b	y	${\(defined($1) ? $1 : q(undef))}	undef	-	several plain alternatives
+(?:x(1)|b|c)+	x1c	y	${\(defined($1) ? $1 : q(undef))}	undef	-	last of several plain alternatives
+(?:x(1)|b)(?:y(2)|b)?q	x1q	y	${\(defined($1) ? $1 : q(undef))}-${\(defined($2) ? $2 : q(undef))}	1-undef	-	separate groups do not clear each other
+(?:x(1)|b)+	x1	y	${\(defined($1) ? $1 : q(undef))}	1	-	single iteration keeps its capture
+(?:x(1)|b)+	bx1	y	${\(defined($1) ? $1 : q(undef))}	1	-	capture set in the last iteration is kept
+(?:a(b)|b)+	abab	y	${\(defined($1) ? $1 : q(undef))}	b	-	alternative that matches last sets its capture
+
 # GH #24915
 x+(?:b{2}){2}	xxbbbb	y	$&	xxbbbb	-	quantified sub-pattern after PLUS
 

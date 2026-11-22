@@ -7751,6 +7751,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 ST.firstpos = NULL;
                 ST.longfold = false; /* char longer if folded => it's harder */
                 ST.nextword = 0;
+                ST.clearedword = 0;
 
                 /* Native input needs at most two encoded octets. Consume
                  * both transitions here instead of revisiting the general
@@ -8021,6 +8022,46 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     else
                         uc += chars;
                 }
+            }
+            if (ST.jump && ST.j_after_paren) {
+                /* Each word of a jump trie stands for one branch of the
+                 * original alternation, in order.  Had the branches been
+                 * tried one at a time, every branch before this one would
+                 * have failed, and BRANCH_next_fail clears the captures of
+                 * a branch that fails.  That is what unsets a capture from
+                 * an earlier iteration of an enclosing repeat, as in
+                 *    "x1b" =~ /(?:x(1)|b)+/
+                 * where $1 is undefined afterwards.
+                 *
+                 * The trie skips straight to the words that can match, so
+                 * do that clearing here for the words it skipped.  Words
+                 * that it does try are cleared in TRIE_next_fail.  Words
+                 * are tried in increasing order, so each is visited once.
+                 *
+                 * This is not done when the trie fails as a whole.  The
+                 * captures concerned can only have been set by an earlier
+                 * iteration or call, and what repeats or calls us restores
+                 * them when we fail. */
+                U32 first = ST.clearedword + 1;
+                U32 last = ST.nextword - 1;
+
+                /* Only words that continue past their literal have a
+                 * capture range recorded.  Groups are numbered in pattern
+                 * order, so the ranges of the skipped words run from the
+                 * start of the first such word's to the end of the last
+                 * one's, and can be cleared together. */
+                while (first <= last && !ST.jump[first])
+                    first++;
+                while (first <= last && !ST.jump[last])
+                    last--;
+                if (first <= last) {
+                    assert(ST.j_before_paren[first] <= rex->nparens
+                           && ST.j_after_paren[last] <= rex->nparens);
+                    CAPTURE_CLEAR(ST.j_before_paren[first] + 1,
+                                  ST.j_after_paren[last],
+                                  "TRIE skipped words");
+                }
+                ST.clearedword = ST.nextword;
             }
             if (ST.jump && ST.jump[ST.nextword]) {
                 reg_trie_data * const trie

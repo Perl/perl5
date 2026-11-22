@@ -455,6 +455,16 @@ of an alternative, preserving the literals that follow them.  [GH #25083]
 
 =item *
 
+When a group containing an alternation is repeated, and a later
+iteration matches a different alternative, the captures of the
+alternatives before that one are unset.  This did not happen if the
+alternatives began with literal text, which lets them be matched with a
+trie.  So C<"x1b" =~ /(?:x(1)|b)+/> left C<$1> as C<"1">, while
+C<"x1b" =~ /(?:x(1)|\w)+/> left it undefined.  Both now leave it
+undefined.
+
+=item *
+
 C<\K> inside a repeated or atomic group was not undone when the regex
 engine backtracked out of that group.  The start of the match could be
 left after its end, as in C<"c" =~ /(?:c\K)?x|/>, or simply in the wrong

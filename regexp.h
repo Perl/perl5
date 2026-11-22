@@ -993,6 +993,8 @@ typedef struct regmatch_state {
             U8          *firstpos;  /* pos in string of first trie match */
             U32         firstchars; /* len in chars of firstpos from start */
             U32         nextword;   /* next word to try */
+            U32         clearedword; /* highest word whose captures have
+                                        been dealt with; see TRIE_next */
             U32         topword;    /* longest accepted word */
         } trie;
 
