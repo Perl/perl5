@@ -16126,7 +16126,17 @@ S_unwind_scan_frames(pTHX_ void *p)
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                    \
     } STMT_END
 
+# define PERL_ARGS_ASSERT_REGCPPOP_RANGE        \
+     STMT_START { Perl_assert_aTHX; assert(rex); assert(maxopenparen_p);  \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;                    \
+    } STMT_END
+
 # define PERL_ARGS_ASSERT_REGCPPUSH             \
+     STMT_START { Perl_assert_aTHX; assert(rex);        \
+                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
+    } STMT_END
+
+# define PERL_ARGS_ASSERT_REGCPPUSH_RANGE       \
      STMT_START { Perl_assert_aTHX; assert(rex);        \
                   PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;  \
     } STMT_END
@@ -16307,8 +16317,17 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1)
         Perl_attribute_nonnull(pTHX_2);
+static void
+S_regcppop_range(pTHX_ regexp *rex, U32 parenceiling, U32 *maxopenparen_p comma_pDEPTH)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_3);
 static CHECKPOINT
 S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEPTH)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1);
+static CHECKPOINT
+S_regcppush_range(pTHX_ const regexp *rex, I32 parenfloor, U32 parenceiling, U32 maxopenparen comma_pDEPTH)
         Perl_attribute_nonnull_aTHX
         Perl_attribute_nonnull(pTHX_1);
 static U8 *

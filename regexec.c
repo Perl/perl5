@@ -234,9 +234,19 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 {
     PERL_ARGS_ASSERT_REGCPPUSH;
 
+    return regcppush_range(rex, parenfloor, maxopenparen, maxopenparen);
+}
+
+static CHECKPOINT
+S_regcppush_range(pTHX_ const regexp *rex, I32 parenfloor, U32 parenceiling,
+                 U32 maxopenparen comma_pDEPTH)
+{
+    PERL_ARGS_ASSERT_REGCPPUSH_RANGE;
+
+    const U32 save_end = MIN(parenceiling, maxopenparen);
     const int retval = PL_savestack_ix;
     /* Number of bytes about to be stored in the stack */
-    const SSize_t paren_bytes_to_push = sizeof(*RXp_OFFSp(rex)) * (maxopenparen - parenfloor);
+    const SSize_t paren_bytes_to_push = sizeof(*RXp_OFFSp(rex)) * (save_end - parenfloor);
     /* Number of savestack[] entries to be filled by the paren data */
     /* Rounding is performed in case we are few elements short */
     const int paren_elems_to_push = (paren_bytes_to_push + sizeof(*PL_savestack) - 1) / sizeof(*PL_savestack);
@@ -258,7 +268,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
                    (long)parenfloor);
 
     DEBUG_BUFFERS_r(
-        if ((int)maxopenparen > (int)parenfloor)
+        if ((int)save_end > (int)parenfloor)
             re_exec_indentf("rex = 0x%" UVxf " offs = 0x%" UVxf ": saving"
                             " capture indices:\n",
                             depth,
@@ -276,7 +286,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 
     DEBUG_BUFFERS_r({
 	I32 p;
-        for (p = parenfloor + 1; p <= (I32)maxopenparen; p++) {
+        for (p = parenfloor + 1; p <= (I32)save_end; p++) {
             re_exec_indentf("    \\%" UVuf " %" IVdf " (%" IVdf ") .. %" IVdf
                             " (regcppush)\n",
                             depth,
@@ -424,8 +434,18 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
 {
     PERL_ARGS_ASSERT_REGCPPOP;
 
+    regcppop_range(rex, U32_MAX, maxopenparen_p);
+}
+
+static void
+S_regcppop_range(pTHX_ regexp *rex, U32 parenceiling,
+                U32 *maxopenparen_p comma_pDEPTH)
+{
+    PERL_ARGS_ASSERT_REGCPPOP_RANGE;
+
     UV i;
     U32 paren;
+    U32 save_end;
 #ifdef DEBUGGING
     I32 orig_ix = PL_savestack_ix;
 #endif
@@ -445,6 +465,9 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
     RXp_LASTCLOSEPAREN(rex) = SSPOPINT;
     RXp_LASTPAREN(rex) = SSPOPINT;
     *maxopenparen_p = SSPOPINT;
+    /* Assertion callers know the copied range from their opcode.  The
+     * saved high-water mark remains the original maxopenparen. */
+    save_end = MIN(parenceiling, *maxopenparen_p);
 
     i -= REGCP_OTHER_ELEMS;
     /* Now restore the parentheses context. */
@@ -468,15 +491,15 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
     i = (i * sizeof(*PL_savestack)) / sizeof(*RXp_OFFSp(rex));
 
     /* calculate paren starting point */
-    /* i is our number of entries which we are subtracting from *maxopenparen_p */
+    /* i is our number of entries, ending at the saved range endpoint. */
     /* and we are storing + 1 this to get the beginning */
-    paren = *maxopenparen_p - i + 1;
+    paren = save_end - i + 1;
 
     /* restore them */
     memcpy(RXp_OFFSp(rex) + paren, &PL_savestack[PL_savestack_ix], i * sizeof(*RXp_OFFSp(rex)));
 
     DEBUG_BUFFERS_r(
-        for (; paren <= *maxopenparen_p; ++paren) {
+        for (; paren <= save_end; ++paren) {
             re_exec_indentf(
                 "    \\%" UVuf " %" IVdf "(%" IVdf ") .. %" IVdf " %s (regcppop)\n",
                 depth,
@@ -10709,13 +10732,15 @@ NULL
             ST.logical = logical;
             logical = 0; /* XXX: reset state of logical once it has been saved into ST */
 
-            /* A negative assertion never contributes captures to the match.
-             * Restore the incoming state after each attempt, including when
-             * failure of the body makes the assertion succeed. */
-            if (!ST.wanted && rex->nparens) {
-                (void)regcppush(rex, 0, maxopenparen);
-                REGCP_SET(ST.lastcp);
+            /* Only captures in this body can need restoring.  Save their
+             * existing values, together with the capture bookkeeping. */
+            if (SUBPATTERN_HAS_CAPTURES(scan)) {
+                const U32 last = SUBPATTERN_LAST_CAPTURE(scan);
+                const U32 floor = MIN(SUBPATTERN_FIRST_CAPTURE(scan) - 1,
+                                      maxopenparen);
+                (void)regcppush_range(rex, floor, last, maxopenparen);
             }
+            REGCP_SET(ST.lastcp);
 
             /* execute body of (?...A) */
             PUSH_YES_STATE_GOTO(IFMATCH_A, REGNODE_AFTER(scan), ST.start,
@@ -10732,9 +10757,11 @@ NULL
         case IFMATCH_A: /* body of (?...A) succeeded */
             matched = true;
           ifmatch_done:
-            if (!ST.wanted && rex->nparens) {
+            if (!ST.wanted || !matched) {
                 REGCP_UNWIND(ST.lastcp);
-                regcppop(rex, &maxopenparen);
+                if (SUBPATTERN_HAS_CAPTURES(ST.me))
+                    regcppop_range(rex, SUBPATTERN_LAST_CAPTURE(ST.me),
+                                   &maxopenparen);
             }
 
             if (!matched && ! ST.logical && ST.count > 1) {
@@ -10763,8 +10790,27 @@ NULL
             scan = ST.me + SUBPATTERN_CONTINUE_OFFSET(ST.me);
             if (scan == ST.me)
                 scan = NULL;
+            if (ST.wanted && matched
+                && (SUBPATTERN_HAS_CAPTURES(ST.me)
+                    || (rex->extflags & RXf_EVAL_SEEN)))
+            {
+                /* Keep successful captures visible to the continuation,
+                 * but restore them if it is abandoned.  Embedded code can
+                 * need the same unwind for local variables and $^R, even
+                 * when this body contains no captures. */
+                PUSH_STATE_GOTO(IFMATCH_B, scan, locinput, loceol,
+                                script_run_begin);
+            }
             continue; /* execute B */
         }
+
+        case IFMATCH_B_fail: /* backtracked past a successful assertion */
+            REGCP_UNWIND(ST.lastcp);
+            if (SUBPATTERN_HAS_CAPTURES(ST.me))
+                regcppop_range(rex, SUBPATTERN_LAST_CAPTURE(ST.me),
+                               &maxopenparen);
+            sayNO;
+            NOT_REACHED; /* NOTREACHED */
 
 #undef ST
 
