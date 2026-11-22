@@ -21,7 +21,7 @@ use 5.010;
 use utf8;
 use Config;
 
-plan tests => 2530;  # Update this when adding/deleting tests.
+plan tests => 2531;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -74,6 +74,13 @@ END_PROGRAM
             fresh_perl_is($program, "$expected\n", {}, "GH #25081: $name");
         }
     }
+
+    fresh_perl_is(
+        q{no warnings 'experimental::uniprop_wildcards';
+          eval q{qr/\p{gc=:L(?:\RA)*:}/};
+          print $@ ? 'error' : 'compiled';},
+        'compiled', {},
+        'GH #25085: preserve wildcard parsing for a group starting with \\R');
 
     like("A \x{263a} B z C", qr/A . B (??{ "z" }) C/,
 	 "Match UTF-8 char in presence of (??{ }); Bug 20000731.001 (#3600)");
