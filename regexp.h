@@ -1022,6 +1022,8 @@ typedef struct regmatch_state {
             char    *end;
             regnode *me;        /* the IFMATCH/SUSPEND/UNLESSM node  */
             char    *prev_match_end;
+            SSize_t keep_start; /* start of match on entry, which a \K in
+                                   the body can change */
         } ifmatch;              /* and SUSPEND/UNLESSM */
 
         struct {

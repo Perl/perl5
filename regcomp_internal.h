@@ -1169,6 +1169,9 @@ static const scan_data_t zero_scan_data = {
             if (RExC_seen & REG_PESSIMIZE_SEEN)                             \
                 Perl_re_printf( aTHX_ "REG_PESSIMIZE_SEEN ");               \
                                                                             \
+            if (RExC_seen & REG_KEEPS_SEEN)                                 \
+                Perl_re_printf( aTHX_ "REG_KEEPS_SEEN ");                   \
+                                                                            \
             Perl_re_printf( aTHX_ "\n");                                    \
         });
 
