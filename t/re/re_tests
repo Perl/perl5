@@ -2276,6 +2276,41 @@ ABCF|BCD[Ee]|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 ^(?:(?:a|)|b)c$	c	y	$&	c	-	flattening handles a trailing NOTHING branch
 ^(?:(?:|a+)|b)c$	aac	y	$&	aac	-	flattening handes a leading NOTHING branch
 
+# GH #25059: a synthetic start class can filter the enclosing alternatives
+# without absorbing an extracted prefix into another trie.
+(?:abx|aby)\d|efgcd	zzabx3	y	$&	abx3	-	extracted prefix first word after skipped input
+(?:abx|aby)\d|efgcd	zzaby4	y	$&	aby4	-	extracted prefix second word after skipped input
+(?:abx|aby)\d|efgcd	zzefgcd	y	$&	efgcd	-	other branch after an extracted prefix
+efgcd|(?:abx|aby)\d	zzaby4	y	$&	aby4	-	extracted prefix in the final branch
+(?:abx|aby)\d|efgcd	efgcd abx3	y	$&	efgcd	-	start class preserves the earliest alternative
+(?:abx|aby)\d|efgcd	zzabz3	n	-	-	-	start class does not imply a complete match
+(?:abx|aby)\d|efgcd	zzabx	n	-	-	-	start class preserves required continuation
+(?:\x{100}x|\x{100}y)\d|efgcd	zz\x{100}y2	y	$&	\x{100}y2	-	UTF-8 extracted prefix remains reachable
+(?:\x00x|\x00y)\d|efgcd	zz\x00y2	y	$&	\x00y2	-	NUL extracted prefix remains reachable
+(?:abx|aby)?\d|efgcd	zz2	y	$&	2	-	nullable prefix includes the continuation's start class
+(*COMMIT)(?:abx|aby)\d|efgcd	zzabx3	n	-	-	-	start class must not skip an early COMMIT
+(?:abx|aby)\d|	zz	y	$+[0]	0	-	empty alternative must remain reachable
+
+# Start-class rejection must advance past empty end-of-string hints.
+(?:[AB]|C).\z(?:x)?\Z	\x{100}a	n	-	-	-	UTF-8 retry after a rejected start class
+(?:[AB]|C).\z(?:x)?\Z	Da	n	-	-	-	byte retry after a rejected start class
+(?:[AB]|C).\z(?:x)?\Z	Aa	y	$&	Aa	-	start class accepts a byte subject
+(?:[AB]|C).\z(?:x)?\Z	\x{100}AB	y	$-[0]	1	-	valid start follows a multibyte prefix
+(?:[AB]|C).\z(?:x)?\Z	\x{100}\x{101}CB	y	$-[0]	2	-	valid start follows several multibyte characters
+(?:[AB]|C).\z(?:x)?\Z	A\x{100}	y	$&	A\x{100}	-	multibyte second character reaches the end
+(?:[AB]|C).\Z(?:x)?\z	\x{100}a	n	-	-	-	reversed end anchors reject the start class
+(?:[\x{100}\x{101}]|\x{102}).\z(?:x)?\Z	\x{103}a	n	-	-	-	wide start class rejects the subject
+(?:[\x{100}\x{101}]|\x{102}).\z(?:x)?\Z	\x{100}a	y	$&	\x{100}a	-	wide start class accepts the subject
+
+# Joining the start classes of alternatives must keep the locale-dependent
+# classes of every alternative.  (Wide subjects are tested in t/re/pat.t,
+# as they warn under a non-UTF-8 locale.)
+(?l)\d|\w	n	y	$&	n	-	second alternative's locale class is a possible start
+(?l)\d|\s|\w	n	y	$&	n	-	third alternative's locale class is a possible start
+(?l)\d|\w	-	n	-	-	-	locale class alternatives still reject other characters
+(?l)\wa|\db	na	y	$&	na	-	locale class alternatives keep narrow starts
+(?l)\da|\sb|\w\d	z7	y	$&	z7	-	locale classes in alternatives with continuations
+
 # Prefixes extracted from jump tries must remain attached to those tries.
 # Otherwise an enclosing trie pass can discard the branch structure needed
 # by backtracking control verbs.  Keep both failing and successful paths here

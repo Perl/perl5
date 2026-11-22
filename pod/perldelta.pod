@@ -97,6 +97,16 @@ implemented in XS for better performance.
 
 XXX
 
+=item *
+
+Patterns such as C</(?:abx|aby)\d|efgcd/> lost the filter that identifies
+possible starting characters.  The matcher should know that a match must
+start with C<a> or C<e>, so it can skip other characters.
+
+The optimizer now combines the starting characters from each alternative
+to restore that filter.  The earlier fix for nested trie merging remains
+in place.  [GH #25059]
+
 =back
 
 =head1 Modules and Pragmata
@@ -379,6 +389,18 @@ case-insensitive matches.
 The optimizer now considers competing fold combinations to find the
 shortest possible input, and uses that calculation consistently for
 literal and trie length bounds.  [GH #25086]
+
+=item *
+
+Under C</l>, a match could be missed when the pattern could start with a
+class such as C<\w> or C<\d> and the optimizer had to work out the set of
+possible first characters.  For example C<"\x{661}x" =~ /(?l)\w?\dx/>
+failed, because the set omitted the code points above Latin-1 that these
+classes match by Unicode rules.  Combining the sets of several alternatives
+could also drop the classes of all but one alternative.
+
+The optimizer now keeps the code points above Latin-1 for these classes,
+and keeps the classes of every alternative.
 
 =item *
 

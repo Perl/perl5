@@ -35,6 +35,10 @@
  * cache. */
 #define SLC_MAX_WHILEM_NODES 30
 
+/* When joining the start classes of the branches of an alternation, stop
+ * once the result needs more than this many ranges of code points. */
+#define SSC_BRANCH_MAX_RANGES 256
+
 static void
 S_unwind_scan_frames(pTHX_ void *p)
 {
@@ -828,7 +832,14 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     {
         /* We ignore P2, leaving P1 going forward */
     }   /* else  Not inverted */
-    else if (or_with_flags & ANYOF_MATCHES_POSIXL) {
+    else if (is_ANYOF_SYNTHETIC(or_with)
+             ? ANYOF_POSIXL_SSC_TEST_ANY_SET(or_with)
+             : cBOOL(or_with_flags & ANYOF_MATCHES_POSIXL))
+    {
+        /* An SSC keeps its posix classes without setting
+         * ANYOF_MATCHES_POSIXL; that flag is only set when the SSC is
+         * finalized.  So test an SSC operand's classes directly, or P2 would
+         * be silently dropped from the union. */
         ANYOF_POSIXL_OR((regnode_charclass_posixl*)or_with, ssc);
         if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
             unsigned int i;
@@ -1740,10 +1751,39 @@ Perl_study_chunk(pTHX_
                         if (data_fake.flags & SF_HAS_EVAL)
                             data->flags |= SF_HAS_EVAL;
                     }
-                    if (flags & SCF_DO_STCLASS)
-                        ssc_or(pRExC_state, &accum, (regnode_charclass*)&this_class);
+                    if (flags & SCF_DO_STCLASS) {
+                        /* Seed ordinary alternations from their first branch.
+                         * ssc_init_zero() matches everything, so ORing into
+                         * that initial class cannot narrow the result.
+                         * Keep the conservative class for control verbs,
+                         * executable code, and IFTHEN's possible implicit
+                         * empty alternative.  Skipping start positions must
+                         * not skip effects such as an early (*COMMIT). */
+                        if (num == 1 && code != IFTHEN
+                            && !(RExC_seen & (REG_VERBARG_SEEN
+                                             |REG_PESSIMIZE_SEEN)))
+                            StructCopy(&this_class, &accum, regnode_ssc);
+                        else
+                            ssc_or(pRExC_state, &accum,
+                                   (regnode_charclass *)&this_class);
+
+                        /* Each union copies the accumulated list, so many
+                         * alternatives that start with scattered code
+                         * points would take quadratic time.  A start class
+                         * with this many ranges is a poor filter anyway;
+                         * give up and let it match anything, which later
+                         * unions leave unchanged. */
+                        if (invlist_len_(accum.invlist)
+                                            > 2 * SSC_BRANCH_MAX_RANGES)
+                            ssc_init(pRExC_state, &accum);
+                    }
                     DEBUG_STUDYDATA("end BRANCH", data, depth, is_inf, min, stopmin, delta);
                 }
+                /* An unfolded multi-character fold can start with part of
+                 * its expansion, outside the literal's fold closure. */
+                if ((flags & SCF_DO_STCLASS)
+                    && (RExC_seen & REG_UNFOLDED_MULTI_SEEN))
+                    ssc_init_zero(pRExC_state, &accum);
                 if (code == IFTHEN && num < 2) /* Empty ELSE branch */
                     min1 = 0;
                 if (flags & SCF_DO_SUBSTR) {
@@ -3162,10 +3202,19 @@ Perl_study_chunk(pTHX_
                         ANYOF_POSIXL_ZERO(data->start_class);
                         if (was_there) {    /* Do an AND */
                             ANYOF_POSIXL_SET(data->start_class, namedclass);
+
+                            /* The posix class bits only describe code
+                             * points below 256.  Above Latin-1 this node
+                             * matches by Unicode rules whatever the locale,
+                             * so those code points must stay in the start
+                             * class.  Keep the ones that could already
+                             * start a match, rather than working out
+                             * exactly which are in this class. */
+                            ssc_intersection(data->start_class,
+                                             PL_AboveLatin1, false);
                         }
-                        /* No individual code points can now match */
-                        data->start_class->invlist
-                                                = sv_2mortal(new_invlist_(0));
+                        /* Otherwise the class bits could not narrow the
+                         * existing code points; leave them as they are. */
                     }
                     else {
                         int complement = namedclass + ((invert) ? -1 : 1);
@@ -3185,6 +3234,11 @@ Perl_study_chunk(pTHX_
                         else {  /* The usual case; just add this class to the
                                    existing set */
                             ANYOF_POSIXL_SET(data->start_class, namedclass);
+
+                            /* The class bits only cover code points below
+                             * 256; see the AND case above. */
+                            ssc_union(data->start_class, PL_AboveLatin1,
+                                      false);
                         }
                     }
                     break;

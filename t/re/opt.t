@@ -276,6 +276,14 @@ abc(*ACCEPT)xyz	3	0+abc	-	-
 (a(*ACCEPT)){2}	1	0+a	-	-
 
 # Nested branches that should be flattened
+# GH #25059: retain a synthetic start class when an extracted prefix keeps
+# the outer alternation from becoming a trie.
+(?:abx|aby)\d|efgcd	4	-	-	stclass=ANYOF[ae]	extracted prefix with a digit continuation
+efgcd|(?:abx|aby)\d	4	-	-	stclass=ANYOF[ae]	extracted prefix in the final branch
+(?:abx|aby)\d|efgcd|z\w	2	-	-	stclass=ANYOF[aez]	extracted prefix with additional alternatives
+(?:abx|aby)\d|	0	-	-	-	empty alternative has no mandatory start class
+(*COMMIT)(?:abx|aby)\d|efgcd	4	-	-	-	start-class filtering must not skip an early COMMIT
+
 (?:mat3|mat4)|mat1|mat2	4	0+mat	-	-	flattened single nested branch
 ^(?:mat1|mat2|(?:mat3|mat4)|mat5|(?:mat6|mat7))$	4	0+mat	-	noscan,anchor SBOL	flattened multiple, simple branches
 (?:foo|bar|(?:baz|bop|bing)|zoop)	3	-	-	stclass=AHOCORASICK-EXACT	flattened multiple branches
