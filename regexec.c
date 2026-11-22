@@ -9044,6 +9044,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             utf8_fold_flags = 0;
           do_nref:
 
+            /* An unset capture can become set after backtracking.  Mark the
+             * dependency before lookup can fail, so that failure is not
+             * cached using only the quantifier and input position. */
+            seen_nonregular = true;
+
             /* For the named back references, find the corresponding buffer
              * number */
             n = reg_check_named_buff_matched(rex,scan);
@@ -9086,6 +9091,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             utf8_fold_flags = 0;
 
           do_ref:
+            seen_nonregular = true;
             type = OP(scan);
             n = REF_CAPTURE(scan);  /* which paren pair */
             if (rex->logical_to_parno) {
@@ -9109,8 +9115,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
 
           do_nref_ref_common:
-            seen_nonregular = true;
-
             if (RXp_LASTPAREN(rex) < n)
                 sayNO;
 

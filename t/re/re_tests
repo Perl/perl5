@@ -2396,6 +2396,25 @@ b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcde5678	y	${\(defined($1) ? $1 : q(undef))}:$
 b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcdef5678	y	${\(defined($1) ? $1 : q(undef))}:$2	abcd:ef567	-	lookbehind without lookahead using long syntax
 b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}:$2	bcde:fg567	-	lookbehind without lookahead using long syntax
 
+# A failed capture lookup must not poison the super-linear cache.
+^(?:|(?<g>))(?:|a)*\k<g>$	aa	y	$&	aa	-	PR #25087: unset named capture before a nullable repeat
+(?:|(?<g>))(?:a+)*\k<g>	aaa	y	$&	aaa	-	PR #25087: named backreference preserves the complete repeated match
+(|(?<g>))(()a)*\k<g>	a	y	$-[0],$+[0]	0,1	-	named backreference initially unset
+(|(?<g>))(()a)*\k<g>	aaa	y	$-[0],$+[0]	0,3	-	named backreference after a longer repeat
+(|(?<g>))(()a)*\g{g}	a	y	$-[0],$+[0]	0,1	-	alternate named backreference syntax
+(?i)(|(?<g>))(()a)*\k<g>	a	y	$-[0],$+[0]	0,1	-	folded named backreference initially unset
+(?iu)(|(?<g>))(()a)*\k<g>	a	y	$-[0],$+[0]	0,1	-	Unicode-folded named backreference initially unset
+(?il)(|(?<g>))(()a)*\k<g>	a	y	$-[0],$+[0]	0,1	-	locale-folded named backreference initially unset
+(?iaa)(|(?<g>))(()a)*\k<g>	a	y	$-[0],$+[0]	0,1	-	ASCII-folded named backreference initially unset
+(|(?<g>))(()\x{100})*\k<g>	\x{100}	y	$-[0],$+[0]	0,1	-	named backreference with a wide subject
+(?|()|())(|())(()a)*\3	a	y	$-[0],$+[0]	0,1	-	branch-reset numbered backreference initially unset
+(?|()|())(|())(()a)*\3	aaa	y	$-[0],$+[0]	0,3	-	branch-reset numbered backreference after a longer repeat
+(?|()|()()|()())(()a)*\2	a	y	$-[0],$+[0]	0,1	-	unmatched numbered backreference maps to multiple physical captures
+(?i)(?|()|())(|())(()a)*\3	a	y	$-[0],$+[0]	0,1	-	folded branch-reset backreference initially unset
+(?iu)(?|()|())(|())(()a)*\3	a	y	$-[0],$+[0]	0,1	-	Unicode-folded branch-reset backreference initially unset
+(?il)(?|()|())(|())(()a)*\3	a	y	$-[0],$+[0]	0,1	-	locale-folded branch-reset backreference initially unset
+(?iaa)(?|()|())(|())(()a)*\3	a	y	$-[0],$+[0]	0,1	-	ASCII-folded branch-reset backreference initially unset
+
 # GH #24915
 x+(?:b{2}){2}	xxbbbb	y	$&	xxbbbb	-	quantified sub-pattern after PLUS
 
