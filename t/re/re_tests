@@ -1413,6 +1413,8 @@ X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
 
 # GH #25085: quantified generic newlines must not split CRLF
 \A\R?\n\z	\r\n	n	-	-
+\A(?:\R|)\n\z	\r\n	n	-	-	-	explicit alternative
+\A(?>\r\n|\v)?\n\z	\r\n	n	-	-	-	explicit atomic expansion
 \A\R*\n\z	\r\n	n	-	-
 \A\R+\n\z	\r\n	n	-	-
 \A\R{0,1}\n\z	\r\n	n	-	-
@@ -2528,6 +2530,8 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 \Aa*(?:\A|())?+a\z	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef
 \A(?(DEFINE)(?<A>a*(?=a|())a))(?<outer>(?&A))\z	a	y	$+{outer}-${\(defined($2) ? $2 : q(undef))}	a-undef
 ^a*(?=^|())a	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef
+^a*(?:^|())a	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef	-	noncapturing control
+^a*(?=^|())a	a	y	${\(defined($-[1]) || defined($+[1]) ? q(defined) : q(undef))}	undef	-	abandoned capture offsets
 \Aa*(?=\A|())a\z	a	y	${\(defined($1) ? q(defined) : q(undef))}	undef
 \Aa*(?=\A|())a\1\z	a	n	-	-
 \Aa*(?=\A|())a(?(1)b|c)\z	ac	y	$&	ac
