@@ -391,6 +391,13 @@ independent of capture state.
 
 =item *
 
+An alternation containing an all-empty group could lose later enclosing
+alternatives during compilation.  For example,
+C<a(?:|(?:)(?:))|\N> missed C<b> or skipped the leftmost match in C<xa>.
+Collapsing the empty group now preserves the enclosing alternatives.
+
+=item *
+
 Overlapping Unicode case folds could make the calculated minimum input
 length too large.  Lookbehind and trie checks could then reject valid
 case-insensitive matches.

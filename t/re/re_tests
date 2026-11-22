@@ -2415,6 +2415,20 @@ b.*(*plb:(*plb:(.{4}))?(.{5})).$	abcdefg5678	y	${\(defined($1) ? $1 : q(undef))}
 (?il)(?|()|())(|())(()a)*\3	a	y	$-[0],$+[0]	0,1	-	locale-folded branch-reset backreference initially unset
 (?iaa)(?|()|())(|())(()a)*\3	a	y	$-[0],$+[0]	0,1	-	ASCII-folded branch-reset backreference initially unset
 
+# GH #25083: preserve enclosing alternatives
+\A(?:(?:(?:)(?:)|)|a)\z	a	y	$&	a	-	PR #25087: nested empty alternatives preserve the outer literal
+a(?:|(?:)(?:))|b	b	y	$&	b	-	PR #25087: enclosing literal alternative remains reachable
+a(?:|(?:)(?:))|\N	b	y	$&	b	-	nonliteral outer alternative remains reachable
+a(?:|(?:)(?:))|\N	xa	y	$-[0],$+[0]	0,1	-	nonliteral alternative preserves the leftmost match
+(?:k|(?:|(?:)a))+	x	y	$-[0],$+[0]	0,0	-	nested empty alternative does not corrupt the regex program
+(?:a(?:|(?:)(?:))|\N)	x	y	$&	x	-	nested enclosing nonliteral alternative
+z|a(?:|(?:)(?:))|\N	x	y	$&	x	-	empty group in a middle alternative
+a(?:|(?:)(?:))|b|c	c	y	$&	c	-	enclosing literal alternatives remain reachable
+(?:a(?:|(?:)(?:))|b|c)d	cd	y	$&	cd	-	enclosing alternatives retain their continuation
+a(?:|(?:)(?:))|(\N)	x	y	$1	x	-	enclosing capturing alternative remains reachable
+a(?:|(?:)(?:))|\x{100}	\x{100}	y	$&	\x{100}	-	enclosing wide alternative remains reachable
+(?i)a(?:|(?:)(?:))|\N	b	y	$&	b	-	folded prefix preserves enclosing alternatives
+
 # GH #24915
 x+(?:b{2}){2}	xxbbbb	y	$&	xxbbbb	-	quantified sub-pattern after PLUS
 
