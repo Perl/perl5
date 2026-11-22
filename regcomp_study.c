@@ -1376,48 +1376,11 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 s_end = d;
             } /* End of creating folded copy of EXACTFL string */
 
-            /* Examine the string for a multi-character fold sequence.  UTF-8
-             * patterns have all characters pre-folded by the time this code is
-             * executed */
-            while (s < s_end - 1) /* Can stop 1 before the end, as minimum
-                                     length sequence we are looking for is 2 */
-            {
-                int count = 0;  /* How many characters in a multi-char fold */
-                int len = is_MULTI_CHAR_FOLD_utf8_safe(s, s_end);
-                if (! len) {    /* Not a multi-char fold: get next char */
-                    s += UTF8SKIP(s);
-                    continue;
-                }
-
-                { /* Here is a generic multi-char fold. */
-                    U8* multi_end  = s + len;
-
-                    /* Count how many characters are in it.  In the case of
-                     * /aa, no folds which contain ASCII code points are
-                     * allowed, so check for those, and skip if found. */
-                    if (OP(scan) != EXACTFAA && OP(scan) != EXACTFAA_NO_TRIE) {
-                        count = utf8_length(s, multi_end);
-                        s = multi_end;
-                    }
-                    else {
-                        while (s < multi_end) {
-                            if (isASCII(*s)) {
-                                s++;
-                                goto next_iteration;
-                            }
-                            else {
-                                s += UTF8SKIP(s);
-                            }
-                            count++;
-                        }
-                    }
-                }
-
-                /* The delta is how long the sequence is minus 1 (1 is how long
-                 * the character that folds to the sequence is) */
-                total_count_delta += count - 1;
-              next_iteration: ;
-            }
+            /* UTF-8 patterns are pre-folded here.  Find the best segmentation
+             * into input characters even when possible folds overlap. */
+            total_count_delta = utf8_length(s, s_end)
+                - S_minimum_folded_chars(s, s_end,
+                        OP(scan) == EXACTFAA || OP(scan) == EXACTFAA_NO_TRIE);
 
             /* We created a temporary folded copy of the string in EXACTFL
              * nodes.  Therefore we need to be sure it doesn't go below zero,
