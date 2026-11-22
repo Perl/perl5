@@ -1773,6 +1773,41 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 /^(?i:foo||baz)bar$/	bazbar	y	<$&>	<bazbar>
 /^(?i:foo||baz)bar$/	foobar	y	<$&>	<foobar>
 
+# GH #25083: a leading NOTHING does not make the whole branch empty
+\A(?:|(?:)a)\z	a	y	$&	a
+\A(?:|(?:)a)\z		y	<$&>	<>
+\A(?:|(?:)a)\z	b	n	-	-
+\A(?:(?:)a|)\z	a	y	$&	a
+\A(?:a|(?:)b)\z	b	y	$&	b
+\A(?:|(?:)a|b)\z	a	y	$&	a
+\A(?:|(?:)a|b)\z	b	y	$&	b
+\A(?:|(?:)(?:)a)\z	a	y	$&	a
+\A(?:|(?:)ab)c\z	abc	y	$&	abc
+\A(?:|(?:)ab)c\z	c	y	$&	c
+\A(?:|(?:)a[bc])\z	ab	y	$&	ab
+\A(?:|(?:)\d)\z	1	y	$&	1
+\A(?:|(?:)\d)\z		y	<$&>	<>
+\A(?:|(?:)\d)\z	a	n	-	-
+\A(?:|(?:))\z		y	<$&>	<>
+\A(?:|(?:))\z	a	n	-	-
+/\A(?:|(?:)ab)\z/i	AB	y	$&	AB
+/\A(?:(?:)a|)\z/i	a	y	$&	a
+/\A(?:(?:)a|)\z/i	A	y	$&	A
+/\A(?:|(?:)_)\z/i	_	y	$&	_
+/\A(?:|(?:)\x{10000})\z/i	\x{10000}	y	$&	\x{10000}
+\A(?:|(?=)a)\z	a	y	$&	a
+\A(?:|(?<=)a)\z	a	y	$&	a
+\A(?:(?:)\d|)\z	1	y	$&	1
+\A(?:(?:)(a)|)\z	a	y	$1	a
+\A(?:|(?:)\x{100})\z	\x{100}	y	$&	\x{100}
+/\A(?:|(?:)\x{100}b)\z/i	\x{101}B	y	$&	\x{101}B
+\A(?:ab|(?:)(?i:cd))\z	CD	y	$&	CD
+\A(?:ab|(?:)(?i:cd))\z	AB	n	-	-
+\A(?:(?i:ab)|(?:)cd)\z	CD	n	-	-
+\A(?:.|ab|(?:)cd)\z	cd	y	$&	cd
+\A(?:|(?:)(?=a))a\z	a	y	$&	a
+\A(?:|(?:)(a))\z	a	y	$1	a
+
 # $^N, $+ on backtrackracking
 # BRANCH
 ^(.)(?:(..)|B)[CX]	ABCDE	y	$^N-$+	A-A	-
@@ -2225,6 +2260,9 @@ ABCF|BCD[Ee]|C[Gg]	ABCDE	y	$&	BCDE	-	# GH 22892 - AHO-CORASICK bug
 # by backtracking control verbs.  Keep both failing and successful paths here
 # to ensure that this protection does not disable prefix extraction itself.
 (?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	(Don't) flatten *THEN
+(?:(?:)(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	aab	n	-	-	-	leading NOTHING must not hide an attached trie
+(?:(?:)(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	ab	y	$&	ab	-	leading NOTHING preserves the successful SKIP path
+(?:)(?:a(*THEN)b|a)|a	a	y	$&	a	-	leading NOTHING preserves the outer THEN alternative
 (?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	ab	y	$&	ab	-	extracted one-character prefix, successful SKIP path
 (?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	ac	n	-	-	-	extracted one-character prefix, SKIP blocks alternatives
 (?:(?:a(*SKIP)b|ac)|a(*COMMIT)b)|x(*THEN)y|a	xy	y	$&	xy	-	sibling THEN path remains reachable
