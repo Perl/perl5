@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 6832 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 6838 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -36,6 +36,17 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+    {
+        'aba' =~ /^(?|(a)(b)?|(c))+$/;
+        is($+, 'a', 'last defined capture skips an unset higher group');
+        is(scalar(@-), 2, 'capture-start array ends at the defined logical group');
+        is(scalar(@{^CAPTURE}), 1, 'capture array skips trailing unset groups');
+        'a' =~ /a/;
+        is(scalar(@-), 1, 'capture-start array retains the complete match');
+        is(scalar(@{^CAPTURE}), 0, 'capture-free match has an empty capture array');
+        ok(!defined($+), 'capture-free match leaves the last capture undefined');
+    }
+
     # Convert the fixture characters before composing patterns and subjects.
     # Numeric escapes below 0x100 otherwise select native codepoints.
     my $e_acute = uni_to_native("\x{e9}");

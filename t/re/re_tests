@@ -2168,6 +2168,14 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 
 \p{nv=-0}	\x{660}	y	$&	\x{660}
 (?:a|xx){0,4}?b	aaaaab 	y	$&	aaaab		# Bug is GH #8369; test is GH #19781
+# $+ uses the highest defined logical capture after an iteration skips a group.
+^(?:(a)(b)?)+$	aba	y	${\(defined($+) ? $+ : q(undef))}	a
+^(?|(a)(b)?|(c))+$	aba	y	${\(defined($+) ? $+ : q(undef))}	a
+^(?|(a)(b)?|(c))+$	abc	y	${\(defined($+) ? $+ : q(undef))}	c
+^(?:(a)(b)?)+$	abab	y	$+	b
+^(a)()$	a	y	<$+>	<>
+^a$	a	y	${\(defined($+) ? $+ : q(undef))}	undef
+
 # Relative backreferences count shared capture numbers rather than storage slots.
 ^(?|(a)|(b))\g{-1}$	aa	y	$&	aa
 ^(?|(a)|(b))\g{-1}$	bb	y	$&	bb
