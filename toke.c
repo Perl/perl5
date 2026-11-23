@@ -14990,7 +14990,7 @@ Perl_parse_subsignature(pTHX_ U32 flags)
 
 These each return true if the string given by their parameters would be
 considered valid as a Perl identifier.  That is, for non-UTF-8 strings, it must
-begin with a character matching C<L/<isIDFIRST>>, followed by characters all
+begin with a character matching C<L</isIDFIRST>>, followed by characters all
 matching C<L</isIDCONT>>.  For UTF-8 strings, the characters must match
 C<L</isIDFIRST_utf8>> and C<L</isIDCONT_utf8>>, respectively.
 
