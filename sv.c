@@ -9732,7 +9732,7 @@ because one of them is C<NaN>, though overloads can extend that.
 
 C<sv_numcmp> always performs 'get' magic.
 
-<sv_numcmp_flags> accepts these flags:
+C<sv_numcmp_flags> accepts these flags:
 
 =over
 
