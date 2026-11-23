@@ -1515,7 +1515,8 @@ sub parse_config_h {
                         # definitely not text) or three uppercase letters in
                         # a row.  Length two ones, like IV, aren't enclosed,
                         # because they often don't look as nice.
-                    | \b \w* (?: _ | [[:upper:]]{3,} ) \w* \b
+                    | \b (?! ANSI \b )
+                        \w* (?: _ | [[:upper:]]{3,} ) \w* \b
                    )
                     (*nla:>)
                  /C<$1>/xg;
