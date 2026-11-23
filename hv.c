@@ -427,7 +427,7 @@ valid precomputed hash value, or 0 to ask for it to be computed.
 These each return the value entry in a hash which corresponds to the specified
 key.
 
-In all, if <hv> is NULL, NULL is returned.
+In all, if C<hv> is NULL, NULL is returned.
 
 They differ principally in how the key is specified, and the form of the return.
 
