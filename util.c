@@ -1490,7 +1490,7 @@ code, as described for C<L</mess_sv>>.
 
 __PLAIN_vs_NOCONTEXT_wording__(mess)
 
-C<vmess> is the same as C<mess> except the arguments are a <va_list>.
+C<vmess> is the same as C<mess> except the arguments are a C<va_list>.
 It needs a thread context parameter only when called with the
 C<Perl_> prefix.
 
