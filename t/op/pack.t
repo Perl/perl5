@@ -761,9 +761,11 @@ SKIP: {
                 "\xFE\xDC",
                 "\x80\x00");
       }
+      # The values are negative and the references big-endian, so a
+      # longer format sign-extends them with 0xFF bytes at the front.
       for my $x (@ref) {
         if ($len > length $x) {
-          $x = $x . "\xFF" x ($len - length $x);
+          $x = "\xFF" x ($len - length $x) . $x;
         }
       }
 
