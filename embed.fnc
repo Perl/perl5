@@ -2775,6 +2775,9 @@ Adp	|OP *	|op_sibling_splice					\
 				|NULLOK OP *start			\
 				|int del_count				\
 				|NULLOK OP *insert
+Qp	|U8	|optimize_invariant_class				\
+				|NN SV *cp_list 			\
+				|NN regnode *node
 px	|OP *	|op_unscope	|NULLOK OP *o
 ARdpx	|OP *	|op_wrap_finally|NN OP *block				\
 				|NN OP *finally
