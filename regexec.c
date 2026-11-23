@@ -9608,9 +9608,24 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case INSUBP:   /*  (?(R))  */
             n = INSUBP_CAPTURE(scan);
-            /* this does not need to use EVAL_CLOSE_PAREN macros, as the arg
-             * of SCAN is already set up as matches a eval.close_paren */
-            sw = cur_eval && (n == 0 || CUR_EVAL.close_paren == n);
+            sw = FALSE;
+            if (cur_eval) {
+                U32 target = CUR_EVAL.close_paren;
+                if (n == 0) {
+                    sw = TRUE;
+                }
+                else if (target) {
+                    /* Zero denotes deferred regex evaluation and one whole
+                     * pattern recursion. Only larger targets name captures. */
+                    if (target > 1 && !(FLAGS(scan) & INSUBP_NAMED)
+                        && rex->parno_to_logical)
+                    {
+                        assert(target - 1 <= rex->nparens);
+                        target = rex->parno_to_logical[target - 1] + 1;
+                    }
+                    sw = cBOOL(target == n);
+                }
+            }
             break;
 
         case DEFINEP:  /*  (?(DEFINE))  */

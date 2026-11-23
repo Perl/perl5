@@ -558,6 +558,10 @@ struct regnode_ssc {
     ARG1u_SET((p), (val));                                                    \
 } STMT_END
 
+/* Named recursion predicates identify a physical group. Numbered predicates
+ * identify a logical group, which can have several physical definitions. */
+#define INSUBP_NAMED 0x01
+
 #define INSUBP_CAPTURE(p)                                                     \
     (assert(OP(p) == INSUBP), PREVENT_LVALUE(ARG1u(p)))
 #define INSUBP_CAPTURE_SET(p, val) STMT_START {                               \

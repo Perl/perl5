@@ -4253,6 +4253,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     goto insert_if_check_paren;
                 }
                 else if (RExC_parse[0] == 'R') {
+                    bool named = FALSE;
                     RExC_parse_inc_by(1);
                     /* parno == 0 => /(?(R)YES|NO)/  "in any form of recursion OR eval"
                      * parno == 1 => /(?(R0)YES|NO)/ "in GOSUB (?0) / (?R)"
@@ -4275,6 +4276,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         /* else "Switch condition not recognized" below */
                     } else if (RExC_parse[0] == '&') {
                         SV *sv_dat;
+                        named = TRUE;
                         RExC_parse_inc_by(1);
                         sv_dat = reg_scan_name(pRExC_state,
                                                REG_RSN_RETURN_DATA);
@@ -4282,6 +4284,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                             parno = 1 + *((I32 *)SvPVX(sv_dat));
                     }
                     ret = reg1node(pRExC_state, INSUBP, parno);
+                    if (named) {
+                        FLAGS(REGNODE_p(ret)) |= INSUBP_NAMED;
+                    }
                     goto insert_if_check_paren;
                 }
                 else if (inRANGE(RExC_parse[0], '1', '9')) {
