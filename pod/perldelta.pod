@@ -382,6 +382,27 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Numbered capture conditions and numbered recursion conditions now use
+logical capture numbers across branch-reset alternatives. Named recursion
+conditions continue to distinguish the individual named definitions.
+
+=item *
+
+Relative backreferences now count logical capture numbers consistently
+after branch-reset groups, rather than counting private capture slots.
+
+=item *
+
+C<$+> now finds the highest defined capture when a later iteration leaves
+a higher capture unset. Capture-array lengths use the same logical search.
+
+=item *
+
+C<split> now returns logical captures from branch-reset delimiters without
+extra fields for the individual alternatives. [GH #22912]
+
+=item *
+
 A named backreference to an unset capture could incorrectly cause a later
 match attempt to fail after backtracking set that capture.  For example,
 C<< "a" =~ /(|(?<g>))(()a)*\k<g>/ >> matched an empty string instead of
