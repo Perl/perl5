@@ -9583,8 +9583,22 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* NOTREACHED */
 
         case GROUPP:  /*  (?(1))  */
-            n = GROUPP_CAPTURE(scan);  /* which paren pair */
-            sw = cBOOL(RXp_LASTPAREN(rex) >= n && RXp_OFFS_END(rex,n) != -1);
+            n = GROUPP_CAPTURE(scan);  /* logical capture number */
+            sw = FALSE;
+            if (n <= (rex->logical_nparens
+                      ? rex->logical_nparens : rex->nparens)) {
+                if (rex->logical_to_parno) {
+                    n = rex->logical_to_parno[n];
+                }
+                do {
+                    if (RXp_LASTPAREN(rex) >= n && RXp_OFFS_VALID(rex,n)) {
+                        sw = TRUE;
+                        break;
+                    }
+                    n = rex->parno_to_logical_next
+                        ? rex->parno_to_logical_next[n] : 0;
+                } while (n);
+            }
             break;
 
         case GROUPPN:  /*  (?(<name>))  */
