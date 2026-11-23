@@ -103,7 +103,7 @@ The following relationships hold between the enum values:
 
 the string may be treated in code as non-UTF8
 
-=item S<C<UTF8NESS_IMMATERIAL E<lt>= <I<enum value>>>
+=item S<C<UTF8NESS_IMMATERIAL E<lt>= I<enum value>>>
 
 the string may be treated in code as encoded in UTF-8
 
