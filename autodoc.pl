@@ -1459,7 +1459,7 @@ sub parse_config_h {
                 # Enclose known file/path names not already so enclosed
                 # with <...>.  (Some entries in config.h are already
                 # '<path/to/file>')
-                my $file_name_qr = qr! [ \w / ]+ \.
+                my $file_name_qr = qr! [ \w / \- ]+ \.
                                     (?: c | h | xs | p [lm] | pmc | PL
                                         | sh | SH | exe ) \b
                                     !xx;
@@ -1471,7 +1471,7 @@ sub parse_config_h {
                     |
                         INSTALL \b
                 !x;
-                s! (*nlb:[ < \w / ]) ( $file_or_path_name_qr ) !<$1>!gxx;
+                s! (*nlb:[ < \w / \- ]) ( $file_or_path_name_qr ) !<$1>!gxx;
 
                 # Enclose <... file/path names with F<...> (but no double
                 # angle brackets)
