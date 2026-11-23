@@ -2636,7 +2636,7 @@ Perl_utf8_to_uv_msgs_helper_(const U8 * const s0,
 
 Returns the number of characters in the sequence of UTF-8-encoded bytes starting
 at C<s> (which must be positioned at the start of a character) and ending at
-the byte just before C<e>.  If <s> and <e> point to the same place, it returns
+the byte just before C<e>.  If C<s> and C<e> point to the same place, it returns
 0 with no warning raised.
 
 If C<e E<lt> s> or if the scan would end up past C<e>, it raises a UTF8 warning
