@@ -6419,11 +6419,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     assert(s != NULL);
 
                     if (isrel) {
-                        num = RExC_npar - num;
+                        num = RExC_logical_npar - num;
                         if (num < 1)
                             vFAIL("Reference to nonexistent or unclosed group");
                     }
-                    else
                     if (num < RExC_logical_npar) {
                         num = RExC_logical_to_parno[num];
                     }

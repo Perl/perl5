@@ -2168,6 +2168,17 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 
 \p{nv=-0}	\x{660}	y	$&	\x{660}
 (?:a|xx){0,4}?b	aaaaab 	y	$&	aaaab		# Bug is GH #8369; test is GH #19781
+# Relative backreferences count shared capture numbers rather than storage slots.
+^(?|(a)|(b))\g{-1}$	aa	y	$&	aa
+^(?|(a)|(b))\g{-1}$	bb	y	$&	bb
+^(?|(a)|(b))\g{-1}$	ab	n	-	-
+^(?|(a)|(b))\g{-2}$	-	c	-	Reference to nonexistent or unclosed group
+^(?|(a)\g{-1}|(b)\g{-1})$	bb	y	$&	bb
+^(?|(a)\g-1|(b)\g-1)$	aa	y	$&	aa
+^(?|(a)(b)|(c)(d))\g{-2}\g{-1}$	cdcd	y	$&	cdcd
+^(?|(a)|(?|(b)|(c)))\g{-1}$	cc	y	$&	cc
+/^(?|(a)|(b))\g{-1}$/i	bB	y	$&	bB
+
 # Numbered recursion conditions use the logical number of the active target.
 ^(?|(a)|(b))((?(R2)Y|c))(?2)$	acY	y	$&	acY
 ^(?|(a)|(b))((?(R2)Y|c))(?2)$	acc	n	-	-
