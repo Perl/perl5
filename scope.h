@@ -273,7 +273,7 @@ a pointer.
 The forms differ in that plain C<SSNEW> allocates C<size> bytes;
 C<SSNEWt> and C<SSNEWat> allocate C<size> objects, each of which is type
 C<type>;
-and <SSNEWa> and C<SSNEWat> make sure to align the new data to an C<align>
+and C<SSNEWa> and C<SSNEWat> make sure to align the new data to an C<align>
 boundary.  The most useful value for the alignment is likely to be
 L</C<MEM_ALIGNBYTES>>.  The alignment will be preserved through savestack
 reallocation B<only> if realloc returns data aligned to a size divisible by
