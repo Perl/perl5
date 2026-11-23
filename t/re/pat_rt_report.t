@@ -21,7 +21,7 @@ use 5.010;
 use utf8;
 use Config;
 
-plan tests => 2533;  # Update this when adding/deleting tests.
+plan tests => 2537;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -29,6 +29,19 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+    for my $pattern ('(?|(?<a>a)|(?<b>b))(?<end>c)(?(2)Y|N)',
+                     '(?|(a)|(b))(c)(?(2)Y|N)') {
+        fresh_perl_like("use re 'debug'; qr/$pattern/;",
+            qr/GROUPP2\s*\(/, {},
+            'numbered condition debug output uses the logical number');
+    }
+    for my $pattern ('(?|(?<a>a)|(?<b>b))(?(2000000000)Y|N)',
+                     '(?|(a)|(b))(?(2000000000)Y|N)') {
+        fresh_perl_like("use re 'debug'; qr/$pattern/;",
+            qr/GROUPP2000000000\s*\(/, {},
+            'out-of-range condition debug output does not index a capture map');
+    }
+
 
     {
         local $::gh25084_value = 'outer';
