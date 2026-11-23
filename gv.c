@@ -2567,7 +2567,7 @@ NULs.
 
 In C<gv_fetchpvs>, C<name> is a literal C string, enclosed in double quotes.
 
-C<gv_fetchpvn> and C<gv_fetchpvn_flags> are identical.  In these, <nambeg> is
+C<gv_fetchpvn> and C<gv_fetchpvn_flags> are identical.  In these, C<nambeg> is
 a Perl string whose byte length is given by C<full_len>, and may contain
 embedded NULs.
 
