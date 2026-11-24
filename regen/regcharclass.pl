@@ -1659,9 +1659,13 @@ sub make_macro {
         $doc_text .= <<~EOT;
 
         $otherwise
-        The value returned gives the number of bytes the matched
-        $character actually occupies.
         EOT
+        if (! $returns_cp) {
+            $doc_text .= <<~EOT;
+            The value returned gives the number of bytes the matched
+            $character actually occupies.
+            EOT
+        }
 
         if (! $opts{safe} && $type !~ /^cp/) {
             $doc_text .= <<~EOT;
