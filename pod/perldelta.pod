@@ -394,6 +394,13 @@ The matcher now restores the previous capture values when abandoning the
 construct.  [GH #25084]
 
 
+=item *
+
+C<\K> is now allowed inside C<(*atomic:...)>, as it always has been inside
+C<< (?>...) >>, which means the same thing.  It was rejected with "\K not
+permitted in lookahead/lookbehind".
+
+
 =back
 
 =head1 Known Problems
