@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 6823 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 6832 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -42,6 +42,41 @@ sub run_tests {
     my $n_tilde = uni_to_native("\x{f1}");
     my $sharp_s_native = uni_to_native("\x{df}");
     my $micro_sign_native = uni_to_native("\x{b5}");
+
+    {
+        # These alternatives need the starts of multi-character folds, not
+        # just the single-character fold closure of the sharp-s literal.
+        my $target = "\x{17f}\x{17f}";
+        ok($target =~ /$sharp_s_native|q/id && $& eq $target,
+           'unfolded multi-character alternative keeps long-s starts under /d');
+        ok($target =~ /(?aa:[${sharp_s_native}_])/i && $& eq $target,
+           'unfolded multi-character alternative keeps long-s starts under /aa');
+    }
+
+    {
+        # Under /l, classes such as \w use Unicode rules above Latin-1, so
+        # a start class built from them must keep those code points.  The
+        # wide subjects warn under a non-UTF-8 locale.
+        no warnings 'locale';
+        my $mark  = "\x{30c}";      # a combining mark; matches \w
+        my $digit = "\x{661}";      # ARABIC-INDIC DIGIT ONE
+        my $lig   = "\x{fb00}";     # LATIN SMALL LIGATURE FF
+
+        ok("${mark}${digit}x" =~ /(?l)\w?\dx/ && $-[0] == 0,
+           'optional locale class keeps wide starts');
+        ok("${mark}x" =~ /(?l)\d?\wx/ && $-[0] == 0,
+           'locale class after an optional class keeps wide starts');
+        ok("${digit}x" =~ /(?l)\D?\dx/ && $-[0] == 0,
+           'complemented locale class keeps wide starts');
+        ok("${mark}_" =~ /(?l)\w|\d/ && $-[0] == 0,
+           'locale class alternatives find the earliest wide start');
+        ok("${mark}a" =~ /(?l)\wa|\db/ && $-[0] == 0,
+           'locale class alternatives with continuations keep wide starts');
+        ok("${lig}a" =~ /(?il)\x{2bc}|()[[:alpha:]]{2}/ && $-[0] == 0,
+           'literal and locale class alternatives keep wide starts');
+        ok("-${digit}" =~ /(?l)\s|\d/ && $-[0] == 1,
+           'locale class alternatives still skip other characters');
+    }
 
     {
         # Vary the offsets of rejected windows and their lengths around the

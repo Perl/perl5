@@ -1743,17 +1743,16 @@ Perl_re_intuit_start(pTHX_
             if (prog->anchored_substr || prog->anchored_utf8) {
                 if (prog->substrs->check_ix == 1) { /* check is float */
                     /* Have both, check_string is floating */
-                    assert(rx_origin + start_shift <= check_at);
-                    if (rx_origin + start_shift != check_at) {
+                    char * const last_origin =
+                        HOP3c(check_at, -start_shift, strbeg);
+                    assert(rx_origin <= last_origin);
+                    if (rx_origin < last_origin) {
                         /* not at latest position float substr could match:
                          * Recheck anchored substring, but not floating.
-                         * The condition above is in bytes rather than
-                         * chars for efficiency. It's conservative, in
-                         * that it errs on the side of doing 'goto
-                         * do_other_substr'. In this case, at worst,
-                         * an extra anchored search may get done, but in
-                         * practice the extra fbm_instr() is likely to
-                         * get skipped anyway. */
+                         * start_shift counts characters, so account for
+                         * UTF-8 when finding that last position.  A byte
+                         * comparison can retry an empty end-of-string
+                         * hint forever after the start class rejects it. */
                         DEBUG_EXECUTE_r( re_printf(
                             "  about to retry anchored at offset %ld (rx_origin now %" IVdf ")...\n",
                             (long)(other_last - strbeg),
