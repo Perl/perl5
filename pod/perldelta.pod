@@ -374,6 +374,12 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+Numbered capture conditions and numbered recursion conditions now use
+logical capture numbers across branch-reset alternatives. Named recursion
+conditions continue to distinguish the individual named definitions.
+
 =back
 
 =head1 Known Problems
