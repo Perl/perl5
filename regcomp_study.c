@@ -2290,7 +2290,7 @@ Perl_study_chunk(pTHX_
                 }
             } else {
                 paren = stopparen;
-                start = scan + 2;
+                start = REGNODE_AFTER_type(scan, tregnode_SUSPEND);
                 end = regnext(scan);
             }
             if (start) {

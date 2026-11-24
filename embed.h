@@ -2212,7 +2212,9 @@
 #     define reg_check_named_buff_matched       S_reg_check_named_buff_matched
 #     define regcp_restore(a,b,c)               S_regcp_restore(aTHX_ a,b,c comma_aDEPTH)
 #     define regcppop(a,b)                      S_regcppop(aTHX_ a,b comma_aDEPTH)
+#     define regcppop_range(a,b,c)              S_regcppop_range(aTHX_ a,b,c comma_aDEPTH)
 #     define regcppush(a,b,c)                   S_regcppush(aTHX_ a,b,c comma_aDEPTH)
+#     define regcppush_range(a,b,c,d)           S_regcppush_range(aTHX_ a,b,c,d comma_aDEPTH)
 #     define reghop3                            S_reghop3
 #     define reghopmaybe3                       S_reghopmaybe3
 #     define reginclass(a,b,c,d,e)              S_reginclass(aTHX_ a,b,c,d,e)
