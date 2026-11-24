@@ -7,10 +7,42 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-plan tests => 219;
+plan tests => 246;
 
 $FS = ':';
 our $IS_ASCII;
+
+{
+    my $reset = qr/(?|(X)()|(Y))/;
+    my @cases = (
+        [ 'reported branch-reset split', 'aa=AA,123 bb=123;dd',
+          qr/\b(\w+)=(?|(\w+),(\d+)|(\d+);(\w+))\b/, 0,
+          ['', 'aa', 'AA', '123', ' ', 'bb', '123', 'dd'] ],
+        [ 'empty and unset captures', 'aXbYc', $reset, 0,
+          ['a', 'X', '', 'b', 'Y', undef, 'c'] ],
+        [ 'trim trailing unset captures', 'aXbY', $reset, 0,
+          ['a', 'X', '', 'b', 'Y'] ],
+        [ 'retain trailing unset captures', 'aXbY', $reset, -1,
+          ['a', 'X', '', 'b', 'Y', undef, ''] ],
+        [ 'limit excludes captured fields', 'aXbY', $reset, 2,
+          ['a', 'X', '', 'bY'] ],
+        [ 'wide subjects', "\x{100}X\x{101}Y\x{102}", qr/(?|(X)|(Y))/, 0,
+          ["\x{100}", 'X', "\x{101}", 'Y', "\x{102}"] ],
+        [ 'empty final capture', 'aX', $reset, -1, ['a', 'X', '', ''] ],
+        [ 'unset final capture', 'aY', $reset, -1, ['a', 'Y', undef, ''] ],
+        [ 'trim empty final capture', 'aX', $reset, 0, ['a', 'X'] ],
+    );
+    for my $case (@cases) {
+        my ($name, $subject, $pattern, $limit, $expected) = @$case;
+        my @got = map { $_ } split($pattern, $subject, $limit);
+        ok(eq_array(\@got, $expected), "$name: logical capture fields");
+        my $count = split($pattern, $subject, $limit);
+        is($count, scalar(@$expected), "$name: scalar count");
+        my @assigned;
+        @assigned = split($pattern, $subject, $limit);
+        ok(eq_array(\@assigned, $expected), "$name: assigned capture fields");
+    }
+}
 
 $_ = 'a:b:c';
 
