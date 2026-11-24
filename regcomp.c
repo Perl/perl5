@@ -1282,6 +1282,9 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
+    /* Make sure is clone-safe */
+    ssc->invlist = NULL;
+
     /* The code in this file assumes that all but these flags aren't relevant
      * to the SSC, except SSC_MATCHES_EMPTY_STRING, which should be cleared
      * by the time we reach here */
@@ -1290,13 +1293,19 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
             |ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
             |ANYOF_HAS_EXTRA_RUNTIME_MATCHES)));
 
+    /* Check if a stclass more efficient than ANYOF, such as an ANYOFM,
+     * can be built */
+    if (!ANYOF_FLAGS(ssc) && !RExC_contains_locale
+        && optimize_invariant_class(invlist, (regnode *) ssc) != END)
+    {
+        SvREFCNT_dec_NN(invlist);
+        return;
+    }
+
     populate_anyof_bitmap_from_invlist( (regnode *) ssc, &invlist);
 
     set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist, NULL, NULL);
     SvREFCNT_dec(invlist);
-
-    /* Make sure is clone-safe */
-    ssc->invlist = NULL;
 
     if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
         ANYOF_FLAGS(ssc) |= ANYOF_MATCHES_POSIXL;

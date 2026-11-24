@@ -294,3 +294,8 @@ abc(*ACCEPT)xyz	3	0+abc	-	-
 \R+foo	4	-	1+foo	skip,stclass=LNBREAK	\R+ start class with PLUS and floating substr
 
 \A(?=a*)[0-9]a	2	1+a	-	noscan,anchor SBOL,stclass=~^ANYOF\[0-9\]	nullable lookahead does not restrict the start class
+
+# Synthetic start classes can be optimized
+[01]*[23]	1	-	-	stclass=ANYOFM[0-3]	ANYOF can become an ANYOFM
+[01]*[24]	1	-	-	stclass=ANYOF[0124]	ANYOF remains when ANYOFM unviable
+(?l)[[:digit:]]?x	1	-	0:1+x	stclass=ANYOFPOSIXL[x\d]	No ANYOFM when locale matters
