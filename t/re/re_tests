@@ -2429,6 +2429,31 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 # Be aware that the test infra counts blank lines and comment lines as a passing
 # test. Thus the test number corresponds to the line in the file.
 
+# GH #25086: overlapping folds must not overestimate the minimum length
+/\A\x{3A9}\x{390}\z/iu	\x{3A9}\x{1FD3}	y	$&	\x{3A9}\x{1FD3}	-	PR #25087: folded literal accepts an equivalent character
+/\A(?:\x{390}|\x{390}a)\z/iu	\x{1FD3}	y	$&	\x{1FD3}	-	PR #25087: folded trie accepts its shorter alternative
+/(?<=\x{3A9}\x{1FD3})a/u	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iu	\x{3C9}\x{390}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iu	\x{3C9}\x{3B9}\x{308}\x{301}a	y	$&	a
+/(?<=\x{3C9}\x{3B9}\x{308}\x{301})a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=\x{1FF3}\x{308}\x{301})a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iu	\x{1FF3}\x{308}\x{301}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3})a/iaa	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<!\x{3A9}\x{1FD3})a/iu	\x{3A9}\x{1FD3}a	n	-	-
+/(?<!\x{3A9}\x{1FD3})a/iu	\x{3A9}a	y	$&	a
+/(?<=\x{3A9}\x{1FD3}|bbbb)a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=bbbb|\x{3A9}\x{1FD3})a/iu	\x{3A9}\x{1FD3}a	y	$&	a
+/\A(?:\x{3A9}\x{1FD3}|bbbb)\z/iu	\x{3A9}\x{1FD3}	y	$&	\x{3A9}\x{1FD3}
+/\A(?:bbbb|\x{3A9}\x{1FD3})\z/iu	\x{3A9}\x{1FD3}	y	$&	\x{3A9}\x{1FD3}
+/\A(?:\x{3A9}\x{1FD3}b|\x{3A9}\x{1FD3}c)\z/iu	\x{3A9}\x{1FD3}b	y	$&	\x{3A9}\x{1FD3}b
+/\A(?:\x{3A9}\x{1FD3}b|\x{3A9}\x{1FD3}c)\z/iu	\x{3A9}\x{1FD3}c	y	$&	\x{3A9}\x{1FD3}c
+/(?<=\x{3A9}\x{1FD3}b|\x{3A9}\x{1FD3}c)a/iu	\x{3A9}\x{1FD3}ca	y	$&	a
+/(?<=\x{3A9}\x{1FD3}\x{3A9}\x{1FD3})a/iu	\x{3A9}\x{1FD3}\x{3A9}\x{1FD3}a	y	$&	a
+/(?<=ss)a/iaa	\x{1E9E}a	n	-	-
+/(?<=ss)a/iu	\x{1E9E}a	y	$&	a
+
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
