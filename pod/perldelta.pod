@@ -374,6 +374,16 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+A lookbehind containing an atomic group could succeed or fail incorrectly
+depending on earlier matches.  The assertion must always end at the
+position where it was entered.
+
+The matcher now preserves that position across atomic groups, so an
+earlier match cannot change the lookbehind result.  [GH #25081]
+
+
 =back
 
 =head1 Known Problems
