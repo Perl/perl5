@@ -2195,7 +2195,11 @@ Perl_study_chunk(pTHX_
                                     OP(startbranch)= NOTHING;
                                     NEXT_OFF_set(startbranch,
                                                  tail - startbranch);
-                                    for ( opt = startbranch + 1; opt < tail ; opt++ )
+                                    /* tail can skip TAIL nodes to a shared
+                                     * continuation beyond an enclosing
+                                     * alternative. Only retire this branch
+                                     * sequence's physical storage. */
+                                    for ( opt = startbranch + 1; opt < scan ; opt++ )
                                         OP(opt)= OPTIMIZED;
                                 }
                             }
