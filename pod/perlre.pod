@@ -1267,6 +1267,11 @@ would match the same as C</(Y) ( (X) \g3 \g1 )/x>.  This allows you to
 interpolate regexes into larger regexes and not have to worry about the
 capture groups being renumbered.
 
+Relative backreferences count logical capture numbers. Alternatives in a
+branch-reset group reuse those numbers, so C<\g{-1}> immediately after
+C<(?|(a)|(b))> refers to capture 1 from whichever alternative matched.
+It does not count the private capture storage for each alternative.
+
 You can dispense with numbers altogether and create named capture groups.
 The notation is C<(?E<lt>I<name>E<gt>...)> to declare and C<\g{I<name>}> to
 reference.  (To be compatible with .Net regular expressions, C<\g{I<name>}> may
