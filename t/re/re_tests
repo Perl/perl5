@@ -2110,6 +2110,18 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 
 \p{nv=-0}	\x{660}	y	$&	\x{660}
 (?:a|xx){0,4}?b	aaaaab 	y	$&	aaaab		# Bug is GH #8369; test is GH #19781
+# Numbered conditions inspect the shared logical capture, not a physical slot.
+^(?|(a)|(b))(?(1)\1|x)$	aa	y	$&	aa
+^(?|(a)|(b))(?(1)\1|x)$	bb	y	$&	bb
+^(?|(a)|(b))(?(1)\1|x)$	bx	n	-	-
+^(?|(a)|(b))(?(1)\1|x)$	ax	n	-	-
+^(?|(a)|(b))(?(2)Y|N)$	bN	y	$&	bN
+^(?|(a)|(b))(?(2)Y|N)$	bY	n	-	-
+^(?|(a)(b)?|(c))(?(2)Y|N)$	abY	y	$&	abY
+^(?|(a)(b)?|(c))(?(2)Y|N)$	cN	y	$&	cN
+^(?|(a)(b)?|(c))(d)(?(3)\3|x)$	cdd	y	$&	cdd
+^(?|(a)|(?|(b)|(c)))(?(1)\1|x)$	cc	y	$&	cc
+
 (?|(?<a>a)|(?<b>b))\1(?&a)(?&b)	bbab 	y	$&	bbab		# GH 20653
 (?|(?<a>a)|(?<b>b))(?(<a>)x|y)\1	byb 	y	$&	byb		# GH 20653
 (?|(?<a>a)|(?<b>b))(?(<a>)x|y)\1	bxb 	n	-	-		# GH 20653
