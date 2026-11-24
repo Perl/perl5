@@ -1712,24 +1712,22 @@ which group the captured content will be stored.
     / ( a )  (?| x ( y ) z | (p (q) r) | (t) u (v) ) ( z ) /x
     # 1            2         2  3        2     3     4
 
-Be careful when using the branch reset pattern in combination with
-named captures. Named captures are implemented as being aliases to
-numbered groups holding the captures, and that interferes with the
-implementation of the branch reset pattern. If you are using named
-captures in a branch reset pattern, it's best to use the same names,
-in the same order, in each of the alternations:
+Named captures retain their own identities inside a branch-reset group,
+even when they share a capture number. Use the same names in corresponding
+positions if you want each alternative to populate the same named captures:
 
    /(?|  (?<a> x ) (?<b> y )
       |  (?<a> z ) (?<b> w )) /x
 
-Not doing so may lead to surprises:
+Different names refer only to the alternative which contains them:
 
   "12" =~ /(?| (?<a> \d+ ) | (?<b> \D+))/x;
   say $+{a};    # Prints '12'
-  say $+{b};    # *Also* prints '12'.
+  say $+{b};    # Undefined: b did not match.
 
-The problem here is that both the group named C<< a >> and the group
-named C<< b >> are aliases for the group belonging to C<< $1 >>.
+Both definitions use logical capture number 1, so C<$1> contains C<12>.
+Named backreferences and named subroutine calls still distinguish C<a>
+from C<b>.
 
 =item Lookaround Assertions
 X<look-around assertion> X<lookaround assertion> X<look-around> X<lookaround>
