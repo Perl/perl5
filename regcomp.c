@@ -6047,6 +6047,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         case 'K':
             if (!RExC_in_lookaround) {
                 RExC_seen_zerolen++;
+                RExC_seen |= REG_KEEPS_SEEN;
                 ret = reg_node(pRExC_state, KEEPS);
                 /* XXX:dmq : disabling in-place substitution seems to
                  * be necessary here to avoid cases of memory corruption, as

@@ -1421,6 +1421,7 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 /* add a short form alias to keep the line length police happy */
 #define REG_LB_SEEN                         REG_LOOKBEHIND_SEEN
 #define REG_GPOS_SEEN                       0x00000004
+#define REG_KEEPS_SEEN                      0x00000008
 /* spare */
 #define REG_RECURSE_SEEN                    0x00000020
 #define REG_TOP_LEVEL_BRANCHES_SEEN         0x00000040

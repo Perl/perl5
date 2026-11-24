@@ -10729,6 +10729,7 @@ NULL
 
           do_ifmatch:
             ST.me = scan;
+            ST.keep_start = RXp_OFFS_START(rex, 0);
             ST.logical = logical;
             logical = 0; /* XXX: reset state of logical once it has been saved into ST */
 
@@ -10762,6 +10763,7 @@ NULL
                 if (SUBPATTERN_HAS_CAPTURES(ST.me))
                     regcppop_range(rex, SUBPATTERN_LAST_CAPTURE(ST.me),
                                    &maxopenparen);
+                RXp_OFFSp(rex)[0].start = ST.keep_start;
             }
 
             if (!matched && ! ST.logical && ST.count > 1) {
@@ -10777,9 +10779,8 @@ NULL
 
             sw = matched == ST.wanted;
             match_end = ST.prev_match_end;
-            if (! ST.logical && !sw) {
+            if (! ST.logical && !sw)
                 sayNO;
-            }
 
             if (OP(ST.me) != SUSPEND) {
                 /* restore old position except for (?>...) */
@@ -10792,12 +10793,13 @@ NULL
                 scan = NULL;
             if (ST.wanted && matched
                 && (SUBPATTERN_HAS_CAPTURES(ST.me)
-                    || (rex->extflags & RXf_EVAL_SEEN)))
+                    || (rex->extflags & RXf_EVAL_SEEN)
+                    || RXp_OFFS_START(rex, 0) != ST.keep_start))
             {
-                /* Keep successful captures visible to the continuation,
-                 * but restore them if it is abandoned.  Embedded code can
-                 * need the same unwind for local variables and $^R, even
-                 * when this body contains no captures. */
+                /* Keep successful captures and match-start resets visible
+                 * to the continuation, but restore them if it is abandoned.
+                 * Embedded code can need the same unwind for local variables
+                 * and $^R, even when this body contains no captures. */
                 PUSH_STATE_GOTO(IFMATCH_B, scan, locinput, loceol,
                                 script_run_begin);
             }
@@ -10809,6 +10811,7 @@ NULL
             if (SUBPATTERN_HAS_CAPTURES(ST.me))
                 regcppop_range(rex, SUBPATTERN_LAST_CAPTURE(ST.me),
                                &maxopenparen);
+            RXp_OFFSp(rex)[0].start = ST.keep_start;
             sayNO;
             NOT_REACHED; /* NOTREACHED */
 

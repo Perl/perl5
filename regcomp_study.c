@@ -2761,6 +2761,12 @@ Perl_study_chunk(pTHX_
                                                             non optimistic eval is seen
                                                             anywhere.*/
                      && !(data->flags & SF_HAS_PAR) /* no parens! */
+                     /* \K moves the start of the match, and relies on
+                      * its own backtracking state to move it back.  CURLYM
+                      * discards the states of each iteration of its body,
+                      * so it could not give back the \K of an iteration
+                      * that it gives back. */
+                     && !(RExC_seen & REG_KEEPS_SEEN)
                      /* CURLYM can emulate a capture around its whole body,
                       * but cannot restore captures inside a nested quantifier
                       * when an iteration fails or is backtracked. */
