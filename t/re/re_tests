@@ -2110,6 +2110,16 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 
 \p{nv=-0}	\x{660}	y	$&	\x{660}
 (?:a|xx){0,4}?b	aaaaab 	y	$&	aaaab		# Bug is GH #8369; test is GH #19781
+# Numbered recursion conditions use the logical number of the active target.
+^(?|(a)|(b))((?(R2)Y|c))(?2)$	acY	y	$&	acY
+^(?|(a)|(b))((?(R2)Y|c))(?2)$	acc	n	-	-
+^(?|(a)|(b))((?(R2)Y|c))(?2)$	bcY	y	$&	bcY
+^(?|(a)|(b))((?(R2)Y|c))(?2)$	bcc	n	-	-
+^(?|(?(DEFINE)(?<left>(?(R1)L|l)))|(?(DEFINE)(?<right>(?(R1)R|r))))(?&left)(?&right)$	LR	y	$&	LR
+^(?|(?(DEFINE)(?<left>(?(R1)L|l)))|(?(DEFINE)(?<right>(?(R1)R|r))))(?&left)(?&right)$	Lr	n	-	-
+^(?|(?(DEFINE)(?<left>(?(R&left)L|l)))|(?(DEFINE)(?<right>(?(R&left)X|r))))(?&left)(?&right)$	Lr	y	$&	Lr
+^(?|(?(DEFINE)(?<left>(?(R&left)L|l)))|(?(DEFINE)(?<right>(?(R&right)R|r))))(?&left)(?&right)$	LR	y	$&	LR
+
 # Numbered conditions inspect the shared logical capture, not a physical slot.
 ^(?|(a)|(b))(?(1)\1|x)$	aa	y	$&	aa
 ^(?|(a)|(b))(?(1)\1|x)$	bb	y	$&	bb
