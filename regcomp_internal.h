@@ -435,7 +435,6 @@ struct RExC_state_t {
 #define HASWIDTH        0x01    /* Known to not match null strings, could match
                                    non-null ones. */
 #define SIMPLE          0x02    /* Exactly one character wide */
-                                /* (or LNBREAK as a special case) */
 #define POSTPONED       0x08    /* (?1),(?&name), (??{...}) or similar */
 #define TRYAGAIN        0x10    /* Weeded out a declaration. */
 #define RESTART_PARSE   0x20    /* Need to redo the parse */
