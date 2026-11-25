@@ -243,9 +243,11 @@ sub check_cpp_compiler ($ccpp, $type, $diag) {
         # gcc allows 23 but claims
         # "Support is highly experimental, and will almost certainly change in incompatible ways in future releases."
         # https://gcc.gnu.org/onlinedocs/gcc/C-Dialect-Options.html
+        # gcc 16 at least allows C++26 to be specified
+        #   https://godbolt.org/z/5M8bG94Kh
         # clang don't document which values are permitted
         # https://clang.llvm.org/docs/ClangCommandLineReference.html
-        %std_args = map {; $_ => "-std=c++$_" } qw(11 14 17 20 23);
+        %std_args = map {; $_ => "-std=c++$_" } qw(11 14 17 20 23 26);
     }
     else {
         die "Unknown compiler type $type\n";
@@ -607,4 +609,25 @@ int main() {
   // std::println() c++23
   // requires clang trunk or gcc trunk at time of writing
   std::println("{}", A{}());
+}
+-- cpp26
+#include <tuple>
+#include <mutex>
+#include <iostream>
+
+//PERLHEADERS
+
+template <typename T, typename U, typename V>
+V h(std::mutex &m, const std::tuple<T, U, V> &tu) {
+    // C++26 placeholders
+    std::lock_guard _(m);
+    auto &[_, _, x] = tu;
+
+    return x;
+}
+
+int main() {
+    std::mutex m;
+    std::tuple t{1, 2, "OK\n"};
+    std::cout << h(m, t);
 }
