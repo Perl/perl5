@@ -150,6 +150,7 @@ fopen(3)
 fork(2)
 fread(3)
 fseek(3)
+fstat(2)
 fsync(2)
 fsync(3c)
 Function::Parameters
