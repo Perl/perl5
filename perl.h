@@ -1144,7 +1144,9 @@ compilers.
 #ifndef PERL_CORE
 #define VOL volatile
 #define CAN_PROTOTYPE
-#define _(args) args
+#  ifndef __cplusplus
+#  define _(args) args
+#  endif
 #define I_LIMITS
 #define I_STDARG
 #define STANDARD_C
