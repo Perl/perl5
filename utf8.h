@@ -503,9 +503,8 @@ are in the character. */
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof? */
-#define UTF8_IS_CONTINUATION(c)     (assert(FITS_IN_8_BITS(c)),             \
-            (((NATIVE_UTF8_TO_I8(c) & UTF_IS_CONTINUATION_MASK)             \
-                                                == UTF_CONTINUATION_MARK)))
+#define UTF8_IS_CONTINUATION(c) \
+    ((NATIVE_UTF8_TO_I8(c) & UTF_IS_CONTINUATION_MASK) == UTF_CONTINUATION_MARK)
 
 /* Is the representation of the Unicode code point 'cp' the same regardless of
  * being encoded in UTF-8 or not? This is a fundamental property of
@@ -739,8 +738,7 @@ EBCDIC) code point if less than 256; a Unicode code point otherwise.
  * C0-C4 I8 start bytes on EBCDIC ones.  On EBCDIC E0 can't start a
  * non-overlong sequence, so we define a base macro and for those platforms,
  * extend it to also exclude E0 */
-#define UTF8_IS_START_base(c)    (assert(FITS_IN_8_BITS(c)),                \
-                             (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_START_BYTE))
+#define UTF8_IS_START_base(c)  (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_START_BYTE)
 #ifdef EBCDIC
 #  define UTF8_IS_START(c)                                                  \
                 (UTF8_IS_START_base(c) && (c) != I8_TO_NATIVE_UTF8(0xE0))
@@ -752,16 +750,15 @@ EBCDIC) code point if less than 256; a Unicode code point otherwise.
 
 /* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
  * represent a code point > 255? */
-#define UTF8_IS_ABOVE_LATIN1(c)     (assert(FITS_IN_8_BITS(c)),             \
-                        (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_ABOVE_LATIN1_BYTE))
+#define UTF8_IS_ABOVE_LATIN1(c)  (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_ABOVE_LATIN1_BYTE)
 
 /* Is the UTF8-encoded byte 'c' the first byte of a sequence that evaluates to
  * a code point that can be represented by a single non-UTF8 byte?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to be
  * well-formed. */
-#define UTF8_IS_DOWNGRADEABLE_START(c)  (assert(FITS_IN_8_BITS(c)),         \
+#define UTF8_IS_DOWNGRADEABLE_START(c)                                      \
                 inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(c),                   \
-                        UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1))
+                        UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1)
 
 /* The largest code point representable by two UTF-8 bytes on this platform.
  * The binary for that code point is:
