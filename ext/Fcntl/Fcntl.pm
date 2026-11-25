@@ -4,7 +4,7 @@ use strict;
 
 use Exporter 'import';
 require XSLoader;
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 XSLoader::load();
 
@@ -136,6 +136,7 @@ our @EXPORT_OK = (qw(
 	O_NOLINK
         O_NOSIGPIPE
 	O_NOTRANS
+        O_PATH
         O_SYMLINK
         O_TMPFILE
         O_TTY_INIT
@@ -588,6 +589,15 @@ C<EPIPE> instead.
 
 (Hurd) If the file to be opened is specially translated, don't invoke the
 translator; open the bare file itself.
+
+=item C<O_PATH>
+
+(Linux, FreeBSD) Create a file descriptor that can be used to refer to a
+location in the file system (e.g. for use with L<fchdir(2)> or L<fstat(2)>),
+but does not provide access to the file's contents.
+
+Flags other than C<O_CLOEXEC>, C<O_DIRECTORY>, and C<O_NOFOLLOW> are ignored
+when used together with C<O_PATH>.
 
 =item C<O_RANDOM>
 
