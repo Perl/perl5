@@ -237,7 +237,7 @@ During the testing phase of the release you have created, you will be
 asked to compare the installed files with a previous install. Save yourself
 some time on release day, and have a (clean) install of the previous
 version ready. Alternatively, you may wish to use the script
-C<Porting/compare-perl-install-files> to download and install the previous
+F<Porting/compare-perl-install-files> to download and install the previous
 version at the time of comparison.
 
 =head3 Email account subscribed to perl5-porters
@@ -1235,7 +1235,7 @@ previous is 5.10.0:
  $ find . -type f | sort > /tmp/f2
  $ diff -u /tmp/f[12]
 
-Alternatively, you may wish to use C<Porting/compare-perl-install-files> which
+Alternatively, you may wish to use F<Porting/compare-perl-install-files> which
 builds and installs two versions and then performs a process similar to the one
 above:
 
