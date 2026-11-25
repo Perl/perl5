@@ -1616,8 +1616,26 @@ sub parse_config_h {
 
             # Symbols of the form I_FOO are for #include files.  They have
             # special usage information
-            if ($name =~ / ^ I_ ( .* ) /x) {
-                my $file = lc $1 . '.h';
+            if ($name eq 'I_SYS_TIME_KERNEL') {
+                # special case: define + include
+                $configs{$name}{usage} = <<~"EOT";
+                    #ifdef $name
+                        #define KERNEL
+                        #include <sys/time.h>
+                    #endif
+                    EOT
+            } elsif ($name =~ / ^ I_ ( .* ) /x) {
+                state %irregular_include_file = (
+                    FP_CLASS     => 'fp_class.h',
+                    GDBMNDBM     => 'gdbm/ndbm.h',
+                    GDBM_NDBM    => 'gdbm-ndbm.h',
+                    MALLOCMALLOC => 'malloc/malloc.h',
+                    SYSMODE      => 'sys/mode.h',
+                    SYSUIO       => 'sys/uio.h',
+                    SYSUTSNAME   => 'sys/utsname.h',
+                );
+                my $file = $irregular_include_file{$1}
+                    // lc($1) =~ tr[_][/]r . '.h';
                 $configs{$name}{usage} = <<~"EOT";
                     #ifdef $name
                         #include <$file>
