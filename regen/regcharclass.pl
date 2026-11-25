@@ -1526,7 +1526,7 @@ sub make_macro {
         }
     }
     my $ret_type= $opts{ret_type} || ( $opts{type} =~ /^cp/ ? 'cp' : 'len' );
-    my $returns_cp = $ret_type eq 'cp';
+    my $returns_cp = $ret_type =~ /^(cp|both)$/;
     my $method;
     if ( $opts{safe} ) {
         $method= 'length_optree';
@@ -1689,7 +1689,11 @@ sub make_macro {
      if ($ret_type eq 'both') {
         push @args, "len";
         $doc_arglist .= "|STRLEN len";
-        warn "Generating apidoc for -both is currently unimplemented";
+        $doc_text .= <<~EOT;
+
+            C<len> is the name of a variable which gets set to the number of
+            bytes actually matched.
+            EOT
     }
 
     my $pfx= $ret_type eq 'both'    ? 'what_len_' :
