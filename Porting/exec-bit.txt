@@ -54,6 +54,7 @@ Porting/checkcfguse.pl
 Porting/checkcfgvar.pl
 Porting/checkpodencoding.pl
 Porting/cmpVERSION.pl
+Porting/compare-perl-install-files
 Porting/config_h.pl
 Porting/core-cpan-diff
 Porting/corecpan.pl

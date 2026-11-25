@@ -6002,6 +6002,7 @@ Porting/checkpodencoding.pl			Check POD encoding
 Porting/checkURL.pl				Check whether we have working URLs
 Porting/checkVERSION.pl				Check whether we have $VERSIONs
 Porting/cmpVERSION.pl				Compare whether two trees have changed modules
+Porting/compare-perl-install-files		Compare files installed by two perl versions
 Porting/config.sh				Sample config.sh
 Porting/config_H				Sample config.h
 Porting/config_h.pl				Reorder config_h.SH after metaconfig
