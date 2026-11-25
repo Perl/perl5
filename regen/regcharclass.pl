@@ -104,9 +104,9 @@ to see if it is acceptable.
 A variant form of each of the C<is_> macro types described above can be
 generated, in which the code point and not the length is returned by the
 macro.  These have the same caveat as L</what_len_WHATEVER_FOO(arg1, ...,
-len)>, plus they should not be used where the set contains a NULL, as 0 is
+len)>, plus they should not be used where the set contains a C<NUL>, as 0 is
 returned for two different cases: a) the set doesn't include the input code
-point; b) the set does include it, and it is a NULL.
+point; b) the set does include it, and it is a C<NUL>.
 
 =back
 
