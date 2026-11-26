@@ -380,6 +380,15 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+Quantified C<\R> could split a CRLF pair during backtracking and allow a
+match that should fail.  C<\R> must treat CRLF as a single newline.
+
+Repetition now restores whole iterations when backtracking, keeping each
+CRLF pair intact.  [GH #25085]
+
+
 =back
 
 =head1 Known Problems

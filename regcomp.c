@@ -5204,14 +5204,21 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
     }
 
+    /* Preserve the wildcard restriction for LNBREAK even though its
+     * variable width requires the general repetition path. */
+    if (max == REG_INFTY && min == 0
+        && UNLIKELY(RExC_pm_flags & PMf_WILDCARD)
+        && ((flags & SIMPLE)
+            || (OP(REGNODE_p(ret)) == LNBREAK
+                && !regnext(REGNODE_p(ret)))))
+    {
+        goto min0_maxINF_wildcard_forbidden;
+    }
+
     /* 'SIMPLE' operands don't require full generality */
     if ((flags&SIMPLE)) {
         if (max == REG_INFTY) {
             if (min == 0) {
-                if (UNLIKELY(RExC_pm_flags & PMf_WILDCARD)) {
-                    goto min0_maxINF_wildcard_forbidden;
-                }
-
                 reginsert(pRExC_state, STAR, ret, depth+1);
                 MARK_NAUGHTY(4);
                 goto done_main_op;
@@ -6196,7 +6203,9 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
         case 'R':
             ret = reg_node(pRExC_state, LNBREAK);
-            *flagp |= HASWIDTH|SIMPLE;
+            /* CRLF is one newline but two characters.  The simple-quantifier
+             * paths backtrack by character and cannot preserve this unit. */
+            *flagp |= HASWIDTH;
             goto finish_meta_pat;
 
         case 'd':
