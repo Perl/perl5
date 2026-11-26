@@ -2233,6 +2233,9 @@
 #     define Perl_utf16_to_utf8_reversed(a,b,c,d) utf16_to_utf8_reversed(a,b,c,d)
 #   endif
 # endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+# if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+#   define optimize_invariant_class(a,b)        Perl_optimize_invariant_class(aTHX_ a,b)
+# endif
 # if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
 #   define finalize_optree(a)                   Perl_finalize_optree(aTHX_ a)
 #   define optimize_optree(a)                   Perl_optimize_optree(aTHX_ a)

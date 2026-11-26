@@ -1908,6 +1908,69 @@ S_dump_ac_prefilters(pTHX_ const reg_ac_data *aho, const U32 depth)
 }
 #endif
 
+/* For a Trie containing only single-octet words, an optimized stclass like
+ * ANYOFM should be more efficient and streamlined than AHO-CORASICK.
+ * (Performance of the generic ANYOF against AHO-CORASICK will likely depend
+ * upon the nature of the target string being searched.) */
+static regnode *
+S_one_octet_trie_stclass(pTHX_ RExC_state_t *pRExC_state, const regnode *source) {
+    const U32 trie_offset = TRIE_DATA_SLOT(source);
+    const reg_trie_data * const trie = (reg_trie_data *)RExC_rxi->data->data[trie_offset];
+
+    /* Caller should have checked these */
+    assert(trie->maxlen == 1);
+    assert(!(trie->prop_flags & TRIE_FOLD_MASK));
+
+    if (TRIE_LITERAL_TYPE(source) != EXACT /* Exclude folding types */
+        || TRIE_CONTAINS_WIDE(trie) )      /* Looking for single U8s only */
+        return NULL;
+
+    /* Shouldn't be any empty words */
+    assert(trie->minlen == 1);
+    assert(trie->startstate == 1);
+    assert(!trie->states[1].wordnum);
+    assert(trie->states[1].trans.base == 1);
+
+    SV * cp_list = NULL;
+
+    for (U32 ch = trie->states[1].min_octet; ch <= trie->states[1].max_octet; ch++) {
+        const reg_trie_trans * const trans = &trie->trans[1 + ch];
+        if (trans->next) {
+            assert(trans->check == 1);
+            assert(UVCHR_IS_INVARIANT(ch));
+            assert(trie->states[trans->next].wordnum);
+            cp_list = add_cp_to_invlist(cp_list, ch);
+        } else {
+            assert(trans->check == 0);
+        }
+    }
+    assert(cp_list);
+
+    regnode_ssc *ssc;
+    Newxz(ssc, 1, regnode_ssc);
+    regnode *stclass = (regnode *) ssc;
+
+    if (optimize_invariant_class(cp_list, stclass) == END) {
+#if 1
+        /* No optimization was found. A simple ANYOF may not suffice */
+        SvREFCNT_dec(cp_list);
+        Safefree(ssc);
+        return NULL;
+#else
+        /* Alternative code in case ANYOF turns out to be desirable */
+        OP(stclass) = ANYOF;
+        ARG1u_SET(stclass, ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE);
+
+        populate_anyof_bitmap_from_invlist(stclass, &cp_list);
+        assert(! cp_list);
+#endif
+    }
+    SvREFCNT_dec(cp_list);
+    const U32 n = reg_add_data(pRExC_state, STR_WITH_LEN("f"));
+    RExC_rxi->data->data[n] = (void *) ssc;
+    return stclass;
+}
+
 regnode *
 Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *source, U32 depth)
 {
@@ -1935,9 +1998,20 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
    the second word where we would try 'g' and succeed, proceeding to match
    'cdgu'.
  */
- /* add a fail transition */
+
     const U32 trie_offset = TRIE_DATA_SLOT(source);
     reg_trie_data *trie = (reg_trie_data *)RExC_rxi->data->data[trie_offset];
+
+    /* But first, if all words contain a single character, check if an
+     * (optimized) single-U8 start class can be built */
+    if (UNLIKELY(trie->maxlen == 1) && !(trie->prop_flags & TRIE_FOLD_MASK)
+        ) {
+        regnode * const anyof = S_one_octet_trie_stclass(aTHX_ pRExC_state, source);
+        if (anyof)
+            return anyof;
+    }
+
+ /* add a fail transition */
     U32 *q;
     const U32 numstates = trie->statecount;
     U32 q_read = 0;

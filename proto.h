@@ -6113,6 +6113,11 @@ Perl_opdump_printf(pTHX_ struct Perl_OpDumpContext *ctx, const char *pat, ...)
                  PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;         \
     } STMT_END
 
+#define PERL_ARGS_ASSERT_OPTIMIZE_INVARIANT_CLASS \
+    STMT_START { Perl_assert_aTHX; assert(cp_list); assert(node);  \
+                 PERL_UNUSED_CONTEXT_FOR_ARGS_ASSERT;              \
+    } STMT_END
+
 PERL_CALLCONV void
 Perl_output_non_portable(pTHX_ const U8 shift)
         __attribute__visibility__("hidden");
@@ -11412,6 +11417,14 @@ S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
         Perl_attribute_nonnull_aTHX;
 # endif /* defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING) */
 #endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+#if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
+PERL_CALLCONV U8
+Perl_optimize_invariant_class(pTHX_ SV *cp_list, regnode *node)
+        Perl_attribute_nonnull_aTHX
+        Perl_attribute_nonnull(pTHX_1)
+        Perl_attribute_nonnull(pTHX_2)
+        __attribute__visibility__("hidden");
+#endif
 #if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
 PERL_CALLCONV void
 Perl_finalize_optree(pTHX_ OP *o)

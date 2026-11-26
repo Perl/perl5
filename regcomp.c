@@ -1282,6 +1282,9 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     assert(is_ANYOF_SYNTHETIC(ssc));
 
+    /* Make sure is clone-safe */
+    ssc->invlist = NULL;
+
     /* The code in this file assumes that all but these flags aren't relevant
      * to the SSC, except SSC_MATCHES_EMPTY_STRING, which should be cleared
      * by the time we reach here */
@@ -1290,13 +1293,19 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
             |ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared
             |ANYOF_HAS_EXTRA_RUNTIME_MATCHES)));
 
+    /* Check if a stclass more efficient than ANYOF, such as an ANYOFM,
+     * can be built */
+    if (!ANYOF_FLAGS(ssc) && !RExC_contains_locale
+        && optimize_invariant_class(invlist, (regnode *) ssc) != END)
+    {
+        SvREFCNT_dec_NN(invlist);
+        return;
+    }
+
     populate_anyof_bitmap_from_invlist( (regnode *) ssc, &invlist);
 
     set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist, NULL, NULL);
     SvREFCNT_dec(invlist);
-
-    /* Make sure is clone-safe */
-    ssc->invlist = NULL;
 
     if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
         ANYOF_FLAGS(ssc) |= ANYOF_MATCHES_POSIXL;
@@ -11690,6 +11699,143 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     return ret;
 }
 
+#ifdef PERL_RE_BUILD_AUX
+U8
+Perl_optimize_invariant_class(pTHX_ SV *cp_list, regnode *node)
+{
+    PERL_ARGS_ASSERT_OPTIMIZE_INVARIANT_CLASS;
+
+    U8 op = END;
+
+    /* This code started life in S_optimize_regclass and was pulled out
+     * so that synthetic start classes could also benefit. */
+
+    /* See if this can be turned into an ANYOFM node.  Think about the bit
+     * patterns in two different bytes.  In some positions, the bits in
+     * each will be 1; and in other positions both will be 0; and in some
+     * positions the bit will be 1 in one byte, and 0 in the other.  Let
+     * 'n' be the number of positions where the bits differ.  We create a
+     * mask which has exactly 'n' 0 bits, each in a position where the two
+     * bytes differ.  Now take the set of all bytes that when ANDed with
+     * the mask yield the same result.  That set has 2**n elements, and is
+     * representable by just two 8 bit numbers: the result and the mask.
+     * Importantly, matching the set can be vectorized by creating a word
+     * full of the result bytes, and a word full of the mask bytes,
+     * yielding a significant speed up.  Here, see if this node matches
+     * such a set.  As a concrete example consider [01], and the byte
+     * representing '0' which is 0x30 on ASCII machines.  It has the bits
+     * 0011 0000.  Take the mask 1111 1110.  If we AND 0x31 and 0x30 with
+     * that mask we get 0x30.  Any other bytes ANDed yield something else.
+     * So [01], which is a common usage, is optimizable into ANYOFM, and
+     * can benefit from the speed up.  We can only do this on UTF-8
+     * invariant bytes, because they have the same bit patterns under UTF-8
+     * as not. */
+    PERL_UINT_FAST8_T inverted = 0;
+
+    /* Highest possible UTF-8 invariant is 7F on ASCII platforms; FF on
+     * EBCDIC */
+    const PERL_UINT_FAST8_T max_permissible
+                                = nBIT_UMAX(7 + ONE_IF_EBCDIC_ZERO_IF_NOT);
+
+    /* If doesn't fit the criteria for ANYOFM, invert and try again.  If
+     * that works we will instead later generate an NANYOFM, and invert
+     * back when through */
+    if (invlist_highest(cp_list) > max_permissible) {
+        invlist_invert_(cp_list);
+        inverted = 1;
+    }
+
+    if (invlist_highest(cp_list) <= max_permissible) {
+        UV this_start, this_end;
+        UV lowest_cp = UV_MAX;  /* init'ed to suppress compiler warn */
+        U8 bits_differing = 0;
+        Size_t full_cp_count = 0;
+        bool first_time = true;
+
+        /* Go through the bytes and find the bit positions that differ */
+        invlist_iterinit(cp_list);
+        while (invlist_iternext(cp_list, &this_start, &this_end)) {
+            unsigned int i = this_start;
+
+            if (first_time) {
+                if (! UVCHR_IS_INVARIANT(i)) {
+                    goto done_anyofm;
+                }
+
+                first_time = false;
+                lowest_cp = this_start;
+
+                /* We have set up the code point to compare with.  Don't
+                 * compare it with itself */
+                i++;
+            }
+
+            /* Find the bit positions that differ from the lowest code
+             * point in the node.  Keep track of all such positions by
+             * OR'ing */
+            for (; i <= this_end; i++) {
+                if (! UVCHR_IS_INVARIANT(i)) {
+                    goto done_anyofm;
+                }
+                bits_differing  |= i ^ lowest_cp;
+            }
+
+            full_cp_count += this_end - this_start + 1;
+        }
+
+        /* At the end of the loop, we count how many bits differ from the
+         * bits in lowest code point, call the count 'd'.  If the set we
+         * found contains 2**d elements, it is the closure of all code
+         * points that differ only in those bit positions.  To convince
+         * yourself of that, first note that the number in the closure must
+         * be a power of 2, which we test for.  The only way we could have
+         * that count and it be some differing set, is if we got some code
+         * points that don't differ from the lowest code point in any
+         * position, but do differ from each other in some other position.
+         * That means one code point has a 1 in that position, and another
+         * has a 0.  But that would mean that one of them differs from the
+         * lowest code point in that position, which possibility we've
+         * already excluded.  */
+        if (  (inverted || full_cp_count > 1)
+            && full_cp_count == 1U << PL_bitcount[bits_differing])
+        {
+            U8 ANYOFM_mask;
+            if (inverted && full_cp_count == 1) {
+                /* Single excluded invariant byte -> NEXACTb.
+                 * This is common enough (searching for the first byte
+                 * after a long repeating prefix, searching for
+                 * "not a closing delimiter" that it's worth
+                 * specializing for. */
+                op = NEXACTb;
+                OP(node) = op;
+                FLAGS(node) = 0;
+                ARG1u_SET(node, lowest_cp);
+            } else {
+                op = ANYOFM + inverted;
+
+                /* We need to make the bits that differ be 0's */
+                ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS */
+
+                OP(node) = op;
+                ANYOFM_MASK_SET(node, ANYOFM_mask);
+
+                /* The argument is the lowest code point */
+                ARG1u_SET(node, lowest_cp);
+            }
+        }
+
+      done_anyofm:
+        invlist_iterfinish(cp_list);
+    }
+
+    if (inverted) {
+        invlist_invert_(cp_list);
+    }
+
+    return op;
+}
+#endif /* PERL_RE_BUILD_AUX */
+
 static U8
 S_optimize_regclass(pTHX_
                     RExC_state_t *pRExC_state,
@@ -11726,7 +11872,7 @@ S_optimize_regclass(pTHX_
     UV start[MAX_FOLD_FROMS+1] = { 0 }; /* +1 for the folded-to char */
     UV   end[MAX_FOLD_FROMS+1] = { 0 };
     bool single_range = false;
-    UV lowest_cp = 0, highest_cp = 0;
+    UV lowest_cp = 0;
 
     if (cp_list) { /* Count the code points in enough ranges that we would see
                       all the ones possible in any fold in this version of
@@ -11758,8 +11904,6 @@ S_optimize_regclass(pTHX_
 
         /* Use a clearer mnemonic for below */
         lowest_cp = start[0];
-
-        highest_cp = invlist_highest(cp_list);
     }
 
     /* Similarly, for /l posix classes, if both a class and its complement
@@ -12196,128 +12340,13 @@ S_optimize_regclass(pTHX_
     }
 
     if (! has_runtime_dependency) {
-
-        /* See if this can be turned into an ANYOFM node.  Think about the bit
-         * patterns in two different bytes.  In some positions, the bits in
-         * each will be 1; and in other positions both will be 0; and in some
-         * positions the bit will be 1 in one byte, and 0 in the other.  Let
-         * 'n' be the number of positions where the bits differ.  We create a
-         * mask which has exactly 'n' 0 bits, each in a position where the two
-         * bytes differ.  Now take the set of all bytes that when ANDed with
-         * the mask yield the same result.  That set has 2**n elements, and is
-         * representable by just two 8 bit numbers: the result and the mask.
-         * Importantly, matching the set can be vectorized by creating a word
-         * full of the result bytes, and a word full of the mask bytes,
-         * yielding a significant speed up.  Here, see if this node matches
-         * such a set.  As a concrete example consider [01], and the byte
-         * representing '0' which is 0x30 on ASCII machines.  It has the bits
-         * 0011 0000.  Take the mask 1111 1110.  If we AND 0x31 and 0x30 with
-         * that mask we get 0x30.  Any other bytes ANDed yield something else.
-         * So [01], which is a common usage, is optimizable into ANYOFM, and
-         * can benefit from the speed up.  We can only do this on UTF-8
-         * invariant bytes, because they have the same bit patterns under UTF-8
-         * as not. */
-        PERL_UINT_FAST8_T inverted = 0;
-
-        /* Highest possible UTF-8 invariant is 7F on ASCII platforms; FF on
-         * EBCDIC */
-        const PERL_UINT_FAST8_T max_permissible
-                                    = nBIT_UMAX(7 + ONE_IF_EBCDIC_ZERO_IF_NOT);
-
-        /* If doesn't fit the criteria for ANYOFM, invert and try again.  If
-         * that works we will instead later generate an NANYOFM, and invert
-         * back when through */
-        if (highest_cp > max_permissible) {
-            invlist_invert_(cp_list);
-            inverted = 1;
-        }
-
-        if (invlist_highest(cp_list) <= max_permissible) {
-            UV this_start, this_end;
-            UV lowest_cp = UV_MAX;  /* init'ed to suppress compiler warn */
-            U8 bits_differing = 0;
-            Size_t full_cp_count = 0;
-            bool first_time = true;
-
-            /* Go through the bytes and find the bit positions that differ */
-            invlist_iterinit(cp_list);
-            while (invlist_iternext(cp_list, &this_start, &this_end)) {
-                unsigned int i = this_start;
-
-                if (first_time) {
-                    if (! UVCHR_IS_INVARIANT(i)) {
-                        goto done_anyofm;
-                    }
-
-                    first_time = false;
-                    lowest_cp = this_start;
-
-                    /* We have set up the code point to compare with.  Don't
-                     * compare it with itself */
-                    i++;
-                }
-
-                /* Find the bit positions that differ from the lowest code
-                 * point in the node.  Keep track of all such positions by
-                 * OR'ing */
-                for (; i <= this_end; i++) {
-                    if (! UVCHR_IS_INVARIANT(i)) {
-                        goto done_anyofm;
-                    }
-
-                    bits_differing  |= i ^ lowest_cp;
-                }
-
-                full_cp_count += this_end - this_start + 1;
-            }
-
-            /* At the end of the loop, we count how many bits differ from the
-             * bits in lowest code point, call the count 'd'.  If the set we
-             * found contains 2**d elements, it is the closure of all code
-             * points that differ only in those bit positions.  To convince
-             * yourself of that, first note that the number in the closure must
-             * be a power of 2, which we test for.  The only way we could have
-             * that count and it be some differing set, is if we got some code
-             * points that don't differ from the lowest code point in any
-             * position, but do differ from each other in some other position.
-             * That means one code point has a 1 in that position, and another
-             * has a 0.  But that would mean that one of them differs from the
-             * lowest code point in that position, which possibility we've
-             * already excluded.  */
-            if (  (inverted || full_cp_count > 1)
-                && full_cp_count == 1U << PL_bitcount[bits_differing])
-            {
-                U8 ANYOFM_mask;
-
-                if (inverted && full_cp_count == 1) {
-                    /* Single excluded invariant byte -> NEXACTb.
-                     * This is common enough (searching for the first byte
-                     * after a long repeating prefix, searching for
-                     * "not a closing delimiter" that it's worth
-                     * specializing for. */
-                    op = NEXACTb;
-                    *ret = reg1node(pRExC_state, op, lowest_cp);
-                } else {
-                    op = ANYOFM + inverted;
-
-                    /* We need to make the bits that differ be 0's */
-                    ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS */
-
-                    /* The argument is the lowest code point */
-                    *ret = reg1node(pRExC_state, op, lowest_cp);
-                    ANYOFM_MASK_SET(REGNODE_p(*ret), ANYOFM_mask);
-                }
-            }
-
-          done_anyofm:
-            invlist_iterfinish(cp_list);
-        }
-
-        if (inverted) {
-            invlist_invert_(cp_list);
-        }
+        /* See if this can be turned into an ANYOFM node. */
+        struct regnode_1 node;
+        op = optimize_invariant_class(cp_list, (regnode *) &node);
 
         if (op != END) {
+            *ret = reg1node(pRExC_state, op, ARG1u(&node));
+            FLAGS(REGNODE_p(*ret)) = FLAGS(&node);
             return op;
         }
 
