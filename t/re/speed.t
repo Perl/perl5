@@ -24,7 +24,7 @@ use Config;
 skip_all('no re module') unless defined &DynaLoader::boot_DynaLoader;
 skip_all_without_unicode_tables();
 
-plan tests => 59;  #** update watchdog timeouts proportionally when adding tests
+plan tests => 62;  #** update watchdog timeouts proportionally when adding tests
 
 use strict;
 use warnings;
@@ -160,6 +160,29 @@ PROG
     # [perl #133185] Infinite loop
     like("!\xdf", eval 'qr/\pp(?aai)\xdf/',
          'Compiling qr/\pp(?aai)\xdf/ doesn\'t loop');
+
+    {
+        # Working out the possible first characters of an alternation
+        # merged the set for each alternative into a growing list.  With
+        # many alternatives that start with different characters above
+        # Latin-1, compilation took quadratic time: minutes for a pattern
+        # of this size.  Use the watchdog rather than a wall-clock limit
+        # so slow machines can complete the optimized compilation.
+        my $count = 300_000;
+        # ASan copies the growing regex program on each realloc.  Use a
+        # smaller pattern there so allocation costs do not hide this test.
+        $count = 10_000
+            if join(' ', @Config{qw(cc ccflags ld ldflags)})
+                =~ /-fsanitize=\S*address/;
+        my @words = map { chr(0x4E00 + 2 * $_) . 'x' } 0 .. $count - 1;
+        my $pattern = join '|', map { sprintf '\x{%x}\d', ord } @words;
+        my $re = qr/$pattern/;
+        pass("alternation with many distinct wide starts compiles");
+        ok(chr(0x4E00) . '7' =~ $re,
+           "alternation with many distinct wide starts matches its first word");
+        ok('zz' . chr(0x4E00 + 2 * ($count - 1)) . '7' =~ $re,
+           "alternation with many distinct wide starts matches its last word");
+    }
 
     watchdog(0);
 
