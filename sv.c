@@ -17841,6 +17841,16 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_setlocale_buf = NULL;
     PL_setlocale_bufsize = 0;
 
+#if defined(USE_LOCALE) && (   defined(WIN32)                               \
+                            || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES))
+    PL_win_bscratch = NULL;
+    PL_win_bscratch_size = 0;
+    PL_wrap_wsetlocale_wlocale = NULL;
+    PL_wrap_wsetlocale_wlocale_size = 0;
+    PL_wrap_wsetlocale_result = NULL;
+    PL_wrap_wsetlocale_result_size = 0;
+#endif
+
 #if defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
     PL_less_dicey_locale_buf = NULL;
     PL_less_dicey_locale_bufsize = 0;
