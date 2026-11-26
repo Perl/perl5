@@ -2195,10 +2195,22 @@ Perl_study_chunk(pTHX_
                                     OP(startbranch)= NOTHING;
                                     NEXT_OFF_set(startbranch,
                                                  tail - startbranch);
-                                    /* tail can skip TAIL nodes to a shared
-                                     * continuation beyond an enclosing
-                                     * alternative. Only retire this branch
-                                     * sequence's physical storage. */
+                                    /* `scan` currently points at whatever
+                                     * comes after this branch sequence, so we
+                                     * can optimize everything before `scan`
+                                     * away.  See the comment at the start of
+                                     * the TRIE detection logic explaining the
+                                     * entry point invariants.  It may be
+                                     * tempting to think we should use `tail`
+                                     * here instead of `scan`, but that would
+                                     * be wrong as `tail` follows TAIL links
+                                     * and may point outside of the current
+                                     * alternation entirely, so we could
+                                     * optimize away far too much.  Consider
+                                     * something like (?:foo|(?:bar|baz)|bop)X,
+                                     * the `tail` for the inner alternation
+                                     * will be "X", not the branch for "bop".
+                                     */
                                     for ( opt = startbranch + 1; opt < scan ; opt++ )
                                         OP(opt)= OPTIMIZED;
                                 }
