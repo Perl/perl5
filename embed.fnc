@@ -6510,7 +6510,7 @@ S	|void	|incline	|SPTR const char *s			\
 S	|int	|intuit_method	|NN char *start 			\
 				|NULLOK SV *ioname			\
 				|NULLOK NOCHECK CV *cv
-S	|int	|intuit_more	|SPTR char *s				\
+S	|bool	|intuit_more	|SPTR char *s				\
 				|EPTRtermNUL char *e			\
 				|U8 caller_context			\
 				|NULLOK char *caller_s			\

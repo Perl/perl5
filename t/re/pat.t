@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 6823 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
+plan tests => 6824 + 6 * $Config{uvsize};  # Update when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -3488,6 +3488,16 @@ PROG
         my $b = "b" x 150000;
         my $c = "c" x 150000;
         print "ok" if "1a" =~ /^(?:(?:\da|$b)|$c)/;
+        PROG
+    }
+
+    {   # GH 24789
+        fresh_perl_is(<<~'PROG', "", {}, "use strict doesnt affect behavior");
+        my @e = 0;
+        my $f = \@e;
+        qr/$$f[0]/;
+        use strict;
+        qr/$$f[0]/;
         PROG
     }
 
