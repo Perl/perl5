@@ -380,6 +380,17 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+When a group containing an alternation is repeated, and a later
+iteration matches a different alternative, the captures of the
+alternatives before that one are unset.  This did not happen if the
+alternatives began with literal text, which lets them be matched with a
+trie.  So C<"x1b" =~ /(?:x(1)|b)+/> left C<$1> as C<"1">, while
+C<"x1b" =~ /(?:x(1)|\w)+/> left it undefined.  Both now leave it
+undefined.
+
+
 =back
 
 =head1 Known Problems
