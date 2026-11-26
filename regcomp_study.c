@@ -1983,14 +1983,21 @@ Perl_study_chunk(pTHX_
                                                            noper_next_trietype)
                                     : NOTHING
                                 : noper_trietype;
+                            /* A leading NOTHING can precede a literal.  Use
+                             * that literal's type so we do not discard it as
+                             * part of an all-empty branch sequence. */
                             U8 compatible_trietype = trietype
-                                ? TRIE_COMPATIBLE_TYPE(trietype, noper_trietype)
-                                : noper_trietype == NOTHING
-                                    ? NOTHING
-                                    : noper_branch_trietype;
-                            const bool noper_next_is_trie =
-                                noper_next && noper_next < tail
-                                && REGNODE_TYPE(noper_next_type) == TRIE;
+                                ? TRIE_COMPATIBLE_TYPE(trietype,
+                                                       noper_branch_trietype)
+                                : noper_branch_trietype;
+                            /* Look past a leading NOTHING when checking for
+                             * a prefix extracted from an attached trie. */
+                            regnode * const word_next =
+                                noper_trietype == NOTHING && noper_next_trietype
+                                    ? regnext(noper_next) : noper_next;
+                            const bool has_attached_trie =
+                                word_next && word_next < tail
+                                && REGNODE_TYPE(OP(word_next)) == TRIE;
                             STRLEN noper_octets = noper_trietype == NOTHING
                                 ? noper_next_trietype ? STR_LEN(noper_next) : 0
                                 : noper_trietype ? STR_LEN(noper) : 0;
@@ -2029,7 +2036,7 @@ Perl_study_chunk(pTHX_
                                    * from an existing trie is likewise not an
                                    * independent branch word and must remain
                                    * attached to that trie. */
-                                  && !noper_next_is_trie
+                                  && !has_attached_trie
                                   && ( !noper_next_trietype
                                        || TRIE_COMPATIBLE_TYPE(
                                                 noper_trietype,
@@ -2101,8 +2108,8 @@ Perl_study_chunk(pTHX_
                                 }
                                 /* The same extracted-prefix restriction
                                  * applies when starting a fresh sequence. */
-                                if ( noper_trietype
-                                     && !noper_next_is_trie
+                                if ( noper_branch_trietype
+                                     && !has_attached_trie
 #ifdef NOJUMPTRIE
                                      && noper_next >= tail
 #endif
@@ -2188,7 +2195,23 @@ Perl_study_chunk(pTHX_
                                     OP(startbranch)= NOTHING;
                                     NEXT_OFF_set(startbranch,
                                                  tail - startbranch);
-                                    for ( opt = startbranch + 1; opt < tail ; opt++ )
+                                    /* `scan` currently points at whatever
+                                     * comes after this branch sequence, so we
+                                     * can optimize everything before `scan`
+                                     * away.  See the comment at the start of
+                                     * the TRIE detection logic explaining the
+                                     * entry point invariants.  It may be
+                                     * tempting to think we should use `tail`
+                                     * here instead of `scan`, but that would
+                                     * be wrong as `tail` follows TAIL links
+                                     * and may point outside of the current
+                                     * alternation entirely, so we could
+                                     * optimize away far too much.  Consider
+                                     * something like (?:foo|(?:bar|baz)|bop)X,
+                                     * the `tail` for the inner alternation
+                                     * will be "X", not the branch for "bop".
+                                     */
+                                    for ( opt = startbranch + 1; opt < scan ; opt++ )
                                         OP(opt)= OPTIMIZED;
                                 }
                             }
