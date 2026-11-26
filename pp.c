@@ -7550,7 +7550,9 @@ PP_wrapped(pp_split,
         }
     }
     else {
-        maxiters += slen * RX_NPARENS(rx);
+        const I32 captures = RX_LOGICAL_NPARENS(rx)
+                            ? RX_LOGICAL_NPARENS(rx) : RX_NPARENS(rx);
+        maxiters += slen * captures;
         while (s < strend && --limit)
         {
             I32 rex_return;
@@ -7576,24 +7578,34 @@ PP_wrapped(pp_split,
                 dstr = newSVpvn_flags(s, m-s, flags);
                 XPUSHs(dstr);
             }
-            if (RX_NPARENS(rx)) {
+            if (captures) {
                 I32 i;
-                for (i = 1; i <= (I32)RX_NPARENS(rx); i++) {
-                    s = orig + RX_OFFS_START(rx,i);
-                    m = orig + RX_OFFS_END(rx,i);
+                for (i = 1; i <= captures; i++) {
+                    I32 physical = RX_LOGICAL_TO_PARNO(rx)
+                                   ? RX_LOGICAL_TO_PARNO(rx)[i] : i;
+                    SSize_t start, end;
 
-                    /* japhy (07/27/01) -- the (m && s) test doesn't catch
-                       parens that didn't match -- they should be set to
-                       undef, not the empty string */
+                    while (physical
+                           && (physical > (I32)RX_LASTPAREN(rx)
+                               || !RX_OFFS_VALID(rx,physical)))
+                    {
+                        physical = RX_PARNO_TO_LOGICAL_NEXT(rx)
+                                   ? RX_PARNO_TO_LOGICAL_NEXT(rx)[physical] : 0;
+                    }
+                    start = physical ? RX_OFFS_START(rx,physical) : -1;
+                    end = physical ? RX_OFFS_END(rx,physical) : -1;
+
+                    /* Retained unmatched captures yield undef, while a
+                     * participating empty capture yields an empty string. */
                     if (gimme_scalar) {
                         iters++;
-                        if (m-s == 0)
+                        if (end == start)
                             trailing_empty++;
                         else
                             trailing_empty = 0;
                     } else {
-                        if (m >= orig && s >= orig) {
-                            dstr = newSVpvn_flags(s, m-s, flags);
+                        if (physical) {
+                            dstr = newSVpvn_flags(orig + start, end-start, flags);
                         }
                         else
                             dstr = &PL_sv_undef;  /* undef, not "" */

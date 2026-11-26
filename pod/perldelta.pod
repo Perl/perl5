@@ -380,6 +380,22 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+Relative backreferences now count logical capture numbers consistently
+after branch-reset groups, rather than counting private capture slots.
+
+=item *
+
+C<$+> now finds the highest defined capture when a later iteration leaves
+a higher capture unset. Capture-array lengths use the same logical search.
+
+=item *
+
+C<split> now returns logical captures from branch-reset delimiters without
+extra fields for the individual alternatives. [GH #22912]
+
+
 =back
 
 =head1 Known Problems

@@ -1328,6 +1328,37 @@ Perl_mg_freeext(pTHX_ SV *sv, int how, const MGVTBL *vtbl)
 
 #include <signal.h>
 
+static I32
+S_regdata_last_defined_capture(REGEXP *rx)
+{
+    I32 last = RX_LASTPAREN(rx);
+    I32 * const map = RX_LOGICAL_TO_PARNO(rx);
+
+    if (!map) {
+        while (last > 0 && !RX_OFFS_VALID(rx,last)) {
+            last--;
+        }
+        if (last > 0) {
+            return last;
+        }
+    }
+    else {
+        /* Physical order can differ from logical order across reset
+         * alternatives. Search logical numbers from highest to lowest. */
+        I32 logical = MIN((I32)RX_LOGICAL_NPARENS(rx), last);
+        for (; logical > 0; logical--) {
+            I32 physical = map[logical];
+            while (physical && physical <= last) {
+                if (RX_OFFS_VALID(rx,physical)) {
+                    return logical;
+                }
+                physical = RX_PARNO_TO_LOGICAL_NEXT(rx)[physical];
+            }
+        }
+    }
+    return RX_OFFS_VALID(rx,0) ? 0 : -1;
+}
+
 U32
 Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -1343,13 +1374,7 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
                 /* return the number possible */
                 return RX_LOGICAL_NPARENS(rx) ? RX_LOGICAL_NPARENS(rx) : RX_NPARENS(rx);
             } else {   /* @- @^CAPTURE  @{^CAPTURE} */
-                I32 paren = RX_LASTPAREN(rx);
-
-                /* return the last filled */
-                while ( paren >= 0 && !RX_OFFS_VALID(rx,paren) )
-                    paren--;
-                if (paren && RX_PARNO_TO_LOGICAL(rx))
-                    paren = RX_PARNO_TO_LOGICAL(rx)[paren];
+                I32 paren = S_regdata_last_defined_capture(rx);
                 if (n == '-') {
                     /* @- */
                     return (U32)paren;
@@ -1866,11 +1891,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         break;
     case '+':                   /* $+ */
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-            paren = RX_LASTPAREN(rx);
-            if (paren) {
-                I32 *parno_to_logical = RX_PARNO_TO_LOGICAL(rx);
-                if (parno_to_logical)
-                    paren = parno_to_logical[paren];
+            paren = S_regdata_last_defined_capture(rx);
+            if (paren > 0) {
                 goto do_numbuf_fetch;
             }
         }

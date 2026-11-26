@@ -2429,6 +2429,27 @@ a+X(*COMMIT)j	aXaXj	n	-	-	-	PLUS skip after (*COMMIT) [ASCII]
 # Be aware that the test infra counts blank lines and comment lines as a passing
 # test. Thus the test number corresponds to the line in the file.
 
+# Relative backreferences count shared capture numbers rather than storage slots.
+^(?|(a)|(b))\g{-1}$	aa	y	$&	aa
+^(?|(a)|(b))\g{-1}$	bb	y	$&	bb
+^(?|(a)|(b))\g{-1}$	ab	n	-	-
+^(?|(a)|(b))\g{-2}$	-	c	-	Reference to nonexistent or unclosed group
+^(?|(a)\g{-1}|(b)\g{-1})$	bb	y	$&	bb
+^(?|(a)\g-1|(b)\g-1)$	aa	y	$&	aa
+^(?|(a)(b)|(c)(d))\g{-2}\g{-1}$	cdcd	y	$&	cdcd
+^(?|(a)|(?|(b)|(c)))\g{-1}$	cc	y	$&	cc
+/^(?|(a)|(b))\g{-1}$/i	bB	y	$&	bB
+
+
+# $+ uses the highest defined logical capture after an iteration skips a group.
+^(?:(a)(b)?)+$	aba	y	${\(defined($+) ? $+ : q(undef))}	a
+^(?|(a)(b)?|(c))+$	aba	y	${\(defined($+) ? $+ : q(undef))}	a
+^(?|(a)(b)?|(c))+$	abc	y	${\(defined($+) ? $+ : q(undef))}	c
+^(?:(a)(b)?)+$	abab	y	$+	b
+^(a)()$	a	y	<$+>	<>
+^a$	a	y	${\(defined($+) ? $+ : q(undef))}	undef
+
+
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab
