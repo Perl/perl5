@@ -1048,3 +1048,5 @@ INCLUDE: APItest_savestack.xs
 INCLUDE: APItest_vstring.xs
 
 INCLUDE: APItest_magicv2.xs
+
+INCLUDE: APItest_av.xs
