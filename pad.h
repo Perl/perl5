@@ -68,11 +68,11 @@ struct padname_fieldinfo;
         CV *	xpadn_protocv;		\
     } xpadn_type_u;			\
     struct padname_fieldinfo *xpadn_fieldinfo; \
+    STRLEN      xpadn_len;		\
     U32		xpadn_low;		\
     U32		xpadn_high;		\
     U32		xpadn_refcnt;		\
     int		xpadn_gen;		\
-    U8		xpadn_len;		\
     U8		xpadn_flags
 
 struct padname {

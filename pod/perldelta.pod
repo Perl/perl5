@@ -378,7 +378,8 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Identifiers can now contain 256 characters.  Since 5.44.0, the maximum
+in many cases was instead 254.
 
 =back
 
