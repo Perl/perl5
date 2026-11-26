@@ -104,9 +104,9 @@ to see if it is acceptable.
 A variant form of each of the C<is_> macro types described above can be
 generated, in which the code point and not the length is returned by the
 macro.  These have the same caveat as L</what_len_WHATEVER_FOO(arg1, ...,
-len)>, plus they should not be used where the set contains a NULL, as 0 is
+len)>, plus they should not be used where the set contains a C<NUL>, as 0 is
 returned for two different cases: a) the set doesn't include the input code
-point; b) the set does include it, and it is a NULL.
+point; b) the set does include it, and it is a C<NUL>.
 
 =back
 
@@ -1526,7 +1526,7 @@ sub make_macro {
         }
     }
     my $ret_type= $opts{ret_type} || ( $opts{type} =~ /^cp/ ? 'cp' : 'len' );
-    my $returns_cp = $ret_type eq 'cp';
+    my $returns_cp = $ret_type =~ /^(cp|both)$/;
     my $method;
     if ( $opts{safe} ) {
         $method= 'length_optree';
@@ -1659,9 +1659,13 @@ sub make_macro {
         $doc_text .= <<~EOT;
 
         $otherwise
-        The value returned gives the number of bytes the matched
-        $character actually occupies.
         EOT
+        if (! $returns_cp) {
+            $doc_text .= <<~EOT;
+            The value returned gives the number of bytes the matched
+            $character actually occupies.
+            EOT
+        }
 
         if (! $opts{safe} && $type !~ /^cp/) {
             $doc_text .= <<~EOT;
@@ -1685,7 +1689,11 @@ sub make_macro {
      if ($ret_type eq 'both') {
         push @args, "len";
         $doc_arglist .= "|STRLEN len";
-        warn "Generating apidoc for -both is currently unimplemented";
+        $doc_text .= <<~EOT;
+
+            C<len> is the name of a variable which gets set to the number of
+            bytes actually matched.
+            EOT
     }
 
     my $pfx= $ret_type eq 'both'    ? 'what_len_' :
