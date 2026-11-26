@@ -61,7 +61,7 @@ typedef struct regnode_2                         tregnode_GOSUB;
 typedef struct regnode                           tregnode_GPOS;
 typedef struct regnode_1                         tregnode_GROUPP;
 typedef struct regnode_1                         tregnode_GROUPPN;
-typedef struct regnode_1                         tregnode_IFMATCH;
+typedef struct regnode_2                         tregnode_IFMATCH;
 typedef struct regnode_1                         tregnode_IFTHEN;
 typedef struct regnode_1                         tregnode_INSUBP;
 typedef struct regnode                           tregnode_KEEPS;
@@ -118,10 +118,10 @@ typedef struct regnode                           tregnode_SRCLOSE;
 typedef struct regnode                           tregnode_SROPEN;
 typedef struct regnode                           tregnode_STAR;
 typedef struct regnode                           tregnode_SUCCEED;
-typedef struct regnode_1                         tregnode_SUSPEND;
+typedef struct regnode_2                         tregnode_SUSPEND;
 typedef struct regnode                           tregnode_TAIL;
 typedef struct regnode_1                         tregnode_TRIE;
-typedef struct regnode_1                         tregnode_UNLESSM;
+typedef struct regnode_2                         tregnode_UNLESSM;
 typedef struct regnode_1                         tregnode_VERB;
 typedef struct regnode                           tregnode_WHILEM;
 
@@ -130,7 +130,7 @@ typedef struct regnode                           tregnode_WHILEM;
 /* Regops and State definitions */
 
 #define REGNODE_MAX           	113
-#define REGMATCH_STATE_MAX    	157
+#define REGMATCH_STATE_MAX    	159
 
 /* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte'); */
 #define with_t_UTF8ness(op, t_utf8) (((op) << 1) + (cBOOL(t_utf8)))
@@ -1621,8 +1621,28 @@ typedef struct regnode                           tregnode_WHILEM;
 #define IFMATCH_A_fail_t8_p8        ((IFMATCH_A_fail) * 4 + 3)
 
 /* 0x8e : 142
+   IFMATCH_B - state for IFMATCH */
+#define IFMATCH_B                   (IFMATCH_A_fail + 1)
+#define IFMATCH_B_tb                ((IFMATCH_B) * 2)
+#define IFMATCH_B_t8                ((IFMATCH_B) * 2 + 1)
+#define IFMATCH_B_tb_pb             ((IFMATCH_B) * 4)
+#define IFMATCH_B_tb_p8             ((IFMATCH_B) * 4 + 1)
+#define IFMATCH_B_t8_pb             ((IFMATCH_B) * 4 + 2)
+#define IFMATCH_B_t8_p8             ((IFMATCH_B) * 4 + 3)
+
+/* 0x8f : 143
+   IFMATCH_B_fail - state for IFMATCH */
+#define IFMATCH_B_fail              (IFMATCH_B + 1)
+#define IFMATCH_B_fail_tb           ((IFMATCH_B_fail) * 2)
+#define IFMATCH_B_fail_t8           ((IFMATCH_B_fail) * 2 + 1)
+#define IFMATCH_B_fail_tb_pb        ((IFMATCH_B_fail) * 4)
+#define IFMATCH_B_fail_tb_p8        ((IFMATCH_B_fail) * 4 + 1)
+#define IFMATCH_B_fail_t8_pb        ((IFMATCH_B_fail) * 4 + 2)
+#define IFMATCH_B_fail_t8_p8        ((IFMATCH_B_fail) * 4 + 3)
+
+/* 0x90 : 144
    CURLY_B_min - state for CURLY */
-#define CURLY_B_min                 (IFMATCH_A_fail + 1)
+#define CURLY_B_min                 (IFMATCH_B_fail + 1)
 #define CURLY_B_min_tb              ((CURLY_B_min) * 2)
 #define CURLY_B_min_t8              ((CURLY_B_min) * 2 + 1)
 #define CURLY_B_min_tb_pb           ((CURLY_B_min) * 4)
@@ -1630,7 +1650,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLY_B_min_t8_pb           ((CURLY_B_min) * 4 + 2)
 #define CURLY_B_min_t8_p8           ((CURLY_B_min) * 4 + 3)
 
-/* 0x8f : 143
+/* 0x91 : 145
    CURLY_B_min_fail - state for CURLY */
 #define CURLY_B_min_fail            (CURLY_B_min + 1)
 #define CURLY_B_min_fail_tb         ((CURLY_B_min_fail) * 2)
@@ -1640,7 +1660,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLY_B_min_fail_t8_pb      ((CURLY_B_min_fail) * 4 + 2)
 #define CURLY_B_min_fail_t8_p8      ((CURLY_B_min_fail) * 4 + 3)
 
-/* 0x90 : 144
+/* 0x92 : 146
    CURLY_B_max - state for CURLY */
 #define CURLY_B_max                 (CURLY_B_min_fail + 1)
 #define CURLY_B_max_tb              ((CURLY_B_max) * 2)
@@ -1650,7 +1670,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLY_B_max_t8_pb           ((CURLY_B_max) * 4 + 2)
 #define CURLY_B_max_t8_p8           ((CURLY_B_max) * 4 + 3)
 
-/* 0x91 : 145
+/* 0x93 : 147
    CURLY_B_max_fail - state for CURLY */
 #define CURLY_B_max_fail            (CURLY_B_max + 1)
 #define CURLY_B_max_fail_tb         ((CURLY_B_max_fail) * 2)
@@ -1660,7 +1680,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CURLY_B_max_fail_t8_pb      ((CURLY_B_max_fail) * 4 + 2)
 #define CURLY_B_max_fail_t8_p8      ((CURLY_B_max_fail) * 4 + 3)
 
-/* 0x92 : 146
+/* 0x94 : 148
    COMMIT_next - state for COMMIT */
 #define COMMIT_next                 (CURLY_B_max_fail + 1)
 #define COMMIT_next_tb              ((COMMIT_next) * 2)
@@ -1670,7 +1690,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define COMMIT_next_t8_pb           ((COMMIT_next) * 4 + 2)
 #define COMMIT_next_t8_p8           ((COMMIT_next) * 4 + 3)
 
-/* 0x93 : 147
+/* 0x95 : 149
    COMMIT_next_fail - state for COMMIT */
 #define COMMIT_next_fail            (COMMIT_next + 1)
 #define COMMIT_next_fail_tb         ((COMMIT_next_fail) * 2)
@@ -1680,7 +1700,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define COMMIT_next_fail_t8_pb      ((COMMIT_next_fail) * 4 + 2)
 #define COMMIT_next_fail_t8_p8      ((COMMIT_next_fail) * 4 + 3)
 
-/* 0x94 : 148
+/* 0x96 : 150
    MARKPOINT_next - state for MARKPOINT */
 #define MARKPOINT_next              (COMMIT_next_fail + 1)
 #define MARKPOINT_next_tb           ((MARKPOINT_next) * 2)
@@ -1690,7 +1710,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define MARKPOINT_next_t8_pb        ((MARKPOINT_next) * 4 + 2)
 #define MARKPOINT_next_t8_p8        ((MARKPOINT_next) * 4 + 3)
 
-/* 0x95 : 149
+/* 0x97 : 151
    MARKPOINT_next_fail - state for MARKPOINT */
 #define MARKPOINT_next_fail         (MARKPOINT_next + 1)
 #define MARKPOINT_next_fail_tb      ((MARKPOINT_next_fail) * 2)
@@ -1700,7 +1720,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define MARKPOINT_next_fail_t8_pb   ((MARKPOINT_next_fail) * 4 + 2)
 #define MARKPOINT_next_fail_t8_p8   ((MARKPOINT_next_fail) * 4 + 3)
 
-/* 0x96 : 150
+/* 0x98 : 152
    SKIP_next - state for SKIP */
 #define SKIP_next                   (MARKPOINT_next_fail + 1)
 #define SKIP_next_tb                ((SKIP_next) * 2)
@@ -1710,7 +1730,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define SKIP_next_t8_pb             ((SKIP_next) * 4 + 2)
 #define SKIP_next_t8_p8             ((SKIP_next) * 4 + 3)
 
-/* 0x97 : 151
+/* 0x99 : 153
    SKIP_next_fail - state for SKIP */
 #define SKIP_next_fail              (SKIP_next + 1)
 #define SKIP_next_fail_tb           ((SKIP_next_fail) * 2)
@@ -1720,7 +1740,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define SKIP_next_fail_t8_pb        ((SKIP_next_fail) * 4 + 2)
 #define SKIP_next_fail_t8_p8        ((SKIP_next_fail) * 4 + 3)
 
-/* 0x98 : 152
+/* 0x9a : 154
    CUTGROUP_next - state for CUTGROUP */
 #define CUTGROUP_next               (SKIP_next_fail + 1)
 #define CUTGROUP_next_tb            ((CUTGROUP_next) * 2)
@@ -1730,7 +1750,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CUTGROUP_next_t8_pb         ((CUTGROUP_next) * 4 + 2)
 #define CUTGROUP_next_t8_p8         ((CUTGROUP_next) * 4 + 3)
 
-/* 0x99 : 153
+/* 0x9b : 155
    CUTGROUP_next_fail - state for CUTGROUP */
 #define CUTGROUP_next_fail          (CUTGROUP_next + 1)
 #define CUTGROUP_next_fail_tb       ((CUTGROUP_next_fail) * 2)
@@ -1740,7 +1760,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define CUTGROUP_next_fail_t8_pb    ((CUTGROUP_next_fail) * 4 + 2)
 #define CUTGROUP_next_fail_t8_p8    ((CUTGROUP_next_fail) * 4 + 3)
 
-/* 0x9a : 154
+/* 0x9c : 156
    KEEPS_next - state for KEEPS */
 #define KEEPS_next                  (CUTGROUP_next_fail + 1)
 #define KEEPS_next_tb               ((KEEPS_next) * 2)
@@ -1750,7 +1770,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define KEEPS_next_t8_pb            ((KEEPS_next) * 4 + 2)
 #define KEEPS_next_t8_p8            ((KEEPS_next) * 4 + 3)
 
-/* 0x9b : 155
+/* 0x9d : 157
    KEEPS_next_fail - state for KEEPS */
 #define KEEPS_next_fail             (KEEPS_next + 1)
 #define KEEPS_next_fail_tb          ((KEEPS_next_fail) * 2)
@@ -1760,7 +1780,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define KEEPS_next_fail_t8_pb       ((KEEPS_next_fail) * 4 + 2)
 #define KEEPS_next_fail_t8_p8       ((KEEPS_next_fail) * 4 + 3)
 
-/* 0x9c : 156
+/* 0x9e : 158
    REF_next - state for REF */
 #define REF_next                    (KEEPS_next_fail + 1)
 #define REF_next_tb                 ((REF_next) * 2)
@@ -1770,7 +1790,7 @@ typedef struct regnode                           tregnode_WHILEM;
 #define REF_next_t8_pb              ((REF_next) * 4 + 2)
 #define REF_next_t8_p8              ((REF_next) * 4 + 3)
 
-/* 0x9d : 157
+/* 0x9f : 159
    REF_next_fail - state for REF */
 #define REF_next_fail               (REF_next + 1)
 #define REF_next_fail_tb            ((REF_next_fail) * 2)
@@ -1927,22 +1947,24 @@ EXTCONST char * const PL_regnode_name[]  INIT( {
 	"CURLYM_B_fail",         	/* REGNODE_MAX +0x1a */
 	"IFMATCH_A",             	/* REGNODE_MAX +0x1b */
 	"IFMATCH_A_fail",        	/* REGNODE_MAX +0x1c */
-	"CURLY_B_min",           	/* REGNODE_MAX +0x1d */
-	"CURLY_B_min_fail",      	/* REGNODE_MAX +0x1e */
-	"CURLY_B_max",           	/* REGNODE_MAX +0x1f */
-	"CURLY_B_max_fail",      	/* REGNODE_MAX +0x20 */
-	"COMMIT_next",           	/* REGNODE_MAX +0x21 */
-	"COMMIT_next_fail",      	/* REGNODE_MAX +0x22 */
-	"MARKPOINT_next",        	/* REGNODE_MAX +0x23 */
-	"MARKPOINT_next_fail",   	/* REGNODE_MAX +0x24 */
-	"SKIP_next",             	/* REGNODE_MAX +0x25 */
-	"SKIP_next_fail",        	/* REGNODE_MAX +0x26 */
-	"CUTGROUP_next",         	/* REGNODE_MAX +0x27 */
-	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x28 */
-	"KEEPS_next",            	/* REGNODE_MAX +0x29 */
-	"KEEPS_next_fail",       	/* REGNODE_MAX +0x2a */
-	"REF_next",              	/* REGNODE_MAX +0x2b */
-	"REF_next_fail",         	/* REGNODE_MAX +0x2c */
+	"IFMATCH_B",             	/* REGNODE_MAX +0x1d */
+	"IFMATCH_B_fail",        	/* REGNODE_MAX +0x1e */
+	"CURLY_B_min",           	/* REGNODE_MAX +0x1f */
+	"CURLY_B_min_fail",      	/* REGNODE_MAX +0x20 */
+	"CURLY_B_max",           	/* REGNODE_MAX +0x21 */
+	"CURLY_B_max_fail",      	/* REGNODE_MAX +0x22 */
+	"COMMIT_next",           	/* REGNODE_MAX +0x23 */
+	"COMMIT_next_fail",      	/* REGNODE_MAX +0x24 */
+	"MARKPOINT_next",        	/* REGNODE_MAX +0x25 */
+	"MARKPOINT_next_fail",   	/* REGNODE_MAX +0x26 */
+	"SKIP_next",             	/* REGNODE_MAX +0x27 */
+	"SKIP_next_fail",        	/* REGNODE_MAX +0x28 */
+	"CUTGROUP_next",         	/* REGNODE_MAX +0x29 */
+	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x2a */
+	"KEEPS_next",            	/* REGNODE_MAX +0x2b */
+	"KEEPS_next_fail",       	/* REGNODE_MAX +0x2c */
+	"REF_next",              	/* REGNODE_MAX +0x2d */
+	"REF_next_fail",         	/* REGNODE_MAX +0x2e */
 });
 
 
@@ -2944,112 +2966,126 @@ EXTCONST struct regnode_meta PL_regnode_info[]  INIT( {
         .off_by_arg = 0
     },
     {
-        /* #142 state CURLY_B_min */
+        /* #142 state IFMATCH_B */
+        .type = IFMATCH,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #143 state IFMATCH_B_fail */
+        .type = IFMATCH,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #144 state CURLY_B_min */
         .type = CURLY,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #143 state CURLY_B_min_fail */
+        /* #145 state CURLY_B_min_fail */
         .type = CURLY,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #144 state CURLY_B_max */
+        /* #146 state CURLY_B_max */
         .type = CURLY,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #145 state CURLY_B_max_fail */
+        /* #147 state CURLY_B_max_fail */
         .type = CURLY,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #146 state COMMIT_next */
+        /* #148 state COMMIT_next */
         .type = COMMIT,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #147 state COMMIT_next_fail */
+        /* #149 state COMMIT_next_fail */
         .type = COMMIT,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #148 state MARKPOINT_next */
+        /* #150 state MARKPOINT_next */
         .type = MARKPOINT,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #149 state MARKPOINT_next_fail */
+        /* #151 state MARKPOINT_next_fail */
         .type = MARKPOINT,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #150 state SKIP_next */
+        /* #152 state SKIP_next */
         .type = SKIP,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #151 state SKIP_next_fail */
+        /* #153 state SKIP_next_fail */
         .type = SKIP,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #152 state CUTGROUP_next */
+        /* #154 state CUTGROUP_next */
         .type = CUTGROUP,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #153 state CUTGROUP_next_fail */
+        /* #155 state CUTGROUP_next_fail */
         .type = CUTGROUP,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #154 state KEEPS_next */
+        /* #156 state KEEPS_next */
         .type = KEEPS,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #155 state KEEPS_next_fail */
+        /* #157 state KEEPS_next_fail */
         .type = KEEPS,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #156 state REF_next */
+        /* #158 state REF_next */
         .type = REF,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
     {
-        /* #157 state REF_next_fail */
+        /* #159 state REF_next_fail */
         .type = REF,
         .arg_len = 0,
         .arg_len_varies = 0,

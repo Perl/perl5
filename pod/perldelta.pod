@@ -380,6 +380,43 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+A lookbehind containing an atomic group could succeed or fail incorrectly
+depending on earlier matches.  The assertion must always end at the
+position where it was entered.
+
+The matcher now preserves that position across atomic groups, so an
+earlier match cannot change the lookbehind result.  [GH #25081]
+
+
+=item *
+
+Captures from a successful lookaround or atomic group could survive after
+backtracking abandoned it.  Those stale values could change later capture
+results or make a conditional or backreference take the wrong path.
+
+The matcher now restores the previous capture values when abandoning the
+construct.  [GH #25084]
+
+
+=item *
+
+C<\K> inside a repeated or atomic group was not undone when the regex
+engine backtracked out of that group.  The start of the match could be
+left after its end, as in C<"c" =~ /(?:c\K)?x|/>, or simply in the wrong
+place: C<"aaab" =~ /(?:a\K)*ab/> set C<$&> to C<"b"> instead of C<"ab">.
+With the start after the end, a substitution could duplicate text,
+C<s///g> died with "Substitution loop", and a list-context C<//g> match
+panicked.
+
+=item *
+
+C<\K> is now allowed inside C<(*atomic:...)>, as it always has been inside
+C<< (?>...) >>, which means the same thing.  It was rejected with "\K not
+permitted in lookahead/lookbehind".
+
+
 =back
 
 =head1 Known Problems

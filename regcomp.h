@@ -666,6 +666,14 @@ struct regnode_ssc {
     REGNODE_NEXT_OFFSET_SET((p), (val));                                      \
 } STMT_END
 
+/* Inclusive physical capture range in a lookaround or atomic group.
+ * Both fields are zero when the body contains no captures. */
+#define SUBPATTERN_FIRST_CAPTURE(p) ARG2a(p)
+#define SUBPATTERN_LAST_CAPTURE(p)  ARG2b(p)
+#define SUBPATTERN_HAS_CAPTURES(p)  (ARG2u(p) != 0)
+#define SUBPATTERN_FIRST_CAPTURE_SET(p, val) ARG2a_SET((p), (val))
+#define SUBPATTERN_LAST_CAPTURE_SET(p, val)  ARG2b_SET((p), (val))
+
 #define CURLY_CAPTURE_PARENS(p)                                               \
     (assert(OP(p) == CURLYN || OP(p) == CURLYM), PREVENT_LVALUE(FLAGS(p)))
 #define CURLY_CAPTURE_PARENS_SET(p, val) STMT_START {                         \
@@ -1413,6 +1421,7 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 /* add a short form alias to keep the line length police happy */
 #define REG_LB_SEEN                         REG_LOOKBEHIND_SEEN
 #define REG_GPOS_SEEN                       0x00000004
+#define REG_KEEPS_SEEN                      0x00000008
 /* spare */
 #define REG_RECURSE_SEEN                    0x00000020
 #define REG_TOP_LEVEL_BRANCHES_SEEN         0x00000040

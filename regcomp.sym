@@ -1420,7 +1420,7 @@ return {
                 "starting \"f..(f-o)\" characters before current",
               "line" => __LINE__,
               "pod" => "Special Case Regops",
-              "struct" => "regnode_1",
+              "struct" => "regnode_2",
             },
             {
               "NAME" => "UNLESSM",
@@ -1434,7 +1434,7 @@ return {
                 "next_off \"o\" means lookbehind assertion starting " .
                 "\"f..(f-o)\" characters before current",
               "line" => __LINE__,
-              "struct" => "regnode_1",
+              "struct" => "regnode_2",
             },
             {
               "NAME" => "SUSPEND",
@@ -1446,7 +1446,7 @@ return {
                 },
               "desc" => "\"Independent\" sub-RE.",
               "line" => __LINE__,
-              "struct" => "regnode_1",
+              "struct" => "regnode_2",
             },
             {
               "NAME" => "IFTHEN",
@@ -1817,7 +1817,7 @@ return {
       {
         "TYPE" => "IFMATCH",
         "line" => __LINE__,
-        "transitions" => "A:FAIL",
+        "transitions" => "A,B:FAIL",
       },
       #################################
       {

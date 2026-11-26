@@ -3688,7 +3688,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 }
 
                 RExC_seen_zerolen++;
-                RExC_in_lookaround = true;
+                /* (*atomic:...) gets here too, but is not a lookaround;
+                 * it is (?>...) spelled out, and like it allows \K. */
+                if (paren != 't')
+                    RExC_in_lookaround = true;
                 RExC_seen |= seen_flag_set;
 
                 RExC_parse_set(start_arg);
@@ -4756,6 +4759,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
 
             reginsert(pRExC_state, node, ret, depth+1);
+            if (RExC_npar - 1 > npar_before_regbranch) {
+                SUBPATTERN_FIRST_CAPTURE_SET(REGNODE_p(ret),
+                                            (U16)npar_before_regbranch + 1);
+                SUBPATTERN_LAST_CAPTURE_SET(REGNODE_p(ret), (U16)RExC_npar - 1);
+            }
             if (node != SUSPEND)
                 LOOKBEHIND_MAX_CHARS_SET(REGNODE_p(ret), flag);
             if (! REGTAIL_STUDY(pRExC_state, ret, reg_node(pRExC_state, TAIL)))
@@ -5288,6 +5296,10 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             REQUIRE_BRANCHJ(flagp, 0);
         }
         reginsert(pRExC_state, SUSPEND, ret, depth+1);
+        if (npar_after != npar_before) {
+            SUBPATTERN_FIRST_CAPTURE_SET(REGNODE_p(ret), (U16)npar_before + 1);
+            SUBPATTERN_LAST_CAPTURE_SET(REGNODE_p(ret), (U16)npar_after);
+        }
         ender = reg_node(pRExC_state, TAIL);
         if (! REGTAIL(pRExC_state, ret, ender)) {
             REQUIRE_BRANCHJ(flagp, 0);
@@ -6035,6 +6047,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         case 'K':
             if (!RExC_in_lookaround) {
                 RExC_seen_zerolen++;
+                RExC_seen |= REG_KEEPS_SEEN;
                 ret = reg_node(pRExC_state, KEEPS);
                 /* XXX:dmq : disabling in-place substitution seems to
                  * be necessary here to avoid cases of memory corruption, as
