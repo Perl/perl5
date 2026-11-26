@@ -67,8 +67,16 @@ sub expand_os_specific {
     $s;
 }
 
+# On Win32, there are no values from Config.pm that ever need to be changed
+# between WinPerl builds, or major interp versions, or by end users.
+# libpth points to CC's .a/.lib not a dir of .dlls. LoadLibraryEx() will not
+# accept .obj .o .a and .lib files.
+# ldlibpthname = '' path_sep = ';' dlext = 'dll' so = 'dll' dlsrc = 'dl_win32.xs'
+my $expand_config_vars = $^O eq 'MSWin32' ? 1 : $ENV{PERL_BUILD_EXPAND_CONFIG_VARS};
+
 unlink "DynaLoader.pm" if -f "DynaLoader.pm";
 open OUT, '>', "DynaLoader.pm" or die $!;
+binmode(OUT) if $^O eq 'MSWin32';
 print OUT <<'EOT';
 
 # Generated from DynaLoader_pm.PL, this file is unique for every OS
@@ -90,7 +98,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    our $VERSION = '1.57';
+    our $VERSION = '1.58';
 }
 
 # Note: in almost any other piece of code "our" would have been a better
@@ -103,7 +111,7 @@ use vars qw(@dl_library_path @dl_resolve_using @dl_require_symbols
 
 EOT
 
-if (!$ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+if (!$expand_config_vars) {
     print OUT "use Config;\n";
 }
 
@@ -128,11 +136,11 @@ sub dl_load_flags { 0x00 }
 
 EOT
 
-if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+if ($expand_config_vars) {
     print OUT "(\$dl_dlext, \$dl_so, \$dlsrc) = (",
               to_string($Config{'dlext'}), ",",
               to_string($Config{'so'}), ",",
-              to_string($Config{'dlsrc'}), ")\n;" ;
+              to_string($Config{'dlsrc'}), ");\n" ;
 }
 else {
     print OUT <<'EOT';
@@ -162,15 +170,26 @@ my $do_expand = <<$^O-eq-VMS>>1<<|$^O-eq-VMS>>0<</$^O-eq-VMS>>;
 
 EOT
 
-my $cfg_dl_library_path = <<'EOT';
+my $cfg_dl_library_path;
+
+if ($^O eq 'MSWin32') {
+    require Text::ParseWords;
+    my @w32libpths = Text::ParseWords::parse_line('\s+', 1, $Config::Config{libpth});
+    @w32libpths = map({if (substr($_, 0, 1) eq '"') {$_ =~ tr/"/'/;} $_;} @w32libpths);
+    my $w32libpths = join(',',@w32libpths);
+    $cfg_dl_library_path = "push(\@dl_library_path, $w32libpths);";
+}
+else {
+    $cfg_dl_library_path = <<'EOT';
 push(@dl_library_path, split(' ', $Config::Config{libpth}));
 EOT
+}
 
 sub dquoted_comma_list {
     join(", ", map {'"'.quotemeta($_).'"'} @_);
 }
 
-if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+if ($expand_config_vars) {
     eval $cfg_dl_library_path;
     if (!$ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
         my $dl_library_path = dquoted_comma_list(@dl_library_path);
@@ -196,7 +215,7 @@ my $ldlibpthname;
 my $ldlibpthname_defined;
 my $pthsep;
 
-if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS}) {
+if ($expand_config_vars) {
     $ldlibpthname         = to_string($Config::Config{ldlibpthname});
     $ldlibpthname_defined = to_string(defined $Config::Config{ldlibpthname} ? 1 : 0);
     $pthsep               = to_string($Config::Config{path_sep});
@@ -215,6 +234,7 @@ EOT
 
 my $env_dl_library_path = <<'EOT';
 if ($ldlibpthname_defined &&
+    length($ldlibpthname) &&
     exists $ENV{$ldlibpthname}) {
     push(@dl_library_path, split(/$pthsep/, $ENV{$ldlibpthname}));
 }
@@ -228,7 +248,7 @@ if ($ldlibpthname_defined &&
 }
 EOT
 
-if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS} && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
+if ($expand_config_vars && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
     eval $env_dl_library_path;
 }
 else {
@@ -241,7 +261,7 @@ $env_dl_library_path
 EOT
 }
 
-if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS} && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
+if ($expand_config_vars && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
     my $dl_library_path = dquoted_comma_list(@dl_library_path);
     print OUT <<EOT;
 # The below \@dl_library_path has been expanded (%Config, %ENV)
