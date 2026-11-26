@@ -380,6 +380,17 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+Overlapping Unicode case folds could make the calculated minimum input
+length too large.  Lookbehind and trie checks could then reject valid
+case-insensitive matches.
+
+The optimizer now considers competing fold combinations to find the
+shortest possible input, and uses that calculation consistently for
+literal and trie length bounds.  [GH #25086]
+
+
 =back
 
 =head1 Known Problems
