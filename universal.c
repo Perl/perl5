@@ -296,7 +296,7 @@ XXX extracted in sv_does_sv is more complicated than the hand waving above
 */
 
 bool
-Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
+Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags  UNUSED)
 {
     PERL_ARGS_ASSERT_SV_DOES_SV;
 
@@ -304,8 +304,6 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
     bool does_it;
     SV *methodname;
     dSP;
-
-    PERL_UNUSED_ARG(flags);
 
     ENTER;
     SAVETMPS;

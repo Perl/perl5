@@ -5207,16 +5207,16 @@ PP_wrapped(pp_shmwrite, 0, 1)
 
     switch (op_type) {
     case OP_MSGSND:
-        value = (I32)(do_msgsnd(MARK, SP) >= 0);
+        value = (I32)(do_msgsnd(MARK) >= 0);
         break;
     case OP_MSGRCV:
-        value = (I32)(do_msgrcv(MARK, SP) >= 0);
+        value = (I32)(do_msgrcv(MARK) >= 0);
         break;
     case OP_SEMOP:
-        value = (I32)(do_semop(MARK, SP) >= 0);
+        value = (I32)(do_semop(MARK) >= 0);
         break;
     default:
-        value = (I32)(do_shmio(op_type, MARK, SP) >= 0);
+        value = (I32)(do_shmio(op_type, MARK) >= 0);
         break;
     }
 
@@ -5236,7 +5236,7 @@ PP_wrapped(pp_semget, 0, 1)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dSP; dMARK; dTARGET;
-    const int anum = do_ipcget(PL_op->op_type, MARK, SP);
+    const int anum = do_ipcget(PL_op->op_type, MARK);
     SP = MARK;
     if (anum == -1)
         RETPUSHUNDEF;
@@ -5253,7 +5253,7 @@ PP_wrapped(pp_semctl, 0, 1)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dSP; dMARK; dTARGET;
-    const int anum = do_ipcctl(PL_op->op_type, MARK, SP);
+    const int anum = do_ipcctl(PL_op->op_type, MARK);
     SP = MARK;
     if (anum == -1)
         RETPUSHUNDEF;
