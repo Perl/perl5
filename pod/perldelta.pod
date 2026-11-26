@@ -380,6 +380,16 @@ manager will later use a regex to expand these into links.
 
 XXX
 
+=item *
+
+A named backreference to an unset capture could incorrectly cause a later
+match attempt to fail after backtracking set that capture.  For example,
+C<< "a" =~ /(|(?<g>))(()a)*\k<g>/ >> matched an empty string instead of
+C<a>.  Numbered backreferences with branch-reset groups could have the
+same problem.  These failures are no longer cached as if they were
+independent of capture state.
+
+
 =back
 
 =head1 Known Problems
