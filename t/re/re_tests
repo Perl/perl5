@@ -2110,6 +2110,35 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 
 \p{nv=-0}	\x{660}	y	$&	\x{660}
 (?:a|xx){0,4}?b	aaaaab 	y	$&	aaaab		# Bug is GH #8369; test is GH #19781
+# Numbered recursion conditions use the logical number of the active target.
+^(?(DEFINE)(?<x>(?(R)r|n)))(?&x)$	r	y	$&	r
+^(?(DEFINE)(?<x>(?(R0)w|s)))(?&x)$	s	y	$&	s
+a(?R)?(?(R0)b|c)	aabc	y	$&	aabc
+^(??{q((?(R)r|n))})$	r	y	$&	r
+^(??{q((?(R0)r|n))})$	n	y	$&	n
+^(?|(a)|(b))((?(R2)Y|c))(?2)$	acY	y	$&	acY
+^(?|(a)|(b))((?(R2)Y|c))(?2)$	acc	n	-	-
+^(?|(a)|(b))((?(R2)Y|c))(?2)$	bcY	y	$&	bcY
+^(?|(a)|(b))((?(R2)Y|c))(?2)$	bcc	n	-	-
+^(?|(?(DEFINE)(?<left>(?(R1)L|l)))|(?(DEFINE)(?<right>(?(R1)R|r))))(?&left)(?&right)$	LR	y	$&	LR
+^(?|(?(DEFINE)(?<left>(?(R1)L|l)))|(?(DEFINE)(?<right>(?(R1)R|r))))(?&left)(?&right)$	Lr	n	-	-
+^(?|(?(DEFINE)(?<left>(?(R&left)L|l)))|(?(DEFINE)(?<right>(?(R&left)X|r))))(?&left)(?&right)$	Lr	y	$&	Lr
+^(?|(?(DEFINE)(?<left>(?(R&left)L|l)))|(?(DEFINE)(?<right>(?(R&right)R|r))))(?&left)(?&right)$	LR	y	$&	LR
+
+# Numbered conditions inspect the shared logical capture, not a physical slot.
+^(?|()|(a))(?(1)Y|N)$	Y	y	$&	Y
+^(?|()|(a))(?(1)Y|N)$	aY	y	$&	aY
+^(?|(a)|(b))(?(1)\1|x)$	aa	y	$&	aa
+^(?|(a)|(b))(?(1)\1|x)$	bb	y	$&	bb
+^(?|(a)|(b))(?(1)\1|x)$	bx	n	-	-
+^(?|(a)|(b))(?(1)\1|x)$	ax	n	-	-
+^(?|(a)|(b))(?(2)Y|N)$	bN	y	$&	bN
+^(?|(a)|(b))(?(2)Y|N)$	bY	n	-	-
+^(?|(a)(b)?|(c))(?(2)Y|N)$	abY	y	$&	abY
+^(?|(a)(b)?|(c))(?(2)Y|N)$	cN	y	$&	cN
+^(?|(a)(b)?|(c))(d)(?(3)\3|x)$	cdd	y	$&	cdd
+^(?|(a)|(?|(b)|(c)))(?(1)\1|x)$	cc	y	$&	cc
+
 (?|(?<a>a)|(?<b>b))\1(?&a)(?&b)	bbab 	y	$&	bbab		# GH 20653
 (?|(?<a>a)|(?<b>b))(?(<a>)x|y)\1	byb 	y	$&	byb		# GH 20653
 (?|(?<a>a)|(?<b>b))(?(<a>)x|y)\1	bxb 	n	-	-		# GH 20653

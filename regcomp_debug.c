@@ -648,13 +648,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (k == WHILEM && WHILEM_CACHE_SLOT(o))                   /* Ordinal/of */
         sv_catpvf(sv, "[%d/%d]", (int)WHILEM_CACHE_SLOT(o), (int)progi->slc_whilem_seen);
-    else if (k == REF || k == OPEN || k == CLOSE
-             || k == GROUPP || op == ACCEPT)
+    else if (k == GROUPP) {
+        sv_catpvf(sv, "%" UVuf, (UV)GROUPP_CAPTURE(o));
+    }
+    else if (k == REF || k == OPEN || k == CLOSE || op == ACCEPT)
     {
         AV *name_list= NULL;
         U32 parno = (op == ACCEPT)              ? ACCEPT_CLOSE_TO_CAPTURE(o) :
                    (op == OPEN || op == CLOSE) ? PARNO(o) :
-                   (k == GROUPP) ? GROUPP_CAPTURE(o) :
                    (op >= REFN) ? NAMED_CAPTURE_LIST_SLOT(o) : REF_CAPTURE(o);
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list = MUTABLE_AV(progi->data->data[progi->name_list_idx]);

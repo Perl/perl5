@@ -9516,8 +9516,22 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* NOTREACHED */
 
         case GROUPP:  /*  (?(1))  */
-            n = GROUPP_CAPTURE(scan);  /* which paren pair */
-            sw = cBOOL(RXp_LASTPAREN(rex) >= n && RXp_OFFS_END(rex,n) != -1);
+            n = GROUPP_CAPTURE(scan);  /* logical capture number */
+            sw = FALSE;
+            if (n <= (rex->logical_nparens
+                      ? rex->logical_nparens : rex->nparens)) {
+                if (rex->logical_to_parno) {
+                    n = rex->logical_to_parno[n];
+                }
+                do {
+                    if (RXp_LASTPAREN(rex) >= n && RXp_OFFS_VALID(rex,n)) {
+                        sw = TRUE;
+                        break;
+                    }
+                    n = rex->parno_to_logical_next
+                        ? rex->parno_to_logical_next[n] : 0;
+                } while (n);
+            }
             break;
 
         case GROUPPN:  /*  (?(<name>))  */
@@ -9527,9 +9541,24 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case INSUBP:   /*  (?(R))  */
             n = INSUBP_CAPTURE(scan);
-            /* this does not need to use EVAL_CLOSE_PAREN macros, as the arg
-             * of SCAN is already set up as matches a eval.close_paren */
-            sw = cur_eval && (n == 0 || CUR_EVAL.close_paren == n);
+            sw = FALSE;
+            if (cur_eval) {
+                U32 target = CUR_EVAL.close_paren;
+                if (n == 0) {
+                    sw = TRUE;
+                }
+                else if (target) {
+                    /* Zero denotes deferred regex evaluation and one whole
+                     * pattern recursion. Only larger targets name captures. */
+                    if (target > 1 && !(FLAGS(scan) & INSUBP_NAMED)
+                        && rex->parno_to_logical)
+                    {
+                        assert(target - 1 <= rex->nparens);
+                        target = rex->parno_to_logical[target - 1] + 1;
+                    }
+                    sw = cBOOL(target == n);
+                }
+            }
             break;
 
         case DEFINEP:  /*  (?(DEFINE))  */
