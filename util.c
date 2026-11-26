@@ -2851,7 +2851,7 @@ Perl_atfork_lock(void)
 #endif
 }
 
-/* this is called in both parent and child after the fork() */
+/* this is called in parent after the fork() */
 void
 Perl_atfork_unlock(void)
 #if defined(USE_ITHREADS)
@@ -2890,7 +2890,15 @@ Perl_atfork_child(void)
     PTHREAD_INIT_SELF(PL_main_thread);
 #endif
 
-    Perl_atfork_unlock();
+#if defined(USE_ITHREADS)
+#  ifdef USE_PERLIO
+    MUTEX_INIT(&PL_perlio_mutex);
+#  endif
+#  ifdef MYMALLOC
+    MUTEX_INIT(&PL_malloc_mutex);
+#  endif
+    OP_REFCNT_INIT;
+#endif
 }
 
 /*
@@ -2915,7 +2923,10 @@ Perl_my_fork(void)
 #if defined(USE_ITHREADS) && !defined(HAS_PTHREAD_ATFORK)
     atfork_lock();
     pid = fork();
-    atfork_unlock();
+    if (pid != 0)
+        atfork_unlock();
+    else
+        atfork_child();
 #else
     /* atfork_lock() and atfork_unlock() are installed as pthread_atfork()
      * handlers elsewhere in the code */
