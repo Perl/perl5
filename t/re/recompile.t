@@ -20,7 +20,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 48;
+plan tests => 50;
 
 my $results = runperl(
 			switches => [ '-Dr' ],
@@ -101,6 +101,14 @@ CODE
 
 comp_1(<<'CODE', 'simple qr');
 "a" =~ qr/$_/ for qw(a a a);
+CODE
+
+# "compflags" in the regex struct must be large enough to hold all
+# RXf_PMf_* bits. At the time of writing, this exercised one of
+# the higher bits and demonstrated a size mismatch bug.
+comp_1(<<'CODE', "re_strict compflags comparison");
+BEGIN{ $^H{reflags} = 1 << 10; $^H |= 0x02000000; }
+"a" =~ /$_/ for qw(a a a);
 CODE
 
 comp_1(<<'CODE', 'literal utf8');

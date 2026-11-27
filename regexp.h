@@ -200,7 +200,8 @@ typedef struct regexp {
 
     /* original flags used to compile the pattern, may differ from
      * extflags in various ways */
-    PERL_BITFIELD32 compflags:9;
+    /* MUST be at least as wide as RXf_PMf_FLAGCOPYMASK */
+    PERL_BITFIELD32 compflags:RXf_PMf_SHIFT_NEXT_;
 
     /* Is offs_spare already in use? */
     PERL_BITFIELD32 offs_spare_used:1;
