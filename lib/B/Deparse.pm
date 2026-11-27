@@ -3968,7 +3968,12 @@ sub indirop {
 	$indir = $kid;
 	$indir = $indir->first; # skip rv2gv
 	if (is_scope($indir)) {
-	    $indir = "{" . $self->deparse($indir, 0) . "}";
+	    my $body = $self->deparse($indir, 0);
+	    # Disambiguate scope/block from anonymous hash
+	    # with the null statement trick; see also mapop.
+	    # e.g. sort {; { $a <=> $b; } } qw( 3 1 2 );
+	    $body =~ s/^\{/;{/;
+	    $indir = "{" . $body . "}";
 	    $indir = "{;}" if $indir eq "{}";
 	} elsif ($indir->name eq "const" && $indir->private & OPpCONST_BARE) {
 	    $indir = $self->const_sv($indir)->PV;

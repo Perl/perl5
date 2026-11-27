@@ -3750,3 +3750,25 @@ my(@s, @a);
 @s = grep({;{
     %$_;
 }} @a);
+####
+# indirops with blocks beginning with a scope
+# CONTEXT use 5.010;
+my @x;
+@x = sort {;{
+    $b cmp $a;
+}} @x;
+print {;{
+    *STDOUT;
+}} 'foo';
+printf {;{
+    *STDOUT;
+}} 'foo';
+say {;{
+    *STDOUT;
+}} 'foo';
+system {;{
+    'foo';
+}} '-foo';
+exec {;{
+    'foo';
+}} '-foo';
