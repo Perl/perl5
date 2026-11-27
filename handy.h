@@ -343,12 +343,15 @@ don't, so that you can portably take advantage of this C99 feature.
 /* Unused by core; should be deprecated */
 #define Ctl(ch) ((ch) & 037)
 
+#define PERL_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define PERL_MAX(a, b) ((a) > (b) ? (a) : (b))
+
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #  ifndef MIN
-#    define MIN(a,b) ((a) < (b) ? (a) : (b))
+#    define MIN(a, b) PERL_MIN(a, b)
 #  endif
 #  ifndef MAX
-#    define MAX(a,b) ((a) > (b) ? (a) : (b))
+#    define MAX(a, b) PERL_MAX(a, b)
 #  endif
 #endif
 
