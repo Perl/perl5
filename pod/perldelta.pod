@@ -378,6 +378,12 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+Regex patterns could have been unnecessarily recompiled at runtime due to a
+mismatched comparison of old and new flags.
+[GH #25126]
+
+=item *
+
 XXX
 
 =back
