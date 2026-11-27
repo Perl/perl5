@@ -776,7 +776,7 @@ EBCDIC) code point if less than 256; a Unicode code point otherwise.
 /* The largest code point representable by two UTF-8 bytes on any platform that
  * Perl runs on. */
 #define MAX_PORTABLE_UTF8_TWO_BYTE                                          \
-                nBIT_UMAX(5 + MIN(       UTF_CONTINUATION_BYTE_INFO_BITS,   \
+           nBIT_UMAX(5 + PERL_MIN(       UTF_CONTINUATION_BYTE_INFO_BITS,   \
                                   UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS))
 
 /*
@@ -798,7 +798,7 @@ uppercase/lowercase/titlecase/fold into.
 =cut
 */
 #define UTF8_MAXBYTES_CASE                                                  \
-        MAX(UTF8_MAXBYTES, UTF8_MAX_FOLD_CHAR_EXPAND * MAX_UNICODE_UTF8_BYTES)
+    PERL_MAX(UTF8_MAXBYTES, UTF8_MAX_FOLD_CHAR_EXPAND * MAX_UNICODE_UTF8_BYTES)
 
 /* Rest of these are attributes of Unicode and perl's internals rather than the
  * encoding, or happen to be the same in both ASCII and EBCDIC (at least at
@@ -920,7 +920,7 @@ C<L</UTF8_SAFE_SKIP>>, for example when interfacing with a C library.
 #define UTF8_SAFE_SKIP(s, e)  (assert((e) >= (s)),                  \
                               UNLIKELY(((e) - (s)) <= 0)            \
                                ? 0                                  \
-                               : MIN(((e) - (s)), UTF8_SKIP(s)))
+                               : PERL_MIN((e) - (s), UTF8_SKIP(s)))
 
 /* Most code that says 'UNI_' really means the native value for code points up
  * through 255 */
