@@ -3968,7 +3968,12 @@ sub indirop {
 	$indir = $kid;
 	$indir = $indir->first; # skip rv2gv
 	if (is_scope($indir)) {
-	    $indir = "{" . $self->deparse($indir, 0) . "}";
+	    my $body = $self->deparse($indir, 0);
+	    # Disambiguate scope/block from anonymous hash
+	    # with the null statement trick; see also mapop.
+	    # e.g. sort {; { $a <=> $b; } } qw( 3 1 2 );
+	    $body =~ s/^\{/;{/;
+	    $indir = "{" . $body . "}";
 	    $indir = "{;}" if $indir eq "{}";
 	} elsif ($indir->name eq "const" && $indir->private & OPpCONST_BARE) {
 	    $indir = $self->const_sv($indir)->PV;
@@ -4047,7 +4052,13 @@ sub mapop {
     $kid = $kid->first->sibling; # skip a pushmark
     my $code = $kid->first; # skip a null
     if (is_scope $code) {
-	$code = "{" . $self->deparse($code, 0) . "} ";
+	my $body = $self->deparse($code, 0);
+	# If we are looking at a scope here, "{" will
+	# be mistaken for an anonymous hash unless we
+	# put, say, a null statement before it.
+	# e.g. map {; { %$_; } } { car => 'cdr' };
+	$body =~ s/^\{/;{/;
+	$code = "{" . $body . "} ";
     } else {
 	$code = $self->deparse($code, 24);
         # Disambiguate anonhash from a block
