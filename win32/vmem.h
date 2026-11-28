@@ -251,11 +251,14 @@ VMem::~VMem(void)
 
 #ifdef _USE_MSVCRT_MEM_ALLOC
 
+/* The pools' blocks are process-wide memory (Perl's own malloc with MYMALLOC,
+ * otherwise the C runtime's): see PerlMemGlobal_malloc() in iperlsys.h. */
+
 void* VMemNL::Malloc(size_t size)
 {
 #ifdef _USE_LINKED_LIST
 
-    PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)malloc(size+sizeof(MEMORY_BLOCK_HEADER));
+    PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)PerlMemGlobal_malloc(size+sizeof(MEMORY_BLOCK_HEADER));
     if (!ptr) {
         return NULL;
     }
@@ -264,7 +267,7 @@ void* VMemNL::Malloc(size_t size)
     FreeLock();
     return (ptr+1);
 #else
-    return malloc(size);
+    return PerlMemGlobal_malloc(size);
 #endif
 }
 
@@ -282,7 +285,7 @@ void* VMemNL::Realloc(void* pMem, size_t size)
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)(((char*)pMem)-sizeof(MEMORY_BLOCK_HEADER));
     GetLock();
     UnlinkBlock(ptr);
-    ptr = (PMEMORY_BLOCK_HEADER)realloc(ptr, size+sizeof(MEMORY_BLOCK_HEADER));
+    ptr = (PMEMORY_BLOCK_HEADER)PerlMemGlobal_realloc(ptr, size+sizeof(MEMORY_BLOCK_HEADER));
     if (!ptr) {
         FreeLock();
         return NULL;
@@ -292,7 +295,7 @@ void* VMemNL::Realloc(void* pMem, size_t size)
 
     return (ptr+1);
 #else
-    return realloc(pMem, size);
+    return PerlMemGlobal_realloc(pMem, size);
 #endif
 }
 
@@ -328,11 +331,11 @@ Win32 fixes-vmem.h hack to handle free-by-wrong-thread after eval "".
     uninit/dealloced/random data, its not aleak to chase!!!! its uninit data!!!
     */
         ptr->u.owner_nl = NULL;
-        free(ptr);
+        PerlMemGlobal_free(ptr);
 
     }
 #else /*_USE_LINKED_LIST*/
-    free(pMem);
+    PerlMemGlobal_free(pMem);
 #endif
 }
 

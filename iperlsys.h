@@ -787,6 +787,24 @@ struct IPerlLIOInfo
     Interface for perl memory allocation
 */
 
+/* PerlMemGlobal: process-wide memory, owned by no interpreter or host and
+ * outliving them all (unlike PerlMem*, PerlMemShared* and PerlMemParse*,
+ * which under PERL_IMPLICIT_SYS are the hosts' pools).  With Perl's own
+ * malloc (MYMALLOC) it comes from there, as with safemalloc() etc. (perl.h);
+ * otherwise from the C library.  (Not Perl_malloc() without MYMALLOC: that
+ * is util.c's wrapper of PerlMem_malloc().) */
+#ifdef MYMALLOC
+#  define PerlMemGlobal_malloc(size)            Perl_malloc((size))
+#  define PerlMemGlobal_realloc(buf, size)      Perl_realloc((buf), (size))
+#  define PerlMemGlobal_free(buf)               Perl_mfree((buf))
+#  define PerlMemGlobal_calloc(num, size)       Perl_calloc((num), (size))
+#else
+#  define PerlMemGlobal_malloc(size)            malloc((size))
+#  define PerlMemGlobal_realloc(buf, size)      realloc((buf), (size))
+#  define PerlMemGlobal_free(buf)               free((buf))
+#  define PerlMemGlobal_calloc(num, size)       calloc((num), (size))
+#endif
+
 #if defined(PERL_IMPLICIT_SYS)
 
 /* IPerlMem             */
@@ -869,28 +887,28 @@ struct IPerlMemInfo
 #else   /* ! PERL_IMPLICIT_SYS */
 
 /* Interpreter specific memory macros */
-#  define PerlMem_malloc(size)          malloc((size))
-#  define PerlMem_realloc(buf, size)    realloc((buf), (size))
-#  define PerlMem_free(buf)             free((buf))
-#  define PerlMem_calloc(num, size)     calloc((num), (size))
+#  define PerlMem_malloc(size)          PerlMemGlobal_malloc((size))
+#  define PerlMem_realloc(buf, size)    PerlMemGlobal_realloc((buf), (size))
+#  define PerlMem_free(buf)             PerlMemGlobal_free((buf))
+#  define PerlMem_calloc(num, size)     PerlMemGlobal_calloc((num), (size))
 #  define PerlMem_get_lock()            
 #  define PerlMem_free_lock()
 #  define PerlMem_is_locked()           0
 
 /* Shared memory macros */
-#  define PerlMemShared_malloc(size)            malloc((size))
-#  define PerlMemShared_realloc(buf, size)      realloc((buf), (size))
-#  define PerlMemShared_free(buf)               free((buf))
-#  define PerlMemShared_calloc(num, size)       calloc((num), (size))
+#  define PerlMemShared_malloc(size)            PerlMemGlobal_malloc((size))
+#  define PerlMemShared_realloc(buf, size)      PerlMemGlobal_realloc((buf), (size))
+#  define PerlMemShared_free(buf)               PerlMemGlobal_free((buf))
+#  define PerlMemShared_calloc(num, size)       PerlMemGlobal_calloc((num), (size))
 #  define PerlMemShared_get_lock()              
 #  define PerlMemShared_free_lock()
 #  define PerlMemShared_is_locked()             0
 
 /* Parse tree memory macros */
-#  define PerlMemParse_malloc(size)             malloc((size))
-#  define PerlMemParse_realloc(buf, size)       realloc((buf), (size))
-#  define PerlMemParse_free(buf)                free((buf))
-#  define PerlMemParse_calloc(num, size)        calloc((num), (size))
+#  define PerlMemParse_malloc(size)             PerlMemGlobal_malloc((size))
+#  define PerlMemParse_realloc(buf, size)       PerlMemGlobal_realloc((buf), (size))
+#  define PerlMemParse_free(buf)                PerlMemGlobal_free((buf))
+#  define PerlMemParse_calloc(num, size)        PerlMemGlobal_calloc((num), (size))
 #  define PerlMemParse_get_lock()               
 #  define PerlMemParse_free_lock()
 #  define PerlMemParse_is_locked()              0

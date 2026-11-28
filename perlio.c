@@ -2554,9 +2554,12 @@ S_more_refcounted_fds(pTHX_ const int new_fd)
 
     assert (new_max > new_fd);
 
-    /* Use plain realloc() since we need this memory to be really
-     * global and visible to all the interpreters and/or threads. */
-    new_array = (int*) realloc(PL_perlio_fd_refcnt, new_max * sizeof(int));
+    /* Process-wide memory, since this array is shared by all the
+     * interpreters and threads, and PerlIO_teardown() frees it after the
+     * last interpreter (and, under PERL_IMPLICIT_SYS, the last host with
+     * its memory pools) is gone. */
+    new_array = (int*) PerlMemGlobal_realloc(PL_perlio_fd_refcnt,
+                                              new_max * sizeof(int));
 
     if (!new_array) {
         MUTEX_UNLOCK(&PL_perlio_mutex);
@@ -2722,7 +2725,8 @@ void PerlIO_teardown(void) /* Call only from PERL_SYS_TERM(). */
      * all the interpreters are gone. */
     if (PL_perlio_fd_refcnt_size /* Assuming initial size of zero. */
         && PL_perlio_fd_refcnt) {
-        free(PL_perlio_fd_refcnt); /* To match realloc() in S_more_refcounted_fds(). */
+        /* To match PerlMemGlobal_realloc() in S_more_refcounted_fds(). */
+        PerlMemGlobal_free(PL_perlio_fd_refcnt);
         PL_perlio_fd_refcnt = NULL;
         PL_perlio_fd_refcnt_size = 0;
     }
